@@ -1,0 +1,40 @@
+#!/bin/bash 
+# Kevin Becker, June 9 2023
+#########################################################
+# Job file, used for running one job                    #
+#   the goal is to make these files for various         #
+#   scenarios and run them                              #
+#########################################################
+
+######################################
+# Launching shoreside                #
+######################################
+SHORE_REPO="moos-ivp-extend0"
+SHORE_MISSION="missions/m2_berta_baseline"
+SHORE_FLAGS=" -a 20"  # Add any extra flags required by the shore mission
+
+######################################
+# Launching vehicles                 #
+######################################
+# This section is UNNECESSARY IF YOU ARE LAUNCHING FROM ONE LAUNCH SCRIPT
+# Note: The order of the following arrays must be consistent
+VEHICLES=2
+VEHICLE_REPOS=("moos-ivp-extend1" "moos-ivp-extend2")
+VEHICLE_MISSIONS=("missions/s1_alpha" "missions/m2_berta_baseline")
+SHARED_VEHICLE_FLAGS=" --ip-localhost --shore_pshare=9200 -s -a 20"
+VEHICLE_FLAGS=( "--start=3,3 --vrole=rescue --vname=abe --tmate=ben --mport=9001 --pshare=9201" 
+                "--start=3,2 --vrole=scout  --vname=ben --tmate=abe --mport=9002 --pshare=9202"  
+            )
+
+# How long to wait for the mission to complete before killing it 
+#   Note: the timewarp is NOT considered in this timeout
+JOB_TIMEOUT=60                                          
+
+######################################
+# Generating plots                   #
+######################################
+# NOTE: These values MUST match the csv headers in the results.csv file!!!
+# The values in PLOT_Y are comma seperated
+PLOT_X="Time (s)"
+PLOT_Y="Config Var 1,Config Var 2"
+# As of right now, it assumes a scatterplot

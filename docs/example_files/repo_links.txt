@@ -1,0 +1,28 @@
+#----------------------------------------------------------
+#   repo_links.txt                                    
+#   Author: Kevin Becker
+#     Date: June 14th 2023
+#----------------------------------------------------------
+# All jobs in subdirectories of this file's dir will
+# have access to the repos listed in this file
+# NOTE: Lines that begin with # are comments
+#----------------------------------------------------------
+# Add other local moos-ivp directories to use in 
+# your job files (NOTE: these must exist on the client)
+#----------------------------------------------------------
+~/moos-ivp-2680
+~/moos-ivp-pavlab
+~/moos-ivp-swarm
+
+
+#----------------------------------------------------------
+# Add links to github repos you want to use
+#----------------------------------------------------------
+git@gitlab.com:kjbecker/moos-ivp-kevinbecker.git
+https://github.com/kjbecker00/moos-ivp-test1.git
+https://github_pat_11A26PGJQ0_you_get_the_point@github.com/kjbecker00/moos-ivp-ktm.git
+
+
+# Example using a personal access token
+# https://github_pat_asdfasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfsadfasdfads@github.com/kjbecker00/moos-ivp-ktm.git
+
