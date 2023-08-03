@@ -235,7 +235,7 @@ if [[ $OFFLOAD != "no" ]]; then
     EXIT_CODE=$?
     if [ ! $EXIT_CODE -eq "0" ]; then
         if [ $EXIT_CODE -eq 255 ]; then
-            echo $txtylw"      warning: ssh unable to connect. Continuing..."$txtrst
+                echo "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst
         else 
             vexit "ssh -n ${SSH_HOST} mkdir -p $HOST_RESULTS_FULL_DIR had exit code $EXIT_CODE. Could not ssh to $SSH_HOST" 3
         fi

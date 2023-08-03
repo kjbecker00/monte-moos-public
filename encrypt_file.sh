@@ -49,7 +49,7 @@ if [[ -d $INPUT ]]; then
     echo "Input is a directory. Compressing..."
     tar -czf "${INPUT}.tar.gz" "$INPUT"
     if [[ $? -ne 0 ]]; then
-        vexit "error compressing directory $INPUT" 2
+        vexit "error compressing file" 2
     fi
     rm -rfd "$INPUT"
     INPUT="${INPUT}.tar.gz"
@@ -61,7 +61,7 @@ else
 fi
 
 
-echo "PASS=$PASSWORD"
+
 
 # Encrypt or decrypt based on file extension
 if [[ $INPUT = *".enc" ]]; then
@@ -74,7 +74,7 @@ if [[ $INPUT = *".enc" ]]; then
     # decrypt
     openssl enc -pbkdf2 -d -aes-256-cbc -in "$INPUT" -out "$OUTPUT" -pass pass:"$PASSWORD"
     if [[ $? -ne 0 ]]; then
-        vexit "error decrypting file $INPUT" 4
+        vexit "error decrypting input " 4
     fi
     rm "$INPUT"
 
@@ -83,7 +83,7 @@ if [[ $INPUT = *".enc" ]]; then
         echo "Decompressing..."
         tar -xzf "$OUTPUT"
         if [[ $? -ne 0 ]]; then
-            vexit "error decompressing file $INPUT" 5
+            vexit "error decompressing file" 5
         fi
         rm "$OUTPUT"
     else
@@ -100,7 +100,7 @@ else
     # encrypt
     openssl enc -pbkdf2 -aes-256-cbc -salt -in "$INPUT" -out "$OUTPUT" -pass pass:"$PASSWORD"
     if [[ $? -ne 0 ]]; then
-        vexit "error encrypting file $INPUT" 6
+        vexit "error encrypting input " 6
     fi
     rm "$INPUT"
 

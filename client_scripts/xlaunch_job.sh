@@ -38,10 +38,10 @@ secho() {   echo "$1"
             EXIT_CODE=$?
             if [ ! $EXIT_CODE -eq "0" ]; then
                 if [ $EXIT_CODE -eq 255 ]; then
-                    echo $txtylw"      warning: ssh unable to connect. Continuing..."$txtrst
+                    vecho "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst 0
                 fi
             fi
-            rsync -zaPr -q status.txt "yodacora@oceanai.mit.edu:~/monte-moos/clients/status/${name}.txt"
+            rsync -zaPr -q status.txt "yodacora@oceanai.mit.edu:~/monte-moos/clients/status/${name}.txt" &> /dev/null
              } # status echo
 
 vexit() { secho $txtred"$ME: Error $1. Exit Code $2" $txtrst; safe_exit "$2" ; }

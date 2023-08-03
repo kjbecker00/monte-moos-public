@@ -223,11 +223,11 @@ if [ "$HOSTLESS" = "no" ] ; then
         # Network error
         if [[ $EXIT_CODE -eq 4 ]]; then
             echo "$txtylw      wget failed with code $EXIT_CODE. Trying to run a local copy...$txtrst"
-            if [ -f "$JOB_FILE" ]; then
+            if [ -f "job_dirs/$JOB_FILE" ]; then
                 vecho "Local copy found. Running..." 1
             else
                 echo "$JOB_FILE" >> "bad_jobs.txt"
-                vexit "Local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
+                vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
             fi
         # - - - - - - - - - - - - - - - - - - - - - 
         # Server error (no file exists on server)

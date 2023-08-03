@@ -14,6 +14,7 @@ force_quit
 
 # Private files
 .password
+myname.txt
 repo_links.txt
 status.txt
 .temp*
@@ -21,4 +22,12 @@ myname.txt
 # Private dirs
 moos-dirs/*
 job_dirs/*
+
+
+# Scratchpads
+scripts/attic/*
+__*
+
+# Documentation
+!docs/*
 
