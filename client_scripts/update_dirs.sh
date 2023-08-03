@@ -71,6 +71,9 @@ fi
 if [ ! -d moos-dirs ]; then
     mkdir moos-dirs
 fi
+if [ ! -f .built_dirs ]; then
+    touch .built_dirs
+fi
 
 
 #--------------------------------------------------------------
@@ -151,10 +154,6 @@ skipline() {
         return 0
     fi
     repo_name=$(extract_repo_name $repo)
-    if [[ "$repo_name" == "moos-ivp" ]]; then
-        vecho "Skipping repeat of moos-ivp ($repo_name)"  5
-        return 0
-    fi    
     if [ $ALL != "yes" ]; then
         if [ -f ".built_dirs" ]; then
             # determines if the repo was found in .built_dirs
@@ -209,10 +208,6 @@ handle_repo_links_file() {
             continue
         fi
         repo_name=$(extract_repo_name $repo)
-        if [[ "$repo_name" == "moos-ivp" ]]; then
-            vecho "Skipping repeat of moos-ivp ($repo_name)"  5
-            continue
-        fi   
           
         if [ $ALL != "yes" ]; then
             if [ -f ".built_dirs" ]; then
@@ -273,7 +268,7 @@ handle_repo_links_file() {
                 if [[ "$repo" == "~/"* ]]; then
                     repo="${repo/#\~/$HOME}"
                 fi
-                echo "   linking with: ln -s \"$repo\" \"moos-dirs/${repo_name}\""
+                echo "        Linking repo..."
                 ln -s "$repo" "moos-dirs/${repo_name}"
             fi
 
