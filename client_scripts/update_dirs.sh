@@ -68,6 +68,9 @@ if [ $ALL = "yes" ]; then
 else
     . "$JOB_FILE"
 fi
+if [ ! -d moos-dirs ]; then
+    mkdir moos-dirs
+fi
 
 
 #--------------------------------------------------------------
