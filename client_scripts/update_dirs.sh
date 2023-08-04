@@ -83,14 +83,19 @@ fi
 is_in_job() {
     local this_repo_name="${1}"
     if [[ "$SHORE_REPO" == "$this_repo_name" ]]; then
+        vecho "$this_repo_name in SHORE_REPO" 3
         return 0
     elif [[ "${VEHICLE_REPOS[@]}" =~ "$this_repo_name" ]]; then
+        vecho "$this_repo_name in VEHICLE_REPOS" 3
         return 0
     elif [[ "${EXTRA_REPOS[@]}" =~ "$this_repo_name" ]]; then
+        vecho "$this_repo_name in EXTRA_REPOS" 3
         return 0
     elif [[ "${EXTRA_LIB_REPOS[@]}" =~ "$this_repo_name" ]]; then
+        vecho "$this_repo_name in EXTRA_LIB_REPOS" 3
         return 0
     elif [[ "${EXTRA_BIN_REPOS[@]}" =~ "$this_repo_name" ]]; then
+        vecho "$this_repo_name in EXTRA_BIN_REPOS" 3
         return 0
     fi
     vecho "      $this_repo_name is not part of this job" 1
@@ -268,8 +273,12 @@ handle_repo_links_file() {
                 if [[ "$repo" == "~/"* ]]; then
                     repo="${repo/#\~/$HOME}"
                 fi
-                echo "        Linking repo..."
-                ln -s "$repo" "moos-dirs/${repo_name}"
+                if [[ -d "$repo" ]]; then
+                    echo "        Linking repo..."
+                    ln -s "$repo" "moos-dirs/${repo_name}"
+                else
+                    vexit "    ${txtylw}linking to $repo failed. Repo does not exist. Check $repo_links_file ${txtrst}" 2
+                fi
             fi
 
             echo -n "        Updating..."

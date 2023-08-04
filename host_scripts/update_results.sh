@@ -149,16 +149,8 @@ done
 
 
 #-------------------------------------------------------------- 
-#  Part 4: Determine what to plot
+#  Part 4: Determine what to plot using job file
 #-------------------------------------------------------------- 
-
-# temp placeholder. TODO: Figure out a way to customize what
-# gets plotted for each job, and add multiple plots
-#    enable multiple types of plots (scatterplot, line, histogram, bar & wisker, etc)
-#  Ideas for how to do this:
-#       - add a file to each job dir that specifies what to plot
-#       - create a pltcsv.py script for each job taylored to that job
-#       - embed the information in the job file (maybe not- can't re-post-process as easily)
 
 JOB_FILE_FULL="$BASE_JOB_DIR/$JOB_DIR/$JOB_NAME"
 if [ -f $JOB_FILE_FULL ]; then

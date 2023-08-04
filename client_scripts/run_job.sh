@@ -189,10 +189,10 @@ fi
 #  Part 3b: Update the moos directories
 echo "[2] Updating dirs from job file... "
 secho "Updating_dirs from $JOB_FILE"
-vecho "./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j8" 1
-./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j8
+vecho "./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j2" 1
+./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j2
 if [ $? -ne 0 ]; then
-    vexit "updating dirs mentioned in job using: ./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j8" 3
+    vexit "updating dirs mentioned in job using: ./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j2" 3
 fi
 echo $txtgrn"      Done updating dirs" $txtrst
 
