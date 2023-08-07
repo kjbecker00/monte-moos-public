@@ -125,7 +125,7 @@ extract_repo_name() {
     fi
     echo $repo_name
 }
-# Wrapper for git pull
+# Wrapper for git pull (note: alter return if no changes)
 gpull() {
     local repo=$1
     local repo_links_file=$2
@@ -136,7 +136,7 @@ gpull() {
     fi
     echo $txtgrn " updated sucessfully" $txtrst
 }
-# Wrapper for svn up
+# Wrapper for svn up (note: alter return if no changes)
 svnup() {
     local repo=$1
     local repo_links_file=$2
@@ -277,7 +277,7 @@ handle_repo_links_file() {
                     echo "        Linking repo..."
                     ln -s "$repo" "moos-dirs/${repo_name}"
                 else
-                    vexit "    ${txtylw}linking to $repo failed. Repo does not exist. Check $repo_links_file ${txtrst}" 2
+                    vexit "${txtylw}linking to $repo failed. Repo does not exist. Check $repo_links_file ${txtrst}" 2
                 fi
             fi
 

@@ -19,6 +19,8 @@ vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$
 secho() {   echo "$1"
             [ -f "myname.txt" ] || { echo "$(hostname)" > myname.txt ; }
             name=$(head -n 1 myname.txt)
+            [ -z "$name" ] || { echo "$(hostname)" > myname.txt ; }
+            name=$(head -n 1 myname.txt)
             echo "$1 (on ${name} as of $(date))" > status.txt ; 
             # Start ssh-agent
             eval `ssh-agent -s` &> /dev/null
@@ -235,7 +237,7 @@ else
     ./client_scripts/extract_results.sh  --job_file=$JOB_FILE
 fi
 if [ $? -ne 0 ]; then
-    vexit "error extracting the results with ./client_scripts/extract_results.sh -v=$VERBOSE --job_file=$JOB_FILE" 6
+    vexit "error extracting the results. Recieved exit code $? with ./client_scripts/extract_results.sh -v=$VERBOSE --job_file=$JOB_FILE" 6
 fi
 
 echo $txtgrn"      Results extracted" $txtrst

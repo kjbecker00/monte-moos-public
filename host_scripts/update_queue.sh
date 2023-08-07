@@ -17,8 +17,8 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtgry}; fi }
-vexit() { echo $txtred"$ME: Error $1. Exit Code $2" $txtrst; exit "$2" ; }
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo "${txtgry}$ME: $1 ${txtgry}"; fi }
+vexit() { echo $txtred"$ME: Error $1. Exit Code $2 $txtrst"; exit "$2" ; }
 
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
@@ -33,8 +33,6 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         exit 0;
-    elif [[ "${ARGI}" = "foo" || "${ARGI}" = "bar" ]]; then
-        FOOBAR=0
     elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -91,71 +89,72 @@ do
         else
             vexit "ls returned exit code: $EXIT_CODE. Check that user has access to $HOST_RESULTS_DIR/$JOB_PATH/" 2
         fi
-        RUNS_ACT=0
+        NUM_RUNS_ACT=0
     else
+        vecho "    counting results in $HOST_RESULTS_DIR/$JOB_PATH/ " 1
+        # Number of runs based on number of directories sent to host
+        NUM_RUNS_ACT=$(ls -1 $HOST_RESULTS_DIR/"$JOB_PATH"/ 2>/dev/null| wc -l)  
 
-        vecho "    counting results in $HOST_RESULTS_DIR/"$JOB_PATH"/ " 1
-        RUNS_ACT=$(ls -1 $HOST_RESULTS_DIR/"$JOB_PATH"/ 2>/dev/null| wc -l)  
+        # Number of runs 
+        NUM_RUNS_WEB=$(find $HOST_RESULTS_DIR/"$JOB_PATH"/ -name "web" | wc -l) 
+        NUM_RUNS_CSV=$(find $HOST_RESULTS_DIR/"$JOB_PATH"/ -name "results.csv" | wc -l)
+
+        vecho "NUM_RUNS_ACT=$NUM_RUNS_ACT NUM_RUNS_WEB=$NUM_RUNS_WEB NUM_RUNS_CSV=$NUM_RUNS_CSV" 1
     fi
 
-    if [[ $RUNS_ACT -ge $RUNS_DES ]]; then
-        echo $txtgrn"    $JOB_PATH ran $RUNS_ACT out of $RUNS_DES runs. Done! "$txtrst
+    if [[ $NUM_RUNS_ACT -ge $RUNS_DES ]]; then
+        echo $txtgrn"    $JOB_PATH ran $NUM_RUNS_ACT out of $RUNS_DES runs. Done! "$txtrst
     else
-        echo $txtylw"    $JOB_PATH ran $RUNS_ACT out of $RUNS_DES runs "$txtrst
+        echo $txtylw"    $JOB_PATH ran $NUM_RUNS_ACT out of $RUNS_DES runs "$txtrst
         QUEUE_COMPLETE="no"
     fi
 
-    if [ "$RUNS_ACT" -gt 0 ]; then
+    if [ "$NUM_RUNS_ACT" -gt 0 ]; then
 
         compiled="$OUTPUT_BASE_DIR/$JOB_PATH" 
 
         # - - - - - - - - - - - - - - - - - - - -
-        # Count using lines in csv
+        # Count number of lines in the compiled csv
         RESULTS_CSV="$compiled/results.csv"
         if [ -f "$RESULTS_CSV" ]; then
-            RUNS_CSV=$(cat "$RESULTS_CSV" | wc -l)
-            RUNS_CSV=$((RUNS_CSV-1))
+            RUNS_COMPILED_CSV=$(cat "$RESULTS_CSV" | wc -l)
+            RUNS_COMPILED_CSV=$((RUNS_COMPILED_CSV-1))
         else
-            RUNS_CSV=0
+            RUNS_COMPILED_CSV=0
         fi
 
         # - - - - - - - - - - - - - - - - - - - -
-        # Count using subdirectories
-        if [ -f "$RUNS_DIRS" ]; then
-            RUNS_DIRS=$(find "$compiled" -mindepth 1 -maxdepth 1 -type d | wc -l)
+        # Count number of post-processed directories
+        # that have been copied to the web
+        if [ -d "$compiled/post_processed/" ]; then
+            RUNS_COMPILED_WEB=$(find "$compiled/post_processed/" -mindepth 1 -maxdepth 1 -type d | wc -l)
         else   
-            RUNS_DIRS=0
+            RUNS_COMPILED_WEB=0
         fi
 
-        # - - - - - - - - - - - - - - - - - - - -
-        # Should have some compiled results, unsure
-        # which method is being used though
-        if [ $RUNS_CSV -gt $RUNS_DIRS ]; then
-            RUNS_PROCESSED=$RUNS_CSV
-        else
-            RUNS_PROCESSED=$RUNS_DIRS
-        fi
 
         # - - - - - - - - - - - - - - - - - - - -
         # (Maybe) post-process the results again
-        if [ "$RUNS_ACT" -le "$RUNS_PROCESSED" ]; then
-            vecho "    $RESULTS_CSV processed $RUNS_PROCESSED out of $RUNS_ACT runs. No need to update results..." 1
-        else
-            vecho "    $RESULTS_CSV processed $RUNS_PROCESSED out of $RUNS_ACT runs. Updating..." 1
+        if [[ "$NUM_RUNS_CSV" -gt "$RUNS_COMPILED_CSV" || "$NUM_RUNS_WEB" -gt "$RUNS_COMPILED_WEB" ]]; then
+            vecho "    $RESULTS_CSV counted $RUNS_COMPILED_CSV lines in the csv out of $NUM_RUNS_CSV results.csv files. Updating..." 1
+            vecho "    $RESULTS_CSV counted $RUNS_COMPILED_WEB out of $NUM_RUNS_WEB web/* dirs copied over. Updating..." 1
             vecho "running ./host_scripts/update_results.sh $HOST_RESULTS_DIR/$JOB_PATH" 1
             ./host_scripts/update_results.sh "$HOST_RESULTS_DIR/$JOB_PATH"
             EXIT_CODE=$?
             [ $EXIT_CODE -eq 0 ]    || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
+        else 
+            vecho "    $RESULTS_CSV processed $NUM_RUNS_CSV out of $RUNS_COMPILED_CSV results.csv files, and copied $NUM_RUNS_WEB out of $RUNS_COMPILED_WEB web subdirectories. No need to update results..." 1
         fi
+        
     fi
 
     # replace the line in queue with the newly counted number of runs
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        sed -i '' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
+        sed -i '' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
     else
         # Linux
-        sed -i'' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
+        sed -i'' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
     fi
 
 
@@ -179,5 +178,6 @@ else
     echo  "$txtylw    Queue not complete. $txtrst"
     exit 1
 fi
+
 
 

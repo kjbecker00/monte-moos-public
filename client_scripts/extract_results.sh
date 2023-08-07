@@ -254,10 +254,9 @@ if [[ $OFFLOAD != "no" ]]; then
     else
         # rsync worked, so delete the local copy
         rm -rf $LOCAL_JOB_RESULTS_DIR
+        echo "    rsync worked. Link to results: $(tput smul)${txtblu}${LINK_TO_RESULTS} ${txtrst}"
         : # no-op command (if you comment out rm)
     fi
-    echo "    Link to results: $(tput smul)${txtblu}${LINK_TO_RESULTS} ${txtrst}"
-
 else
     vecho "Not offloading results" 1
 fi

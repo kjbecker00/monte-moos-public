@@ -126,13 +126,13 @@ while true; do
             ./clean.sh
             exit 0
         fi
-        secho "Perpetual mode: waiting 30 seconds before checking again...$txtrst"
+        secho "Perpetual mode: waiting 30 seconds before checking again..."
         check_sleep 30
         RE_UPDATE="yes"
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 2: Job was bad
     elif [ $EXIT -eq 2 ]; then
-        echo "$0 skipping bad job"
+        secho "$0 skipping bad job"
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 130: ctrl-c
     elif [ $EXIT -eq 130 ]; then
