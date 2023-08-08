@@ -54,12 +54,13 @@ done
 #  Part 3: 
 #--------------------------------------------------------------
 echo "$TO_PRINT"
-command -v raspi-gpio
+command -v raspi-gpio 2>/dev/null
 if [ "$?" = "0" ]; then
    name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
 else
    name="$(hostname)"
 fi
+echo "$name" > myname.txt ;
 echo "$TO_PRINT (on ${name} as of $(date))" > status.txt ; 
 # Start ssh-agent
 eval `ssh-agent -s` &> /dev/null

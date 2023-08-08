@@ -277,10 +277,13 @@ vecho "Part 3: Query the mission for halt conditions" 1
 echo ""
 valid_uquerydb="yes"
 start_time=`date +%s`
+first_iter="yes"
 
 while [ 1 ]; do 
 
     rm -f .checkvars
+    vecho "first_iter=$first_iter" 1
+    vecho "VALID_UQUERYDB=$valid_uquerydb" 1
 
     #-----------------------------------------------------
     # Check for halt conditions
@@ -288,15 +291,15 @@ while [ 1 ]; do
     if [[ $valid_uquerydb = "yes" ]]; then
         vecho "uQueryDB $SHORE_TARG " 2
         if [ "${QUIET}" = "yes" ]; then 
-            (uQueryDB $SHORE_TARG --wait=3)  &>/dev/null 
+            (uQueryDB $SHORE_TARG)  &>/dev/null 
             # (uQueryDB $SHORE_TARG)  &>/dev/null &
         else
-            (uQueryDB $SHORE_TARG --wait=3) 
+            (uQueryDB $SHORE_TARG)
             # (uQueryDB $SHORE_TARG) &
         fi
         EXIT_CODE=$?
         PID=$!
-        vecho "uQueryDB output=$?" 2
+        vecho "uQueryDB___OUTPUT=$EXIT_CODE" 2
 
         if [ $EXIT_CODE -eq 1 ]; then
             vecho "Continuing mission..." 3
@@ -305,19 +308,24 @@ while [ 1 ]; do
         if [ $EXIT_CODE -eq 0 ]; then
             current_time=`date +%s`
             elapsed_time=$(($current_time-$start_time))
-            if [ $elapsed_time -lt 3 ]; then
+            if [ $first_iter = "yes" ]; then
                 valid_uquerydb="no"
+                first_iter="no"
                 vecho "Invalid uQueryDB. Resorting to only using the timer..." 1
             else
+                first_iter="no"
                 echo "${txtgrn}      Mission completed after ${elapsed_time} seconds${txtrst}"
                 break;
             fi
+            
         fi
 
         # Kill uQueryDB (if still running)
         vecho "kill uquerydb" 1
         (disown "$PID") >/dev/null 2>&1
         (kill "$PID") >/dev/null 2>&1
+    else
+        vecho "Invalid uQueryDB (failed on first iter)" 1
     fi
 
     # Check timer, exit if necessary
@@ -325,16 +333,10 @@ while [ 1 ]; do
     elapsed_time=$(($current_time-$start_time))
     vecho "     elapsed time=$elapsed_time (timeout=$JOB_TIMEOUT)" 2
 
-    if [ $elapsed_time -gt $JOB_TIMEOUT ]; then
-        echo ""
-        echo "${txtylw}      Mission timed out after ${elapsed_time} seconds${txtrst}"
-        break;
-    fi
-
     #-----------------------------------------------------
     # Update timer
     #-----------------------------------------------------
-    if [ $valid_uquerydb = "no" ]; then
+    # if [ $valid_uquerydb = "no" ]; then
         bar_width=40
         progress=$(echo "$bar_width/$JOB_TIMEOUT*$elapsed_time" | bc -l)
         fill=$(printf "%.0f\n" $progress)
@@ -357,7 +359,7 @@ while [ 1 ]; do
             printf "%${empty}s" '' | tr ' ' ▉
         else
             printf "\r      ["
-            printf "%${fill}s" '' #| tr ' ' '_'
+            printf "%${fill}s" ''
             printf "%${empty}s" '' | tr ' ' '='
             printf "]"
         fi
@@ -365,7 +367,7 @@ while [ 1 ]; do
         if [ $valid_uquerydb = "no" ]; then
             printf " \e[33mWarning: uQueryDB failed. Using timer \e[0m"
         fi
-    fi
+    # fi
 
     # Check timer, exit if necessary
     if [ $elapsed_time -gt $JOB_TIMEOUT ]; then
@@ -378,6 +380,7 @@ while [ 1 ]; do
     # Sleep, if uQueryDB has too short of a wait time
     #-----------------------------------------------------
     sleep 1
+    first_iter="no"
 
 done
 
