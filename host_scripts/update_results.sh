@@ -131,7 +131,7 @@ for job_result in "$JOB_RESULTS"/*; do
           # Copy or link the results to the web directory
           if [ "$TYPE" = "cp" ]; then
             vecho "cp -rp $job_result/web/* $post_processed_dirs/$JOB_ID" 3
-            cp -rp "$job_result/web/"* "$post_processed_dirs/$JOB_ID"
+            cp -rp "$job_result/web/"* "$post_processed_dirs/$JOB_ID" 2>/dev/null
           elif [ "$TYPE" = "ln" ]; then
             vecho "ln -s $job_result/web/* $post_processed_dirs/$JOB_ID" 3
             ln -s "$job_result/web/"* "$post_processed_dirs/$JOB_ID"

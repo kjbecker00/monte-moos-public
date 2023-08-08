@@ -54,36 +54,48 @@ for item in "job_dirs"/*; do
     
     vecho "  item=$item" 1
     if [ ! -d $item ]; then
+        vecho "    $item is not a directory. continuing..." 1
         continue
     fi
 
+
+    #  copy to backup
+    #- - - - - - - - - - - - - - - - - - - - - - - -
     JOB_DIR="${item#job_dirs/}"
 
     vecho "  copying to backup job_dir" 3
-    ENCRYPTED_JOB_DIR="/home/web/monte/clients/job_dirs/$JOB_DIR.tar.gz.enc"
     cp -rp "job_dirs/$JOB_DIR" "job_dirs/backup_$JOB_DIR"
+    vecho "cp -rp job_dirs/$JOB_DIR job_dirs/backup_$JOB_DIR" 2
             EXIT_CODE=$?
             [ $EXIT_CODE -eq 0 ]    || { vexit "failed to run cp -rp \"job_dirs/$JOB_DIR\" \"backup_$JOB_DIR\" returned exit code: $EXIT_CODE" 3; }
     
-    vecho "  encrypting job_dir $JOB_DIR" 3
+
+
+    #  encrypt
+    #- - - - - - - - - - - - - - - - - - - - - - - -
+    ENCRYPTED_JOB_DIR="/home/web/monte/clients/job_dirs/$JOB_DIR.tar.gz.enc"
+    vecho "  encrypting job_dir with ./encrypt_file.sh job_dirs/$JOB_DIR" 3
     ./encrypt_file.sh "job_dirs/$JOB_DIR" > /dev/null
-            EXIT_CODE=$?
-            [ $EXIT_CODE -eq 0 ]    || { vexit "running ./encrypt_file.sh returned exit code: $EXIT_CODE" 4; }
-
-
+    EXIT_CODE=$?
+    [ $EXIT_CODE -eq 0 ]    || { vexit "running ./encrypt_file.sh returned exit code: $EXIT_CODE" 4; }
     if [ ! -d "job_dirs/backup_$JOB_DIR" ]; then
         vexit "job_dirs/$JOB_DIR does not exist" 5
     fi
 
+
+    #  restore origional from backup
+    #- - - - - - - - - - - - - - - - - - - - - - - -
     mv "job_dirs/backup_$JOB_DIR" "job_dirs/$JOB_DIR"
-            EXIT_CODE=$?
-            [ $EXIT_CODE -eq 0 ]    || { vexit "mv job_dirs/backup_$JOB_DIR  job_dirs/$JOB_DIR returned exit code: $EXIT_CODE" 6; }
-
-
+    vecho "mv job_dirs/backup_$JOB_DIR job_dirs/$JOB_DIR" 3
+    EXIT_CODE=$?
+    [ $EXIT_CODE -eq 0 ]    || { vexit "mv job_dirs/backup_$JOB_DIR  job_dirs/$JOB_DIR returned exit code: $EXIT_CODE" 6; }
     if [ ! -f "job_dirs/${JOB_DIR}.tar.gz.enc" ]; then
         vexit "job_dirs/${JOB_DIR}.tar.gz.enc does not exist" 7
     fi
 
+
+    #  move encrypted to web
+    #- - - - - - - - - - - - - - - - - - - - - - - -
     vecho "   moving encrypted job dir to web directory" 3
     vecho "   using: mv job_dirs/${JOB_DIR}.tar.gz.enc $ENCRYPTED_JOB_DIR" 3
     # mkdir -p "$ENCRYPTED_JOB_DIR"

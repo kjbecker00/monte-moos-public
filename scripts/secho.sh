@@ -51,17 +51,26 @@ for ARGI; do
 done
 
 #--------------------------------------------------------------
-#  Part 3: 
+#  Part 3: Print it regularly
 #--------------------------------------------------------------
 echo "$TO_PRINT"
-command -v raspi-gpio 2>/dev/null
-if [ "$?" = "0" ]; then
+
+
+#--------------------------------------------------------------
+#  Part 4: Write to status.txt
+#--------------------------------------------------------------
+if [ -f "/home/student2680/pablo-common/bin/get_vname.sh" ]; then
    name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
 else
    name="$(hostname)"
 fi
 echo "$name" > myname.txt ;
 echo "$TO_PRINT (on ${name} as of $(date))" > status.txt ; 
+
+
+#--------------------------------------------------------------
+#  Part 5: Copy to host
+#--------------------------------------------------------------
 # Start ssh-agent
 eval `ssh-agent -s` &> /dev/null
 ps -p $SSH_AGENT_PID &> /dev/null

@@ -19,6 +19,7 @@ repo_links.txt
 status.txt
 .temp*
 myname.txt
+*.enc
 # Private dirs
 moos-dirs/*
 job_dirs/*

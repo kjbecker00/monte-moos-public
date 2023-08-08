@@ -109,16 +109,12 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
         echo "Sleeping (as of $(date))" > status.txt # can't seco because -n
         echo -n "${txtltblu}Sleeping${txtrst}"
         check_sleep 60
-        check_quit
         echo -n "${txtltblu}.${txtrst}"
         check_sleep 60
-        check_quit
         echo -n "${txtltblu}.${txtrst}"
         check_sleep 60
-        check_quit
         echo "${txtltblu}.${txtrst}"
         check_sleep 60
-        check_quit
         check_sleep 60
     fi
 
