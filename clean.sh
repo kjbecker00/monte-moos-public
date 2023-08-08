@@ -149,6 +149,8 @@ fi
 
 # Always clean all remaining .enc files
 find . -name '*.enc'   -exec rm -rf {} \; 2>/dev/null
+find . -name '*.enc.1'   -exec rm -rf {} \; 2>/dev/null
+find . -name '*.enc.2'   -exec rm -rf {} \; 2>/dev/null
 
 
 #-------------------------------------------------------

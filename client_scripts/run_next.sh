@@ -88,7 +88,7 @@ if [ "$HOSTLESS" = "no" ]; then
     if [[ "$EXIT_CODE" -ne 0 ]]; then
         echo "$txtylw      wget failed with code $EXIT_CODE. Continuing with local repo_links.txt ...$txtrst"
     elif [[ ! -f "host_job_queue.txt.enc" ]]; then
-        echo "$txtylw      file host_job_queue.txt.enc not found, but wget had no error?. Continuing with local repo_links.txt ...$txtrst"
+        echo "$txtylw      file host_job_queue.txt.enc not found, but wget had no error? Continuing with local repo_links.txt ...$txtrst"
     else
         ./encrypt_file.sh host_job_queue.txt.enc > /dev/null
         EXIT_CODE=$?

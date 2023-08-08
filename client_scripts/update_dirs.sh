@@ -290,10 +290,21 @@ handle_repo_links_file() {
         #  Part 4c: build the repo
         cd moos-dirs/"$repo_name" ||  (vexit "unable to cd moos-dirs/$repo_name " 2)
         echo -n "        Building..."
-        if [[ $QUIET == "yes" ]]; then
-            ./$script "${FLOW_DOWN_ARGS}" > /dev/null 2>&1
+
+        ##############################################
+        # SVN repos were developed in the lab.       #
+        # these repos should be built with -mx to    #
+        # ensure they can run a shoreside as well    #
+        ##############################################
+        if [ -f ".svn" ]; then
+            ARGS="${FLOW_DOWN_ARGS} -mx"
         else
-            ./$script "${FLOW_DOWN_ARGS}"
+            ARGS="${FLOW_DOWN_ARGS}"
+        fi
+        if [[ $QUIET == "yes" ]]; then
+            ./$script "${ARGS}" > /dev/null 2>&1
+        else
+            ./$script "${ARGS}"
         fi
 
         if [ $? -ne 0 ]; then
