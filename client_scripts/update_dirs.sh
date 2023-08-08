@@ -171,10 +171,6 @@ skipline() {
             if [ ! -z "$num" ]; then
                 echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
             fi
-            if [ -d "$repo_name/bin" ]; then
-                echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
-                echo "$repo_name" >> .built_dirs
-            fi
         fi
         # Determines if the repo is used for the job
         if is_in_job $repo_name; then
@@ -226,10 +222,6 @@ handle_repo_links_file() {
                 if [ ! -z "$num" ]; then
                     echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
                 fi
-                if [ -d "$repo_name/bin" ]; then
-                    echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
-                    echo "$repo_name" >> .built_dirs
-                fi
             fi
             # Determines if the repo is used for the job
             if is_in_job $repo_name; then
@@ -252,7 +244,7 @@ handle_repo_links_file() {
                 gpull $repo $repo_links_file
                 cd ../..
             else
-                echo "   Cloning $repo_name..."
+                echo "        Cloning $repo_name..."
                 cd moos-dirs
                 git clone "$repo" &> /dev/null
                 # if ! timeout $PROMPT_TIMEOUT git clone "$repo" &> /dev/null; then

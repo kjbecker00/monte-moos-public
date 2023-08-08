@@ -32,26 +32,7 @@ txtgry=$(tput setaf 8) # Grey
 txtbld=$(tput bold)    # Bold                           
 # vecho "message" level_int
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi }
-secho() {   echo "$1"
-            [ -f "myname.txt" ] || { echo "$(hostname)" > myname.txt ; }
-            name=$(head -n 1 myname.txt)
-            echo "$1 (on ${name} as of $(date))" > status.txt ; 
-            # Start ssh-agent
-            eval `ssh-agent -s` &> /dev/null
-            ps -p $SSH_AGENT_PID &> /dev/null
-            SSH_AGENT_RUNNING=$?
-            [ ${SSH_AGENT_RUNNING} -eq 0 ] || { vecho "Unable to start ssh-agent" 3 ; }
-            ssh-add -t 7200 ~/.ssh/id_rsa_yco 2> /dev/null
-            [ "$?" -eq "0" ] || { vexit "ssh agent unable to add yco key" 3 ; }
-            ssh -n "yodacora@oceanai.mit.edu" "mkdir -p ~/monte-moos/clients/status" &> /dev/null
-            EXIT_CODE=$?
-            if [ ! $EXIT_CODE -eq "0" ]; then
-                if [ $EXIT_CODE -eq 255 ]; then
-                    vecho "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst 0
-                fi
-            fi
-            rsync -zaPr -q status.txt "yodacora@oceanai.mit.edu:~/monte-moos/clients/status/${name}.txt" &> /dev/null
-             } # status echo
+secho() {   ./scripts/secho.sh "$1" ; } # status echo
 vexit() { secho $txtred"$ME: Error $1. Exit Code $2" $txtrst; safe_exit "$2" ; }
 safe_exit() {
     PATH=$original_ivp_behavior_dirs
