@@ -84,8 +84,11 @@ if [ "$HOSTLESS" = "no" ]; then
     vecho "Getting host's job queue..." 1
     wget -q "https://oceanai.mit.edu/monte/clients/host_job_queue.txt.enc"
     EXIT_CODE=$?
+    wait
     if [[ "$EXIT_CODE" -ne 0 ]]; then
         echo "$txtylw      wget failed with code $EXIT_CODE. Continuing with local repo_links.txt ...$txtrst"
+    elif [[ ! -f "host_job_queue.txt.enc" ]]; then
+        echo "$txtylw      file host_job_queue.txt.enc not found, but wget had no error?. Continuing with local repo_links.txt ...$txtrst"
     else
         ./encrypt_file.sh host_job_queue.txt.enc > /dev/null
         EXIT_CODE=$?
