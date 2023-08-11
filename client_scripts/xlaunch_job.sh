@@ -51,11 +51,19 @@ for ARGI; do
         echo " --help, -h Show this help message " 
         echo " --job_file=<job> file with all parameters" 
 	    echo "  --quiet, -q        Quiet uQueryDB, uPokeDB                 " 
+	    echo "  --verbose=, -v=      Set verbosity                 " 
+	    echo "  --verbose, -v        Set verbosity=1                 " 
         safe_exit 0;
     elif [[ "${ARGI}" =~ "--job_file=" ]]; then
         JOB_FILE="${ARGI#*=}"
     elif [ "${ARGI}" = "--quiet" -o "${ARGI}" = "-q" ]; then
         QUIET="yes"
+    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+        if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
+            VERBOSE=1
+        else
+            VERBOSE="${ARGI#*=}"
+        fi
     else 
         FLOW_DOWN_ARGS+="${ARGI} "
     fi
@@ -201,8 +209,8 @@ vecho "PATH=$PATH" 3
 #-----------------------------------------------------
 
 vecho "Part 1: Launching the mission... " 1
-vecho "./client_scripts/source_launch.sh --script="${SHORESIDE_SCRIPT}" --repo="${SHORE_REPO}" --mission="${SHORE_MISSION}" ${SHORE_FLAGS}" 2
-./client_scripts/source_launch.sh --script="${SHORESIDE_SCRIPT}" --repo="${SHORE_REPO}" --mission="${SHORE_MISSION}" ${SHORE_FLAGS}
+vecho "./client_scripts/source_launch.sh --script=${SHORESIDE_SCRIPT} --repo=${SHORE_REPO} --mission=${SHORE_MISSION}  -v=$VERBOSE ${SHORE_FLAGS}" 2
+./client_scripts/source_launch.sh --script="${SHORESIDE_SCRIPT}" --repo="${SHORE_REPO}" --mission="${SHORE_MISSION}" -v=$VERBOSE  ${SHORE_FLAGS}
 LEXIT_CODE=$?
 if [ $LEXIT_CODE != 0 ]; then
     vexit " ./client_scripts/source_launch.sh --script=${SHORESIDE_SCRIPT} --repo=${SHORE_REPO} --mission=${SHORE_MISSION} ${SHORE_FLAGS} returned non-zero exit code:  $LEXIT_CODE" 4
@@ -215,10 +223,10 @@ fi
 for (( i=0; i<VEHICLES; i++ ));
 do
     vecho "./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}" 2
-    ./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}
+    ./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}"  -v=$VERBOSE ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}
     LEXIT_CODE=$?
     if [ $LEXIT_CODE != 0 ]; then
-        vexit " ./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS} returned non-zero exit code:  $LEXIT_CODE" 5
+        vexit " ./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}"  -v=$VERBOSE ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS} returned non-zero exit code:  $LEXIT_CODE" 5
     fi
 done
 

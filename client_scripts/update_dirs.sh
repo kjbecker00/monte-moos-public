@@ -105,10 +105,15 @@ is_in_job() {
 has_built_repo() {
     local repo=$1
     num=$(grep -Fx -m 1 "$repo" .built_dirs)
-    if [ ! -z "$num" ]; then
-        return 0
+    if [ -z "$num" ]; then
+        return 1
     fi
-    return 1
+    local name=$(extract_repo_name $repo)
+    num2=$(grep -Fx -m 1 "$name" .built_dirs)
+    if [ -z "$num2" ]; then
+        return 1
+    fi
+    return 0
 }
 # given a line in repo_links.txt, retrieves the repo name
 extract_repo_name() {
@@ -162,13 +167,13 @@ skipline() {
     if [ $ALL != "yes" ]; then
         if [ -f ".built_dirs" ]; then
             # determines if the repo was found in .built_dirs
-            num=$(grep -Fx -m 1 "$repo" .built_dirs)
+            num=$(grep -Fx -m 1 "$repo_name" .built_dirs)
             display_num=$num
             if [ -z "$display_num" ]; then
                 display_num="0"
             fi
-            vecho "num of repo=$repo in .built_dirs is $display_num" 2
-            if [ ! -z "$num" ]; then
+            vecho "num of repo=$repo_name in .built_dirs is $display_num" 2
+            if [[ ! -z "$num" || "$num" -gt 0 ]]; then
                 echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
             fi
         fi
@@ -213,12 +218,12 @@ handle_repo_links_file() {
         if [ $ALL != "yes" ]; then
             if [ -f ".built_dirs" ]; then
                 # determines if the repo was found in .built_dirs
-                num=$(grep -Fx -m 1 "$repo" .built_dirs)
+                num=$(grep -Fx -m 1 "$repo_name" .built_dirs)
                 display_num=$num
                 if [ -z "$display_num" ]; then
                     display_num="0"
                 fi
-                vecho "num of repo=$repo in .built_dirs is $display_num" 2
+                vecho "num of repo=$repo_name in .built_dirs is $display_num" 2
                 if [ ! -z "$num" ]; then
                     echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
                 fi
@@ -302,18 +307,21 @@ handle_repo_links_file() {
             ARGS="${FLOW_DOWN_ARGS}"
         fi
         if [[ $QUIET == "yes" ]]; then
-            ./$script "${ARGS}" > /dev/null 2>&1
+            ./$script "${ARGS}" > .build_log.txt 2>&1
         else
-            ./$script "${ARGS}"
+            ./$script "${ARGS}" > .build_log.txt
         fi
 
         if [ $? -ne 0 ]; then
             vexit "build failed on $repo_name with exit code $?" 3
         fi
+        if tail -1 ".build_log.txt" | grep -iq "error"; then
+            vexit "build failed on $repo_name. Check $repo_name/.build_log.txt" 3
+        fi
         wait
         echo $txtgrn " built sucessfully" $txtrst
         cd - > /dev/null || exit 1
-        echo "$repo" >> .built_dirs
+        echo "$repo_name" >> .built_dirs
     done < "$repo_links_file"
 }
 
@@ -356,11 +364,17 @@ while [[ "$SEARCH_DIR" != "$SEARCH_DIR_BASE" ]]; do
     vecho "Searching for repo_links.txt in $SEARCH_DIR" 3
     if [ -f "$SEARCH_DIR/repo_links.txt" ]; then
         vecho "     Found $SEARCH_DIR/repo_links.txt" 1
-        handle_repo_links_file "$SEARCH_DIR/repo_links.txt"
+        array+=("$SEARCH_DIR/repo_links.txt")
     else
         vecho "     Did not find a repo_links.txt in $SEARCH_DIR" 5
     fi
     SEARCH_DIR=$(dirname $SEARCH_DIR)
+done
+
+# Loop through repo links in descending order 
+# More natural to have dependencies in this manner
+for ((i=${#array[@]}-1; i>=0; i--)); do
+    handle_repo_links_file "${array[i]}"
 done
 
 

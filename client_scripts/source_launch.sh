@@ -70,6 +70,8 @@ for ARGI; do
         echo " --libdir=moos-ivp-extend/lib,    which repo to add to IVP_BEHAVIOR_DIRS"
         echo "                      (Defaults to repo/lib)              "
         echo "                                                          " 
+	    echo "  --verbose=, -v=      Set verbosity                 " 
+	    echo "  --verbose, -v        Set verbosity=1                 " 
         echo " All other arguments will flow down to the launch script"
         exit 0;
     elif [[ "${ARGI}" =~ "--script=" ]]; then
@@ -84,6 +86,12 @@ for ARGI; do
         BIN_SDIR="${ARGI#*=}"
     elif [[ "${ARGI}" =~ "--libdir=" ]]; then
         LIB_SDIR="${ARGI#*=}"
+    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+        if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
+            VERBOSE=1
+        else
+            VERBOSE="${ARGI#*=}"
+        fi
     else 
         FLOW_DOWN_ARGS+="${ARGI} "
     fi
@@ -150,13 +158,17 @@ original_path=$PATH
 original_ivp_behavior_dirs=$IVP_BEHAVIOR_DIRS
     
 if [[ $TO_SOURCE == "yes" ]]; then
-    vecho "Temporarially adding $BIN_DIR to PATH" 1
+    vecho "Temporarially adding $BIN_DIR to PATH" 2
     export PATH=$PATH:$BIN_DIR
 fi
 if [[ $TO_ADD_LIB == "yes" ]]; then
-    vecho "Temporarially adding $LIB_DIR to PATH" 1
+    vecho "Temporarially adding $LIB_DIR to PATH" 2
     export IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS:$LIB_DIR
 fi
+
+
+vecho "Launching with PATH=$PATH" 1
+vecho "Launching with IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
 
 # Run the launch.sh script with pre-determined flags
 cd "$MISSION_DIR" || safe_exit 9

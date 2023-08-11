@@ -126,16 +126,20 @@ for job_result in "$JOB_RESULTS"/*; do
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         #  if [ there's something to cp] and [the job hasn't been copied yet]
         if [ -d "$job_result/web" ] && [ ! -d "$post_processed_dirs/$JOB_ID" ]; then
-          mkdir -p "$post_processed_dirs/$JOB_ID"
-
-          # Copy or link the results to the web directory
-          if [ "$TYPE" = "cp" ]; then
-            vecho "cp -rp $job_result/web/* $post_processed_dirs/$JOB_ID" 3
-            cp -rp "$job_result/web/"* "$post_processed_dirs/$JOB_ID" 2>/dev/null
-          elif [ "$TYPE" = "ln" ]; then
-            vecho "ln -s $job_result/web/* $post_processed_dirs/$JOB_ID" 3
-            ln -s "$job_result/web/"* "$post_processed_dirs/$JOB_ID"
-          fi
+            # only copy if the web isn't empty
+            if [ "$(ls -A $job_result/web)" ]; then 
+                mkdir -p "$post_processed_dirs/$JOB_ID"
+                # Copy or link the results to the web directory
+                if [ "$TYPE" = "cp" ]; then
+                    vecho "cp -rp $job_result/web/* $post_processed_dirs/$JOB_ID" 3
+                    cp -rp "$job_result/web/"* "$post_processed_dirs/$JOB_ID" 2>/dev/null
+                elif [ "$TYPE" = "ln" ]; then
+                    vecho "ln -s $job_result/web/* $post_processed_dirs/$JOB_ID" 3
+                    ln -s "$job_result/web/"* "$post_processed_dirs/$JOB_ID"
+                fi
+            else
+                vecho "$job_result/web is empty. Nothing to copy" 3
+            fi
         else
           [ -d "$job_result/web" ]  || { vecho "No results to copy to web (no dir at $job_result/web)" 3 ; }
           [ ! -d "$post_processed_dirs/$JOB_ID" ]  || { vecho "Results have already been copied to ($post_processed_dirs/$JOB_ID)" 3 ; }
