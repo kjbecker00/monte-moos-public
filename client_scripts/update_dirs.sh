@@ -321,7 +321,11 @@ handle_repo_links_file() {
             vexit "build failed on $repo_name with exit code $?" 3
         fi
         if tail -1 ".build_log.txt" | grep -iq "error"; then
-            vexit "build failed on $repo_name. Check $repo_name/.build_log.txt" 3
+            if [ -f ".svn" ]; then
+                wecho "build failed on $repo_name. Check $repo_name/.build_log.txt"
+            else
+                vexit "build failed on $repo_name. Check $repo_name/.build_log.txt" 3
+            fi
         fi
         wait
         echo $txtgrn " built sucessfully" $txtrst
