@@ -287,10 +287,9 @@ handle_repo_links_file() {
             )
             if [ -f ".git" ]; then
                 gpull $repo $repo_links_file
-            elif [ -f ".svn" ]; then
+            elif [[ -f ".svn" || -d ".svn" ]]; then
                 svnup $repo $repo_links_file
             fi
-            echo $txtgrn " updated sucessfully" $txtrst
             cd ../..
         else
             vexit "$repo is not a valid repo" 2
@@ -306,11 +305,12 @@ handle_repo_links_file() {
         # these repos should be built with -mx to    #
         # ensure they can run a shoreside as well    #
         ##############################################
-        if [ -f ".svn" ]; then
+        if [[ -f ".svn" || -d ".svn" ]]; then
             ARGS="${FLOW_DOWN_ARGS} -mx"
         else
             ARGS="${FLOW_DOWN_ARGS}"
         fi
+
         if [[ $QUIET == "yes" ]]; then
             ./$script "${ARGS}" >.build_log.txt 2>&1
         else
@@ -320,8 +320,9 @@ handle_repo_links_file() {
         if tail -1 ".build_log.txt" | grep -iq "error"; then
             BUILD_FAIL=1
         fi
+
         if [ $BUILD_FAIL -ne 0 ]; then
-            if [ -f ".svn" ]; then
+            if [[ -f ".svn" || -d ".svn" ]]; then
                 wecho "build failed on $repo_name. Check $repo_name/.build_log.txt"
             else
                 vexit "build failed on $repo_name with exit code $?" 3
