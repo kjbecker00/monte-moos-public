@@ -1,20 +1,22 @@
-#!/bin/bash 
+#!/bin/bash
 # Kevin Becker Jun 9 2023
-
 
 ME=$(basename "$0")
 VERBOSE=0
 CLIENT="no"
 TEST="no"
-txtrst=$(tput sgr0)    # Reset                       
-txtred=$(tput setaf 1) # Red                        
-txtgrn=$(tput setaf 2) # Green                      
-txtylw=$(tput setaf 3) # Yellow                     
-txtblu=$(tput setaf 4) # Blue                     
-txtgry=$(tput setaf 8) # Grey                             
+txtrst=$(tput sgr0)    # Reset
+txtred=$(tput setaf 1) # Red
+txtgrn=$(tput setaf 2) # Green
+txtylw=$(tput setaf 3) # Yellow
+txtblu=$(tput setaf 4) # Blue
+txtgry=$(tput setaf 8) # Grey
 # vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi }
-vexit() { echo $txtred"$ME: Error $1. Exit Code $2" $txtrst; exit "$2" ; }
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
+vexit() {
+    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    exit "$2"
+}
 
 #-------------------------------------------------------
 #  Part 0: Check for and handle command-line arguments
@@ -26,13 +28,13 @@ for ARGI; do
         echo " Checks a job file for (some) errors. "
         echo " Note: If the job file itself returns a non-zero exit code,"
         echo "    this script will return that same exit code."
-        echo "Options:                                                  " 
-        echo " --help, -h Show this help message                        " 
-        echo " --job_file=[FILE]    job file to be run" 
-        echo " --client, -c         check as a client (check ssh-agent)" 
-        exit 0;
+        echo "Options:                                                  "
+        echo " --help, -h Show this help message                        "
+        echo " --job_file=[FILE]    job file to be run"
+        echo " --client, -c         check as a client (check ssh-agent)"
+        exit 0
     elif [[ "${ARGI}" =~ "--job_file=" ]]; then
-        JOB_FILE="${ARGI#*=}" 
+        JOB_FILE="${ARGI#*=}"
     elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
         VERBOSE=1
     elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
@@ -75,13 +77,13 @@ fi
 #  Part 2: Check vehicle counts
 #-------------------------------------------------------
 if [[ $VEHICLES -gt 0 ]]; then
-    [ "$VEHICLES" = ${#VEHICLE_REPOS[@]} ]    || { vexit "VEHICLES ($VEHICLES) does not match number of VEHICLE_REPOS (${#VEHICLE_REPOS[@]})" 6; }
-    [ "$VEHICLES" = ${#VEHICLE_MISSIONS[@]} ]    || { vexit "VEHICLES ($VEHICLES) does not match number of VEHICLE_MISSIONS (${#VEHICLE_MISSIONS[@]})" 7; }
+    [ "$VEHICLES" = ${#VEHICLE_REPOS[@]} ] || { vexit "VEHICLES ($VEHICLES) does not match number of VEHICLE_REPOS (${#VEHICLE_REPOS[@]})" 6; }
+    [ "$VEHICLES" = ${#VEHICLE_MISSIONS[@]} ] || { vexit "VEHICLES ($VEHICLES) does not match number of VEHICLE_MISSIONS (${#VEHICLE_MISSIONS[@]})" 7; }
 
     if [[ -z "$VEHICLE_FLAGS" ]]; then
         echo "${txtylw}$0 Warning, VEHICLE_FLAGS array ($VEHICLE_FLAGS) is empty${txtrst}"
     else
-        [ "$VEHICLES" = ${#VEHICLE_MISSIONS[@]} ]    || { vexit "VEHICLES ($VEHICLES) does not match number of VEHICLE_FLAGS (${#VEHICLE_FLAGS[@]})" 8; }
+        [ "$VEHICLES" = ${#VEHICLE_MISSIONS[@]} ] || { vexit "VEHICLES ($VEHICLES) does not match number of VEHICLE_FLAGS (${#VEHICLE_FLAGS[@]})" 8; }
     fi
     vecho "Vehicle count good" 1
 else
@@ -91,9 +93,9 @@ fi
 #-------------------------------------------------------
 #  Part 3: Check that shoreside is set
 #-------------------------------------------------------
-[ -n "$SHORE_FLAGS" ]    || { echo "${txtylw}$0 Warning, SHORE_FLAGS ($SHORE_FLAGS) is empty${txtrst}"; }
-[ -n "$SHORE_REPO" ]    || { vexit "SHORE_REPO ($SHORE_REPO) must be set" 9; }
-[ -n "$SHORE_MISSION" ]    || { vexit "SHORE_MISSION ($SHORE_MISSION) must be set" 10; }
+[ -n "$SHORE_FLAGS" ] || { echo "${txtylw}$0 Warning, SHORE_FLAGS ($SHORE_FLAGS) is empty${txtrst}"; }
+[ -n "$SHORE_REPO" ] || { vexit "SHORE_REPO ($SHORE_REPO) must be set" 9; }
+[ -n "$SHORE_MISSION" ] || { vexit "SHORE_MISSION ($SHORE_MISSION) must be set" 10; }
 vecho "Shoreside variables set" 1
 
 #-------------------------------------------------------
@@ -107,23 +109,22 @@ vecho "JOB_TIMEOUT set" 1
 #-------------------------------------------------------
 if [ "$(hostname)" != "oceanai" ] && [ "$CLIENT" == "yes" ]; then
     # Check for ssh key
-    if [ -f ~/.ssh/id_rsa_yco ] ; then    
-        chmod -R go-rwx ~/.ssh/id_rsa_yco &> /dev/null
+    if [ -f ~/.ssh/id_rsa_yco ]; then
+        chmod -R go-rwx ~/.ssh/id_rsa_yco &>/dev/null
     else
         vexit "Unable to find ssh key. Make sure it is saved to ~/.ssh/id_rsa_yco. If you are not using the current computer as the client, feel free to continue" 14
     fi
     # Start ssh-agent
-    eval `ssh-agent -s` &> /dev/null
-    ps -p $SSH_AGENT_PID &> /dev/null
+    eval $(ssh-agent -s) &>/dev/null
+    ps -p $SSH_AGENT_PID &>/dev/null
     SSH_AGENT_RUNNING=$?
-    if [ ${SSH_AGENT_RUNNING} -ne 0 ] ; then
+    if [ ${SSH_AGENT_RUNNING} -ne 0 ]; then
         vexit "Unable to start ssh-agent. If you are not using the current computer as the client, feel free to continue" 16
     fi
     vecho "ssh-agent working" 1
 else
     echo "${txtylw}$0: Assuming current machine is not a client (skipping ssh-agent check). Add -c to check as a client"
 fi
-
 
 #-------------------------------------------------------
 #  Done!

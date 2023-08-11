@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 # Kevin Becker, June 9 2023
 
 # This script is used to update the queue of jobs to run
@@ -7,19 +7,31 @@ ME=$(basename "$0")
 VERBOSE=0
 PERPETUAL="no"
 QUEUE_COMPLETE="no"
-txtrst=$(tput sgr0)    # Reset                       
-txtred=$(tput setaf 1) # Red                        
-txtgrn=$(tput setaf 2) # Green                     
-txtblu=$(tput setaf 4) # Blue                     
-txtltblu=$(tput setaf 75) # Light blue                     
-txtgry=$(tput setaf 8) # Grey  
+txtrst=$(tput sgr0)       # Reset
+txtred=$(tput setaf 1)    # Red
+txtgrn=$(tput setaf 2)    # Green
+txtblu=$(tput setaf 4)    # Blue
+txtltblu=$(tput setaf 75) # Light blue
+txtgry=$(tput setaf 8)    # Grey
 
 # Status echo
-secho() { echo "$1" ; echo "$1 (as of $(date)). To quit, make the file 'force_quit' in this directory" > status.txt ; }
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then secho $(tput setaf 245)"$ME: $1" $txtrst; fi }
-vexit() { secho $txtred"$ME: Error $1. Exit Code $2" $txtrst ; exit "$2" ; }
-check_quit() { if [ -f "force_quit" ]; then secho "force_quit file found. Exiting" ; exit 0 ; fi }
-check_sleep() { for i in $(seq 1 1 $1 ); do check_quit ; sleep 1 ; done ; }
+secho() {
+    echo "$1"
+    echo "$1 (as of $(date)). To quit, make the file 'force_quit' in this directory" >status.txt
+}
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then secho $(tput setaf 245)"$ME: $1" $txtrst; fi; }
+vexit() {
+    secho $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    exit "$2"
+}
+check_quit() { if [ -f "force_quit" ]; then
+    secho "force_quit file found. Exiting"
+    exit 0
+fi; }
+check_sleep() { for i in $(seq 1 1 $1); do
+    check_quit
+    sleep 1
+done; }
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -33,11 +45,11 @@ for ARGI; do
         echo "    and repo links.  It is recommended to run this script"
         echo "    with tmux. To detach, press ctrl-b then d. To reattach,"
         echo "    run 'tmux attach' in this directory."
-        echo "Options:                                                  " 
-        echo " --help, -h Show this help message                        " 
-        echo " --verbose, -v Change verbosity level                        " 
-        echo " --perpetual, -p Run perpetually (until force_quit file is made)" 
-        exit 0;
+        echo "Options:                                                  "
+        echo " --help, -h Show this help message                        "
+        echo " --verbose, -v Change verbosity level                        "
+        echo " --perpetual, -p Run perpetually (until force_quit file is made)"
+        exit 0
     elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
         VERBOSE=1
     elif [ "${ARGI}" = "--perpetual" -o "${ARGI}" = "-p" ]; then
@@ -58,13 +70,10 @@ if [ -f "force_quit" ]; then
     exit 0
 fi
 
-
-
 #-------------------------------------------------------
 #  Part 3: Looping thru the queue
 #-------------------------------------------------------
 while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
-
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #  Part 3a: Push latest queue to web
@@ -84,29 +93,26 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     fi
     check_quit
 
-    
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #  Part 3b: Update the job_dirs and repo links on the web
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     secho "Updating job dirs"
     ./host_scripts/update_job_dirs.sh
     EXIT_CODE=$?
-    [ $EXIT_CODE -eq 0 ]    || { vexit "running ./host_scripts/update_job_dirs.sh returned exit code: $EXIT_CODE" 2; }
+    [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_job_dirs.sh returned exit code: $EXIT_CODE" 2; }
     check_quit
-    
 
     secho "Updating repo links"
     ./host_scripts/update_repo_links.sh
     EXIT_CODE=$?
-    [ $EXIT_CODE -eq 0 ]    || { vexit "running ./host_scripts/update_repo_links.sh returned exit code: $EXIT_CODE" 2; }
+    [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_repo_links.sh returned exit code: $EXIT_CODE" 2; }
     check_quit
-
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #  Part 3c: If perpetual mode, wait a bit
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; then
-        echo "Sleeping (as of $(date))" > status.txt # can't seco because -n
+        echo "Sleeping (as of $(date))" >status.txt # can't seco because -n
         echo -n "${txtltblu}Sleeping${txtrst}"
         check_sleep 60
         echo -n "${txtltblu}.${txtrst}"
@@ -130,6 +136,3 @@ check_sleep 60
 secho "Updating queue one last time (for accurate count and publish all results)"
 ./host_scripts/update_queue.sh
 secho "${txtgrn}Done${txtrst}"
-
-
-

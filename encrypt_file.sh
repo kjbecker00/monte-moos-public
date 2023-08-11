@@ -4,15 +4,17 @@
 
 ME=$(basename "$0")
 VERBOSE=0
-txtrst=$(tput sgr0)    # Reset                       
-txtred=$(tput setaf 1) # Red                        
-txtgrn=$(tput setaf 2) # Green                     
-txtblu=$(tput setaf 4) # Blue                     
-txtgry=$(tput setaf 8) # Grey                             
+txtrst=$(tput sgr0)    # Reset
+txtred=$(tput setaf 1) # Red
+txtgrn=$(tput setaf 2) # Green
+txtblu=$(tput setaf 4) # Blue
+txtgry=$(tput setaf 8) # Grey
 # vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi }
-vexit() { echo $txtred"$ME: Error $1. Exit Code $2" $txtrst; exit "$2" ; }
-
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
+vexit() {
+    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    exit "$2"
+}
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -22,14 +24,14 @@ for ARGI; do
     if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
         echo "$ME.sh  [FILE]"
         echo " This is a script used to encrypt/decrypt files/dirs "
-        echo "Options:                                                  " 
-        echo " --help, -h Show this help message                        " 
+        echo "Options:                                                  "
+        echo " --help, -h Show this help message                        "
         # echo " --input=       file or dir to be encrypted "
         echo " --output=       "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" =~ "--output=" ]]; then
         OUTPUT="${ARGI#*=}"
-    else 
+    else
         INPUT="${ARGI}"
     fi
 done
@@ -41,7 +43,6 @@ PASSWORD=$(head -n 1 .password)
 if [[ -z $INPUT ]]; then
     vexit " No input file or dir found. Use -h or --help for help with this script" 1
 fi
-
 
 # If it's a directory, compress it first
 if [[ -d $INPUT ]]; then
@@ -59,9 +60,6 @@ elif [[ -f $INPUT ]]; then
 else
     vecho "Input is not a file or directory" 1
 fi
-
-
-
 
 # Encrypt or decrypt based on file extension
 if [[ $INPUT = *".enc" ]]; then
@@ -107,4 +105,3 @@ else
 fi
 
 exit 0
-

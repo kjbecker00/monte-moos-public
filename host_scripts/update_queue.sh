@@ -4,7 +4,7 @@
 # Date: 07/18/2023
 # Script: host_scripts/update_queue.sh
 #--------------------------------------------------------------
-# Part 1: Convenience functions   
+# Part 1: Convenience functions
 #--------------------------------------------------------------
 ME=$(basename "$0")
 VERBOSE=0
@@ -17,8 +17,11 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo "${txtgry}$ME: $1 ${txtgry}"; fi }
-vexit() { echo $txtred"$ME: Error $1. Exit Code $2 $txtrst"; exit "$2" ; }
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo "${txtgry}$ME: $1 ${txtgry}"; fi; }
+vexit() {
+    echo $txtred"$ME: Error $1. Exit Code $2 $txtrst"
+    exit "$2"
+}
 
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
@@ -32,7 +35,7 @@ for ARGI; do
         echo "    Display this help message                         "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -40,12 +43,12 @@ for ARGI; do
             VERBOSE="${ARGI#*=}"
         fi
     else
-	     vexit "Bad Arg: $ARGI" 1
+        vexit "Bad Arg: $ARGI" 1
     fi
 done
 
 #--------------------------------------------------------------
-#  Part 3: 
+#  Part 3:
 #--------------------------------------------------------------
 
 HOST_RESULTS_DIR="/home/yodacora/monte-moos/results"
@@ -56,8 +59,7 @@ QUEUE_COMPLETE="yes"
 
 # Number of jobs in queue
 length=$(wc -l "$QUEUE_FILE" | awk '{print $1}')
-for ((i=1; i<=length; i++))
-do
+for ((i = 1; i <= length; i++)); do
     # select ith job from the queue
     line=$(awk -v n=$i 'NR == n {print; exit}' "$QUEUE_FILE")
     if [[ -z $line ]]; then
@@ -93,10 +95,10 @@ do
     else
         vecho "    counting results in $HOST_RESULTS_DIR/$JOB_PATH/ " 1
         # Number of runs based on number of directories sent to host
-        NUM_RUNS_ACT=$(ls -1 $HOST_RESULTS_DIR/"$JOB_PATH"/ 2>/dev/null| wc -l)  
+        NUM_RUNS_ACT=$(ls -1 $HOST_RESULTS_DIR/"$JOB_PATH"/ 2>/dev/null | wc -l)
 
-        # Number of runs 
-        NUM_RUNS_WEB=$(find $HOST_RESULTS_DIR/"$JOB_PATH"/ -name "web" | wc -l) 
+        # Number of runs
+        NUM_RUNS_WEB=$(find $HOST_RESULTS_DIR/"$JOB_PATH"/ -name "web" | wc -l)
         NUM_RUNS_CSV=$(find $HOST_RESULTS_DIR/"$JOB_PATH"/ -name "results.csv" | wc -l)
 
         vecho "NUM_RUNS_ACT=$NUM_RUNS_ACT NUM_RUNS_WEB=$NUM_RUNS_WEB NUM_RUNS_CSV=$NUM_RUNS_CSV" 1
@@ -111,14 +113,14 @@ do
 
     if [ "$NUM_RUNS_ACT" -gt 0 ]; then
 
-        compiled="$OUTPUT_BASE_DIR/$JOB_PATH" 
+        compiled="$OUTPUT_BASE_DIR/$JOB_PATH"
 
         # - - - - - - - - - - - - - - - - - - - -
         # Count number of lines in the compiled csv
         RESULTS_CSV="$compiled/results.csv"
         if [ -f "$RESULTS_CSV" ]; then
             RUNS_COMPILED_CSV=$(cat "$RESULTS_CSV" | wc -l)
-            RUNS_COMPILED_CSV=$((RUNS_COMPILED_CSV-1))
+            RUNS_COMPILED_CSV=$((RUNS_COMPILED_CSV - 1))
         else
             RUNS_COMPILED_CSV=0
         fi
@@ -128,10 +130,9 @@ do
         # that have been copied to the web
         if [ -d "$compiled/post_processed/" ]; then
             RUNS_COMPILED_WEB=$(find "$compiled/post_processed/" -mindepth 1 -maxdepth 1 -type d | wc -l)
-        else   
+        else
             RUNS_COMPILED_WEB=0
         fi
-
 
         # - - - - - - - - - - - - - - - - - - - -
         # (Maybe) post-process the results again
@@ -141,11 +142,11 @@ do
             vecho "running ./host_scripts/update_results.sh $HOST_RESULTS_DIR/$JOB_PATH" 1
             ./host_scripts/update_results.sh "$HOST_RESULTS_DIR/$JOB_PATH"
             EXIT_CODE=$?
-            [ $EXIT_CODE -eq 0 ]    || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
-        else 
+            [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
+        else
             vecho "    $RESULTS_CSV processed $NUM_RUNS_CSV out of $RUNS_COMPILED_CSV results.csv files, and copied $NUM_RUNS_WEB out of $RUNS_COMPILED_WEB web subdirectories. No need to update results..." 1
         fi
-        
+
     fi
 
     # replace the line in queue with the newly counted number of runs
@@ -157,27 +158,21 @@ do
         sed -i'' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
     fi
 
-
 done
-
 
 # Re-encrypt the file
 vecho "Encrypting $QUEUE_FILE" 2
 cp "$QUEUE_FILE" "backup_$QUEUE_FILE" || exit 3
-./encrypt_file.sh $QUEUE_FILE > /dev/null
+./encrypt_file.sh $QUEUE_FILE >/dev/null
 EXIT_CODE=$?
-[ $EXIT_CODE -eq 0 ]    || { vexit "running ./encrypt_file.sh returned exit code: $EXIT_CODE" 9; }
+[ $EXIT_CODE -eq 0 ] || { vexit "running ./encrypt_file.sh returned exit code: $EXIT_CODE" 9; }
 mv "$QUEUE_FILE.enc" "$ENCRYPTED_QUEUE_FILE"
 mv "backup_$QUEUE_FILE" "$QUEUE_FILE"
 
-
 if [ $QUEUE_COMPLETE == "yes" ]; then
-    echo  "$(tput bold)$txtgrn    Queue complete! $txtrst"
+    echo "$(tput bold)$txtgrn    Queue complete! $txtrst"
     exit 0
 else
-    echo  "$txtylw    Queue not complete. $txtrst"
+    echo "$txtylw    Queue not complete. $txtrst"
     exit 1
 fi
-
-
-

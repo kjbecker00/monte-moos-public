@@ -1,6 +1,5 @@
-#!/bin/bash 
+#!/bin/bash
 # Kevin Becker Jun 9 2023
-
 
 ME=$(basename "$0")
 VERBOSE=0
@@ -8,16 +7,19 @@ TEST=""
 HOSTLESS="no"
 OLD_PATH=$PATH
 OLD_DIRS=$IVP_BEHAVIOR_DIRS
-txtrst=$(tput sgr0)    # Reset                       
-txtred=$(tput setaf 1) # Red                        
-txtgrn=$(tput setaf 2) # Green                      
-txtylw=$(tput setaf 3) # Yellow                     
-txtblu=$(tput setaf 4) # Blue                     
-txtgry=$(tput setaf 8) # Grey                              
+txtrst=$(tput sgr0)    # Reset
+txtred=$(tput setaf 1) # Red
+txtgrn=$(tput setaf 2) # Green
+txtylw=$(tput setaf 3) # Yellow
+txtblu=$(tput setaf 4) # Blue
+txtgry=$(tput setaf 8) # Grey
 # vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi }
-secho() {   ./scripts/secho.sh "$1" ; } # status echo
-vexit() { secho $txtred"$ME: Error $1. Exit Code $2" $txtrst; safe_exit "$2" ; }
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
+secho() { ./scripts/secho.sh "$1"; } # status echo
+vexit() {
+    secho $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    safe_exit "$2"
+}
 safe_exit() {
     PATH=$OLD_PATH
     IVP_BEHAVIOR_DIRS=$OLD_IVP_BEHAVIOR_DIRS
@@ -30,10 +32,9 @@ safe_exit() {
     exit $1
 }
 trap ctrl_c INT
-ctrl_c () {
+ctrl_c() {
     safe_exit 130
 }
-
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -43,22 +44,22 @@ for ARGI; do
     ALL_ARGS+=$ARGI" "
     if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
         echo "$ME.sh --job_file=[JOB_FILE]       "
-        echo "Options:                                                  " 
-        echo " --help, -h Show this help message                        "  
-        echo " --job_file=[FILE]    job file to be run" 
+        echo "Options:                                                  "
+        echo " --help, -h Show this help message                        "
+        echo " --job_file=[FILE]    job file to be run"
         echo "               If not specified, the first flag-less argument   "
         echo "               is assumed to be the JOB_FILE, and the script   "
         echo "               is automatically put into test mode.   "
         echo " --test, -t   used to test your job's post_process_results  "
-        echo "              script. Sets verbosity to 1 (if not already  " 
+        echo "              script. Sets verbosity to 1 (if not already  "
         echo "              set) and skips the extract_results.sh script."
         echo "              Test mode is enabled when the --job_file= flag"
         echo "              is not explicitly specified. Skips the "
         echo "              extract_results.sh script."
         echo "  --verbose=num, -v=num or --verbose, -v              "
-        echo " --hostless, -nh run everything without the host              " 
+        echo " --hostless, -nh run everything without the host              "
         echo "    Set verbosity                                     "
-        safe_exit 0;
+        safe_exit 0
     elif [[ "${ARGI}" =~ "--job_file=" ]]; then
         JOB_FILE="${ARGI#*=}"
     elif [[ "${ARGI}" = "--test" || "${ARGI}" = "-t" ]]; then
@@ -71,7 +72,7 @@ for ARGI; do
         else
             VERBOSE="${ARGI#*=}"
         fi
-    else 
+    else
         # Job file provided without the flag
         # Assumed running as test
         if [ -z $JOB_FILE ]; then
@@ -88,22 +89,20 @@ remove_from_var() {
     INDEX=1
     output_var=""
     while [ 1 ]; do
-        PART=`echo $1 | cut -d : -f $INDEX`
+        PART=$(echo $1 | cut -d : -f $INDEX)
         if [[ "${PART}" = "" ]]; then
             break
         elif [[ "${PART}" =~ "$2" ]]; then
-            INDEX=$((INDEX+1))
+            INDEX=$((INDEX + 1))
             continue
         else
             output_var+="$PART:"
         fi
-        INDEX=$((INDEX+1))
+        INDEX=$((INDEX + 1))
     done
     output_var="${output_var%:}"
     echo "$output_var"
 }
-
-
 
 #-------------------------------------------------------
 #  Part 1b: Set up test mode
@@ -154,17 +153,15 @@ fi
 echo -n "[1] Checking job file..."
 if [ "$HOSTLESS" = "yes" ] || [ "$TEST" = "yes" ]; then
     vecho "./check_job.sh  --job_file=$JOB_FILE" 1
-    ./check_job.sh  --job_file=$JOB_FILE
+    ./check_job.sh --job_file=$JOB_FILE
 else
     vecho "./check_job.sh  --job_file=$JOB_FILE --client" 1
-    ./check_job.sh  --job_file=$JOB_FILE --client
+    ./check_job.sh --job_file=$JOB_FILE --client
 fi
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
     vexit "Job file is invalid (failed check_job.sh with exit code $EXIT_CODE)" 3
 fi
-
-
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 3b: Update the moos directories
@@ -182,7 +179,7 @@ echo $txtgrn"      Done updating dirs" $txtrst
 vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE -v=$VERBOSE" 1
 echo "[3] Running job from file..."
 secho "Running job $JOB_FILE"
-./client_scripts/xlaunch_job.sh   --job_file=$JOB_FILE -v=$VERBOSE
+./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE -v=$VERBOSE
 EXIT_CODE=$?
 if [[ $EXIT_CODE -eq 2 ]]; then
     echo "Mission timed out. Extracting results anyway..."
@@ -213,7 +210,7 @@ if [ "$HOSTLESS" = "yes" ]; then
     ./client_scripts/extract_results.sh -no --job_file=$JOB_FILE
 else
     vecho "./client_scripts/extract_results.sh --job_file=$JOB_FILE" 1
-    ./client_scripts/extract_results.sh  --job_file=$JOB_FILE
+    ./client_scripts/extract_results.sh --job_file=$JOB_FILE
 fi
 if [ $? -ne 0 ]; then
     vexit "error extracting the results. Recieved exit code $? with ./client_scripts/extract_results.sh -v=$VERBOSE --job_file=$JOB_FILE" 6
@@ -221,4 +218,3 @@ fi
 
 echo $txtgrn"      Results extracted" $txtrst
 safe_exit 0
-

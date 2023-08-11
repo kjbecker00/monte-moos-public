@@ -13,7 +13,7 @@ script="build.sh"
 repo_links="repo_links.txt"
 # args to get passed on to "script"
 FLOW_DOWN_ARGS=""
-QUIET="yes" 
+QUIET="yes"
 ALL="no"
 PROMPT_TIMEOUT=20
 txtrst=$(tput sgr0)       # Reset
@@ -25,9 +25,12 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi }
-wecho() { echo ${txtylw}"$ME: $1" ${txtrst} ; }
-vexit() { echo ${txtred}"$ME: Error $1. Exit Code $2" ${txtrst} ; exit "$2" ; }
+vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
+wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
+vexit() {
+    echo ${txtred}"$ME: Error $1. Exit Code $2" ${txtrst}
+    exit "$2"
+}
 
 #-------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
@@ -37,25 +40,25 @@ for ARGI; do
     if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
         echo "$ME.sh [OPTIONS] "
         echo "  Updates and builds moos-dirs"
-        echo "Options: " 
-        echo " --help, -h    Show this help message " 
+        echo "Options: "
+        echo " --help, -h    Show this help message "
         echo "  --verbose=num, -v=num or --verbose, -v"
         echo "    Set verbosity                                     "
-        echo " --job_file=    set the name of the job file (only updates dirs that apply to this job) " 
-        echo " --all, -a      update everything it has a repo_links.txt for" 
+        echo " --job_file=    set the name of the job file (only updates dirs that apply to this job) "
+        echo " --all, -a      update everything it has a repo_links.txt for"
         echo " All other arguments will flow down to the build script (e.g. -j8 for 8 cores)"
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" =~ "--job_file=" ]]; then
         JOB_FILE="${ARGI#*=}"
-    elif [ "${ARGI}" = "--all" -o "${ARGI}" = "-a" ] ; then
-	    ALL="yes"
+    elif [ "${ARGI}" = "--all" -o "${ARGI}" = "-a" ]; then
+        ALL="yes"
     elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
             VERBOSE="${ARGI#*=}"
         fi
-    else 
+    else
         FLOW_DOWN_ARGS+="${ARGI} "
     fi
 done
@@ -74,7 +77,6 @@ fi
 if [ ! -f .built_dirs ]; then
     touch .built_dirs
 fi
-
 
 #--------------------------------------------------------------
 #  Part 4: Useful functions
@@ -120,13 +122,13 @@ extract_repo_name() {
     local repo_full=$1
     local repo_name=""
     if [[ $repo_full =~ \.git$ ]]; then
-        repo_name=$(basename "$repo_full" .git) 
+        repo_name=$(basename "$repo_full" .git)
     elif [[ "$repo_full" == "~/"* ]] || [[ "$repo_full" == "/"* ]]; then
         # repo_name="${repo_full##*/}" Old version
         repo_name="$(basename $repo_full)"
     else
         echo "$0 Error: Repo type not recognized: $repo_full"
-        exit 1 
+        exit 1
     fi
     echo $repo_name
 }
@@ -134,10 +136,10 @@ extract_repo_name() {
 gpull() {
     local repo=$1
     local repo_links_file=$2
-    git pull &> /dev/null
+    git pull &>/dev/null
     if [ $? -ne 0 ]; then
         echo ""
-        echo "    ${txtylw}Warning: git pull on $repo failed, check $repo_links_file ${txtrst}" 
+        echo "    ${txtylw}Warning: git pull on $repo failed, check $repo_links_file ${txtrst}"
     fi
     echo $txtgrn " updated sucessfully" $txtrst
 }
@@ -145,10 +147,10 @@ gpull() {
 svnup() {
     local repo=$1
     local repo_links_file=$2
-    svn up &> /dev/null
+    svn up &>/dev/null
     if [ $? -ne 0 ]; then
         echo ""
-        echo "    ${txtylw}Warning: svn up on $repo failed, check $repo_links_file ${txtrst}" 
+        echo "    ${txtylw}Warning: svn up on $repo failed, check $repo_links_file ${txtrst}"
     fi
     echo $txtgrn " updated sucessfully" $txtrst
 }
@@ -174,7 +176,8 @@ skipline() {
             fi
             vecho "num of repo=$repo_name in .built_dirs is $display_num" 2
             if [[ ! -z "$num" || "$num" -gt 0 ]]; then
-                echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
+                echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}"
+                continue
             fi
         fi
         # Determines if the repo is used for the job
@@ -195,8 +198,7 @@ handle_repo_links_file() {
     #-------------------------------------------------------
 
     # Loop through all repos in the file
-    while read -r repo || [[ -n "$repo" ]]
-    do
+    while read -r repo || [[ -n "$repo" ]]; do
         if [[ $repo == "" ]]; then
             vecho "Skipping blank line... $repo" 10
             continue
@@ -214,7 +216,7 @@ handle_repo_links_file() {
             continue
         fi
         repo_name=$(extract_repo_name $repo)
-          
+
         if [ $ALL != "yes" ]; then
             if [ -f ".built_dirs" ]; then
                 # determines if the repo was found in .built_dirs
@@ -225,7 +227,8 @@ handle_repo_links_file() {
                 fi
                 vecho "num of repo=$repo_name in .built_dirs is $display_num" 2
                 if [ ! -z "$num" ]; then
-                    echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}" ; continue
+                    echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}"
+                    continue
                 fi
             fi
             # Determines if the repo is used for the job
@@ -236,7 +239,6 @@ handle_repo_links_file() {
                 continue
             fi
         fi
-
 
         #-------------------------------------------------------
         #  Part 4b: Handle mutliple types of repos: git
@@ -251,7 +253,7 @@ handle_repo_links_file() {
             else
                 echo "        Cloning $repo_name..."
                 cd moos-dirs
-                git clone "$repo" &> /dev/null
+                git clone "$repo" &>/dev/null
                 # if ! timeout $PROMPT_TIMEOUT git clone "$repo" &> /dev/null; then
                 #     vexit "git clone on $repo timed out, check $repo_links_file" 2
                 # fi
@@ -279,7 +281,10 @@ handle_repo_links_file() {
             fi
 
             echo -n "        Updating..."
-            cd moos-dirs/$repo_name ||  (echo $txtred "$0 Error unable to cd moos-dirs/$repo_name exiting..."; exit 1)
+            cd moos-dirs/$repo_name || (
+                echo $txtred "$0 Error unable to cd moos-dirs/$repo_name exiting..."
+                exit 1
+            )
             if [ -f ".git" ]; then
                 gpull $repo $repo_links_file
             elif [ -f ".svn" ]; then
@@ -290,10 +295,10 @@ handle_repo_links_file() {
         else
             vexit "$repo is not a valid repo" 2
         fi
-        
+
         #-------------------------------------------------------
         #  Part 4c: build the repo
-        cd moos-dirs/"$repo_name" ||  (vexit "unable to cd moos-dirs/$repo_name " 2)
+        cd moos-dirs/"$repo_name" || (vexit "unable to cd moos-dirs/$repo_name " 2)
         echo -n "        Building..."
 
         ##############################################
@@ -307,9 +312,9 @@ handle_repo_links_file() {
             ARGS="${FLOW_DOWN_ARGS}"
         fi
         if [[ $QUIET == "yes" ]]; then
-            ./$script "${ARGS}" > .build_log.txt 2>&1
+            ./$script "${ARGS}" >.build_log.txt 2>&1
         else
-            ./$script "${ARGS}" > .build_log.txt
+            ./$script "${ARGS}" >.build_log.txt
         fi
 
         if [ $? -ne 0 ]; then
@@ -320,16 +325,15 @@ handle_repo_links_file() {
         fi
         wait
         echo $txtgrn " built sucessfully" $txtrst
-        cd - > /dev/null || exit 1
-        echo "$repo_name" >> .built_dirs
-    done < "$repo_links_file"
+        cd - >/dev/null || exit 1
+        echo "$repo_name" >>.built_dirs
+    done <"$repo_links_file"
 }
-
 
 #-------------------------------------------------------
 #  Part 5: Add cmake to path if not already there
 #-------------------------------------------------------
-if type cmake > /dev/null 2>&1; then
+if type cmake >/dev/null 2>&1; then
     true
 else
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -344,13 +348,11 @@ else
     fi
     export PATH
 fi
-if type cmake > /dev/null 2>&1; then
+if type cmake >/dev/null 2>&1; then
     true
 else
     vexit "make not found. Please fix and try again" 1
 fi
-
-
 
 #-------------------------------------------------------
 #  Part 6: Loop through and finds each repo_links.txt file
@@ -371,44 +373,36 @@ while [[ "$SEARCH_DIR" != "$SEARCH_DIR_BASE" ]]; do
     SEARCH_DIR=$(dirname $SEARCH_DIR)
 done
 
-# Loop through repo links in descending order 
+# Loop through repo links in descending order
 # More natural to have dependencies in this manner
-for ((i=${#array[@]}-1; i>=0; i--)); do
+for ((i = ${#array[@]} - 1; i >= 0; i--)); do
     handle_repo_links_file "${array[i]}"
 done
-
 
 #-------------------------------------------------------
 #  Part 7: Check that every required repo has been updated
 #-------------------------------------------------------
 # Check that all repos have been built
-for repo in "${VEHICLE_REPOS[@]}"
-do
-    if has_built_repo $repo ; then
+for repo in "${VEHICLE_REPOS[@]}"; do
+    if has_built_repo $repo; then
         vexit "has not built $repo" 1
     fi
 done
-for repo in "${EXTRA_REPOS[@]}"
-do
-    if has_built_repo $repo ; then
+for repo in "${EXTRA_REPOS[@]}"; do
+    if has_built_repo $repo; then
         vexit "has not built $repo" 1
     fi
 done
-for repo in "{$EXTRA_LIB_REPOS[@]}"
-do
-    if has_built_repo $repo ; then
+for repo in "{$EXTRA_LIB_REPOS[@]}"; do
+    if has_built_repo $repo; then
         vexit "has not built $repo" 1
     fi
 done
-for repo in "{$EXTRA_BIN_REPOS[@]}"
-do
-    if has_built_repo $repo ; then
+for repo in "{$EXTRA_BIN_REPOS[@]}"; do
+    if has_built_repo $repo; then
         vexit "has not built $repo" 1
     fi
 done
-if has_built_repo moos-ivp ; then
-        vexit "has not built moos-ivp" 1
+if has_built_repo moos-ivp; then
+    vexit "has not built moos-ivp" 1
 fi
-
-
-

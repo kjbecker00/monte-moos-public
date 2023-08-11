@@ -18,9 +18,12 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$1" ]]; then echo ${txtgry}"$ME: $2" ${txtrst}; fi }
-wecho() { echo ${txtylw}"$ME: $1" ${txtrst};  }
-vexit() { echo ${txtred}"$ME: Error $2. Exit Code $2" ${txtrst} ; exit "$1" ; }
+vecho() { if [[ "$VERBOSE" -ge "$1" ]]; then echo ${txtgry}"$ME: $2" ${txtrst}; fi; }
+wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
+vexit() {
+    echo ${txtred}"$ME: Error $2. Exit Code $2" ${txtrst}
+    exit "$1"
+}
 
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
@@ -34,7 +37,7 @@ for ARGI; do
         echo "    Display this help message                         "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -45,7 +48,7 @@ for ARGI; do
         if [ -z $TO_PRINT ]; then
             TO_PRINT="$ARGI"
         else
-	        vexit "Bad Arg: $ARGI" 1
+            vexit "Bad Arg: $ARGI" 1
         fi
     fi
 done
@@ -55,37 +58,32 @@ done
 #--------------------------------------------------------------
 echo "$TO_PRINT"
 
-
 #--------------------------------------------------------------
 #  Part 4: Write to status.txt
 #--------------------------------------------------------------
 if [ -f "/home/student2680/pablo-common/bin/get_vname.sh" ]; then
-   name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
+    name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
 else
-   name="$(hostname)"
+    name="$(hostname)"
 fi
-echo "$name" > myname.txt ;
-echo "$TO_PRINT (on ${name} as of $(date))" > status.txt ; 
-
+echo "$name" >myname.txt
+echo "$TO_PRINT (on ${name} as of $(date))" >status.txt
 
 #--------------------------------------------------------------
 #  Part 5: Copy to host
 #--------------------------------------------------------------
 # Start ssh-agent
-eval `ssh-agent -s` &> /dev/null
-ps -p $SSH_AGENT_PID &> /dev/null
+eval $(ssh-agent -s) &>/dev/null
+ps -p $SSH_AGENT_PID &>/dev/null
 SSH_AGENT_RUNNING=$?
-[ ${SSH_AGENT_RUNNING} -eq 0 ] || { vecho "Unable to start ssh-agent" 3 ; }
-ssh-add -t 7200 ~/.ssh/id_rsa_yco 2> /dev/null
-[ "$?" -eq "0" ] || { vexit "ssh agent unable to add yco key" 3 ; }
-ssh -n "yodacora@oceanai.mit.edu" "mkdir -p ~/monte-moos/clients/status" &> /dev/null
+[ ${SSH_AGENT_RUNNING} -eq 0 ] || { vecho "Unable to start ssh-agent" 3; }
+ssh-add -t 7200 ~/.ssh/id_rsa_yco 2>/dev/null
+[ "$?" -eq "0" ] || { vexit "ssh agent unable to add yco key" 3; }
+ssh -n "yodacora@oceanai.mit.edu" "mkdir -p ~/monte-moos/clients/status" &>/dev/null
 EXIT_CODE=$?
 if [ ! $EXIT_CODE -eq "0" ]; then
     if [ $EXIT_CODE -eq 255 ]; then
         vecho "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst 0
     fi
 fi
-rsync -zaPr -q status.txt "yodacora@oceanai.mit.edu:~/monte-moos/clients/status/${name}.txt" &> /dev/null
-
-
-
+rsync -zaPr -q status.txt "yodacora@oceanai.mit.edu:~/monte-moos/clients/status/${name}.txt" &>/dev/null

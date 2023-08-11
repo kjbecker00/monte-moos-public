@@ -4,7 +4,7 @@
 # Date: 07/18/2023
 # Script: host_scripts/update_repo_links.sh
 #--------------------------------------------------------------
-# Part 1: Convenience functions   
+# Part 1: Convenience functions
 #--------------------------------------------------------------
 ME=$(basename "$0")
 VERBOSE=0
@@ -17,8 +17,11 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtgry}; fi }
-vexit() { echo $txtred"$ME: Error $1. Exit Code $2" $txtrst; exit "$2" ; }
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtgry}; fi; }
+vexit() {
+    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    exit "$2"
+}
 
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
@@ -32,7 +35,7 @@ for ARGI; do
         echo "    Display this help message                         "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" = "foo" || "${ARGI}" = "bar" ]]; then
         FOOBAR=0
     elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
@@ -42,22 +45,18 @@ for ARGI; do
             VERBOSE="${ARGI#*=}"
         fi
     else
-	     vexit "Bad Arg: $ARGI" 1
+        vexit "Bad Arg: $ARGI" 1
     fi
 done
 
 #--------------------------------------------------------------
-#  Part 3: 
+#  Part 3:
 #--------------------------------------------------------------
-
 
 # encrypt and copy repo_links.txt
 cp repo_links.txt backup_repo_links.txt
-./encrypt_file.sh repo_links.txt > /dev/null
+./encrypt_file.sh repo_links.txt >/dev/null
 mv repo_links.txt.enc /home/web/monte/clients
 mv backup_repo_links.txt repo_links.txt
 
 echo "$txtgrn    Repo links updated$txtrst"
-
-
-
