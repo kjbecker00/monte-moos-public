@@ -78,11 +78,10 @@ for ((i = 1; i <= length; i++)); do
     # check number of runs left for that job
     linearray=($line)
     JOB_PATH=${linearray[0]}
-    RUNS_DES=${linearray[1]}
+    NUM_RUNS_DES=${linearray[1]}
 
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Count number of runs based on the number of subdirectories
-
+    # Count number of runs using subdirectories
     THROWAWAY=$(ls -1 $HOST_RESULTS_DIR/$JOB_PATH/ 2>/dev/null)
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
@@ -104,58 +103,55 @@ for ((i = 1; i <= length; i++)); do
         vecho "NUM_RUNS_ACT=$NUM_RUNS_ACT NUM_RUNS_WEB=$NUM_RUNS_WEB NUM_RUNS_CSV=$NUM_RUNS_CSV" 1
     fi
 
-    if [[ $NUM_RUNS_ACT -ge $RUNS_DES ]]; then
-        echo $txtgrn"    $JOB_PATH ran $NUM_RUNS_ACT out of $RUNS_DES runs. Done! "$txtrst
+    if [[ $NUM_RUNS_ACT -ge $NUM_RUNS_DES ]]; then
+        echo $txtgrn"    $JOB_PATH ran $NUM_RUNS_ACT out of $NUM_RUNS_DES runs. Done! "$txtrst
     else
-        echo $txtylw"    $JOB_PATH ran $NUM_RUNS_ACT out of $RUNS_DES runs "$txtrst
+        echo $txtylw"    $JOB_PATH ran $NUM_RUNS_ACT out of $NUM_RUNS_DES runs "$txtrst
         QUEUE_COMPLETE="no"
     fi
 
-    if [ "$NUM_RUNS_ACT" -gt 0 ]; then
+    compiled="$OUTPUT_BASE_DIR/$JOB_PATH"
 
-        compiled="$OUTPUT_BASE_DIR/$JOB_PATH"
-
-        # - - - - - - - - - - - - - - - - - - - -
-        # Count number of lines in the compiled csv
-        RESULTS_CSV="$compiled/results.csv"
-        if [ -f "$RESULTS_CSV" ]; then
-            RUNS_COMPILED_CSV=$(cat "$RESULTS_CSV" | wc -l)
-            RUNS_COMPILED_CSV=$((RUNS_COMPILED_CSV - 1))
-        else
-            RUNS_COMPILED_CSV=0
-        fi
-
-        # - - - - - - - - - - - - - - - - - - - -
-        # Count number of post-processed directories
-        # that have been copied to the web
-        if [ -d "$compiled/post_processed/" ]; then
-            RUNS_COMPILED_WEB=$(find "$compiled/post_processed/" -mindepth 1 -maxdepth 1 -type d | wc -l)
-        else
-            RUNS_COMPILED_WEB=0
-        fi
-
-        # - - - - - - - - - - - - - - - - - - - -
-        # (Maybe) post-process the results again
-        if [[ "$NUM_RUNS_CSV" -gt "$RUNS_COMPILED_CSV" || "$NUM_RUNS_WEB" -gt "$RUNS_COMPILED_WEB" ]]; then
-            vecho "    $RESULTS_CSV counted $RUNS_COMPILED_CSV lines in the csv out of $NUM_RUNS_CSV results.csv files. Updating..." 1
-            vecho "    $RESULTS_CSV counted $RUNS_COMPILED_WEB out of $NUM_RUNS_WEB web/* dirs copied over. Updating..." 1
-            vecho "running ./host_scripts/update_results.sh $HOST_RESULTS_DIR/$JOB_PATH" 1
-            ./host_scripts/update_results.sh "$HOST_RESULTS_DIR/$JOB_PATH"
-            EXIT_CODE=$?
-            [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
-        else
-            vecho "    $RESULTS_CSV processed $NUM_RUNS_CSV out of $RUNS_COMPILED_CSV results.csv files, and copied $NUM_RUNS_WEB out of $RUNS_COMPILED_WEB web subdirectories. No need to update results..." 1
-        fi
-
+    # - - - - - - - - - - - - - - - - - - - -
+    # Count number of lines in the compiled csv
+    RESULTS_CSV="$compiled/results.csv"
+    if [ -f "$RESULTS_CSV" ]; then
+        RUNS_COMPILED_CSV=$(cat "$RESULTS_CSV" | wc -l)
+        RUNS_COMPILED_CSV=$((RUNS_COMPILED_CSV - 1))
+    else
+        RUNS_COMPILED_CSV=0
     fi
+
+    # - - - - - - - - - - - - - - - - - - - -
+    # Count number of directories that have been copied to the web
+    if [ -d "$compiled/post_processed/" ]; then
+        RUNS_COMPILED_WEB=$(find "$compiled/post_processed/" -mindepth 1 -maxdepth 1 -type d | wc -l)
+    else
+        RUNS_COMPILED_WEB=0
+    fi
+
+    # - - - - - - - - - - - - - - - - - - - -
+    # (Maybe) post-process the results again
+    if [[ "$NUM_RUNS_CSV" -ne "$RUNS_COMPILED_CSV" && "$NUM_RUNS_WEB" -ne "$RUNS_COMPILED_WEB" ]]; then
+        vecho "    $RESULTS_CSV counted $RUNS_COMPILED_CSV lines in the csv out of $NUM_RUNS_CSV results.csv files" 1
+        vecho "    $RESULTS_CSV counted $RUNS_COMPILED_WEB out of $NUM_RUNS_WEB web/* dirs copied over" 1
+        # vecho "running ./host_scripts/update_results.sh $HOST_RESULTS_DIR/$JOB_PATH" 1
+        echo "        Updating results for job..."
+        ./host_scripts/update_results.sh "$HOST_RESULTS_DIR/$JOB_PATH"
+        EXIT_CODE=$?
+        [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
+    else
+        vecho "    $RESULTS_CSV processed $NUM_RUNS_CSV out of $RUNS_COMPILED_CSV results.csv files, and copied $NUM_RUNS_WEB out of $RUNS_COMPILED_WEB web subdirectories. No need to update results..." 1
+    fi
+
 
     # replace the line in queue with the newly counted number of runs
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        sed -i '' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
+        sed -i '' "s@^$JOB_PATH.*@$JOB_PATH $NUM_RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
     else
         # Linux
-        sed -i'' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
+        sed -i'' "s@^$JOB_PATH.*@$JOB_PATH $NUM_RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
     fi
 
 done
@@ -170,9 +166,9 @@ mv "$QUEUE_FILE.enc" "$ENCRYPTED_QUEUE_FILE"
 mv "backup_$QUEUE_FILE" "$QUEUE_FILE"
 
 if [ $QUEUE_COMPLETE == "yes" ]; then
-    echo "$(tput bold)$txtgrn    Queue complete! $txtrst"
+    echo "$(tput bold)$txtgrn  Queue complete! $txtrst"
     exit 0
 else
-    echo "$txtylw    Queue not complete. $txtrst"
+    echo "$txtylw  Queue not complete. $txtrst"
     exit 1
 fi

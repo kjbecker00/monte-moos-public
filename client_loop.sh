@@ -74,6 +74,10 @@ if [ -d "job_dirs" ] && [ "$(hostname)" != "oceanai" ]; then
     fi
 fi
 #  Part 1c: Check for force_quit file
+if [ "$(hostname)" = "oceanai" ]; then
+    vexit "This script should only be run on a client" 1
+fi
+#  Part 1d: Check for force_quit file
 if [ -f "force_quit" ]; then
     secho "force_quit file found. Not starting up until this is manually deleted."
     exit 0
@@ -94,8 +98,7 @@ while true; do
     if [ "$RE_UPDATE" = "yes" ]; then
         RE_UPDATE=""
         day_of_last_update=$(date +%u)
-    else
-        FLAGS+=" --noup"
+        FLAGS+=" --update"
     fi
     if [ "$HOSTLESS" = "yes" ]; then
         FLAGS+=" --hostless"

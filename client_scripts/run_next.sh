@@ -2,7 +2,7 @@
 # Kevin Becker Jun 9 2023
 QUEUE_FILE="host_job_queue.txt"
 HOSTLESS="no"
-NOUP="no"
+TO_UPDATE="no"
 ALL_JOBS_OK="yes"
 ME=$(basename "$0")
 VERBOSE=0
@@ -32,21 +32,21 @@ for ARGI; do
         echo " the results. "
         echo "Options:                                                  "
         echo " --help, -h Show this help message                        "
-        echo " --noup,    don't update the repos                        "
+        echo " --update, -u   update the repos                        "
         echo " --hostless, -nh run everything without the host          "
         exit 0
-    elif [[ "${ARGI}" = "--noup" ]]; then
-        NOUP="yes"
+    elif [[ "${ARGI}" = "--update" || "${ARGI}" = "-u" ]]; then
+        TO_UPDATE="yes"
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
         HOSTLESS="yes"
-        NOUP="yes"
+        TO_UPDATE="no"
     else
         vexit "Bad Arg: $ARGI " 3
     fi
 done
 
 # if it should update
-if [[ "$NOUP" == "no" ]]; then
+if [[ "$TO_UPDATE" == "yes" ]]; then
     # remove old cache files
     rm -f .built_dirs
     if [ -f .built_dirs ]; then
@@ -58,7 +58,9 @@ if [[ "$NOUP" == "no" ]]; then
     if [ -f repo_links.txt.enc ]; then
         rm repo_links.txt.enc
     fi
+fi
 
+if [[ "$HOSTLESS" != "yes" ]]; then
     vecho "Getting host's repo_links..." 1
     wget -q "https://oceanai.mit.edu/monte/clients/repo_links.txt.enc"
     EXIT_CODE=$?

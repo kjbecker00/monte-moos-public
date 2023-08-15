@@ -83,10 +83,11 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     EXIT_CODE=$?
     vecho " update_queue exit code $EXIT_CODE" 1
     if [ ! $EXIT_CODE -eq 0 ]; then
-        if [ ! $EXIT_CODE -eq 1 ]; then
-            vexit "running ./host_scripts/update_queue.sh returned exit code: $EXIT_CODE" 1
+        if [ $EXIT_CODE -eq 1 ]; then
+            vecho "Queue is not complete" 1
+            QUEUE_COMPLETE="no"
         else
-            vecho "Queue is empty" 1
+            vexit "running ./host_scripts/update_queue.sh returned exit code: $EXIT_CODE" 1
         fi
     else
         QUEUE_COMPLETE="yes"
@@ -109,7 +110,7 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     check_quit
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    #  Part 3c: If perpetual mode, wait a bit
+    #  Part 3c: If it will do another loop, wait a bit
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; then
         echo "Sleeping (as of $(date))" >status.txt # can't seco because -n
