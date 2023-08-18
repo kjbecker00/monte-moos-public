@@ -275,13 +275,13 @@ if [[ $EXIT_CODE -ne 0 ]]; then
     vexit "run_job.sh failed with exit code: $EXIT_CODE" 130
 fi
 
-# update the queue file (helpful if trying to run w/o a host)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    sed -i '' "s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
-else
-    # Linux
-    sed -i'' "s@^$JOB_PATH.*@$JOB_PATH $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
-fi
+# # update the queue file (helpful if trying to run w/o a host)
+# if [[ "$OSTYPE" == "darwin"* ]]; then
+#         # macOS
+# sed -i '' 's@^$JOB_FILE.*@$JOB_FILE $NUM_RUNS_DES $NUM_RUNS_ACT@' "$QUEUE_FILE"
+# else
+# # Linux
+# sed -i "s@^$JOB_FILE.*@$JOB_FILE $NUM_RUNS_DES $NUM_RUNS_ACT@" "$QUEUE_FILE"
+# fi
 
 exit 0
