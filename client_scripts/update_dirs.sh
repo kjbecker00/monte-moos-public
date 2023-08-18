@@ -302,11 +302,11 @@ handle_repo_links_file() {
 
         ##############################################
         # SVN repos were developed in the lab.       #
-        # these repos should be built with -mx to    #
+        # these repos should be built with -m to     #
         # ensure they can run a shoreside as well    #
         ##############################################
         if [[ -f ".svn" || -d ".svn" ]]; then
-            ARGS="${FLOW_DOWN_ARGS} -mx"
+            ARGS="${FLOW_DOWN_ARGS} -m"
         else
             ARGS="${FLOW_DOWN_ARGS}"
         fi

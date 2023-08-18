@@ -161,9 +161,13 @@ if [ -f $JOB_FILE_FULL ]; then
     if [[ -z $PLOT_X ]] || [[ -z $PLOT_Y ]]; then
         vecho "PLOT_X or PLOT_Y have not been set in the job file $JOB_FILE_FULL. Not plotting" 1
     else
-        vecho " plotting: ./scripts/pltcsv.py $compiled_csv --fname=$compiled_plot --title=$JOB_NAME -x=\"$PLOT_X\" -y=\"$PLOT_Y\"" 1
-        ./scripts/pltcsv.py "$compiled_csv" --fname="$compiled_plot" --title="$JOB_NAME" -x="$PLOT_X" -y="$PLOT_Y"
-        [ $? -eq 0 ] || echo "${txtylw}Error running ./scripts/pltcsv.py${txtrst}" #$txtylw $txtrst
+        if [ -f "${compiled_csv}" ]; then
+            vecho " plotting: ./scripts/pltcsv.py $compiled_csv --fname=$compiled_plot --title=$JOB_NAME -x=\"$PLOT_X\" -y=\"$PLOT_Y\"" 1
+            ./scripts/pltcsv.py "$compiled_csv" --fname="$compiled_plot" --title="$JOB_NAME" -x="$PLOT_X" -y="$PLOT_Y"
+            [ $? -eq 0 ] || echo "${txtylw}Error running ./scripts/pltcsv.py${txtrst}" #$txtylw $txtrst
+        else
+            vecho "$JOB_NAME has no results yet. Not plotting..." 1
+        fi
     fi
 else
     vexit "Job file ($JOB_FILE_FULL) not found" 12

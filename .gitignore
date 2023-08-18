@@ -20,6 +20,7 @@ status.txt
 .temp*
 myname.txt
 *.enc
+.vscode/*
 # Private dirs
 moos-dirs/*
 job_dirs/*
