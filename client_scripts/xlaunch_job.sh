@@ -6,7 +6,8 @@
 QUIET="yes"
 UQUERY_TRIES=2
 ME=$(basename "$0")
-VERBOSE=0
+VERBOSE=3
+TIMER_ONLY="no"
 OLD_PATH=$PATH
 OLD_DIRS=$IVP_BEHAVIOR_DIRS
 txtrst=$(tput sgr0)    # Reset
@@ -43,6 +44,19 @@ safe_exit() {
 trap ctrl_c INT
 ctrl_c() {
     safe_exit 130
+}
+
+check_uquerydb(){
+    local QUERY_MODE="a"
+
+    if [[ "${QUERY_MODE}" = "a" ]]; then
+        uQueryDB --alias="mm-query" $SHORE_TARG &>/dev/null
+        EXIT_CODE=$?
+        OUTPUT=$EXIT_CODE
+    fi
+
+    vecho "                                                                  uQueryDB (mode $QUERY_MODE) output: $OUTPUT" 3
+    return $OUTPUT
 }
 for ARGI; do
     ALL_ARGS+=$ARGI" "
@@ -285,44 +299,42 @@ while [ 1 ]; do
     #-----------------------------------------------------
     # Check for halt conditions
     #-----------------------------------------------------
-    if [[ $valid_uquerydb = "yes" ]]; then
-        vecho "uQueryDB $SHORE_TARG " 2
-        if [ "${QUIET}" = "yes" ]; then
-            (uQueryDB $SHORE_TARG) &>/dev/null
-            # (uQueryDB $SHORE_TARG)  &>/dev/null &
-        else
-            (uQueryDB $SHORE_TARG)
-            # (uQueryDB $SHORE_TARG) &
-        fi
-        EXIT_CODE=$?
-        PID=$!
-        vecho "uQueryDB___OUTPUT=$EXIT_CODE" 2
+    if [[ $TIMER_ONLY = "yes" ]]; then
+        vecho "Timer only mode. Not querying..." 1
+        : # no-op. Will get checked later
+    else
+        vecho "ELSE" 1
+        if [[ $valid_uquerydb = "yes" ]]; then
+            vecho "uQueryDB $SHORE_TARG " 1
+            check_uquerydb #pulls shore_targ from this scope
+            QUERY=$?
+            vecho "output of query: $QUERY" 1
 
-        if [ $EXIT_CODE -eq 1 ]; then
-            vecho "Continuing mission..." 3
-        fi
-
-        if [ $EXIT_CODE -eq 0 ]; then
-            current_time=$(date +%s)
-            elapsed_time=$(($current_time - $start_time))
-            if [ $first_iter = "yes" ]; then
-                valid_uquerydb="no"
-                first_iter="no"
-                vecho "Invalid uQueryDB. Resorting to only using the timer..." 1
-            else
-                first_iter="no"
-                echo "${txtgrn}      Mission completed after ${elapsed_time} seconds${txtrst}"
-                break
+            if [ $QUERY -eq 1 ]; then
+                vecho "Continuing mission..." 1
             fi
 
-        fi
+            if [ $QUERY -eq 0 ]; then
+                current_time=$(date +%s)
+                elapsed_time=$(($current_time - $start_time))
+                if [ $first_iter = "yes" ]; then
+                    valid_uquerydb="no"
+                    first_iter="no"
+                    vecho "Empty uQueryDB. Resorting to only using the timer..." 1
+                else
+                    first_iter="no"
+                    echo "${txtgrn}      Mission completed after ${elapsed_time} seconds${txtrst}"
+                    break
+                fi
+            fi
 
-        # Kill uQueryDB (if still running)
-        vecho "kill uquerydb" 1
-        (disown "$PID") >/dev/null 2>&1
-        (kill "$PID") >/dev/null 2>&1
-    else
-        vecho "Invalid uQueryDB (failed on first iter)" 1
+            # Kill uQueryDB (if still running)
+            vecho "kill uquerydb" 1
+            (disown "$PID") >/dev/null 2>&1
+            (kill "$PID") >/dev/null 2>&1
+        else
+            vecho "Invalid uQueryDB (failed on first iter)" 1
+        fi
     fi
 
     # Check timer, exit if necessary

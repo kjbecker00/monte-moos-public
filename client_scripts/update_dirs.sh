@@ -190,6 +190,42 @@ skipline() {
     fi
     return 1
 }
+build_script() {
+    # Quietly try to build the script as is
+    if [[ $QUIET == "yes" ]]; then
+        ./$script "${ALL_FLOW_DOWN_ARGS}" >.build_log.txt 2>&1
+    else
+        ./$script "${ALL_FLOW_DOWN_ARGS}" >.build_log.txt
+    fi
+    BUILD_FAIL=$?
+    if tail -1 ".build_log.txt" | grep -iq "error"; then
+        BUILD_FAIL=1
+    fi
+
+    # If the build fails, try cleaning and rebuilding
+    if [[ $BUILD_FAIL -ne 0 ]]; then
+        echo "        build failed. Cleaning and retrying..."
+
+        # cleaning
+        if [[ -f ./clean.sh ]]; then
+            ./clean.sh 2>&1
+        else 
+            ./$script --clean
+        fi
+
+        # re-building
+        if [[ $QUIET == "yes" ]]; then
+            ./$script "${ALL_FLOW_DOWN_ARGS}" >.build_log.txt 2>&1
+        else
+            ./$script "${ALL_FLOW_DOWN_ARGS}" >.build_log.txt
+        fi
+        BUILD_FAIL=$?
+        if tail -1 ".build_log.txt" | grep -iq "error"; then
+            BUILD_FAIL=1
+        fi
+    fi
+    return $BUILD_FAIL
+}
 #  Updates all necesary repos in an repo_links.txt file
 handle_repo_links_file() {
     local repo_links_file=$1
@@ -306,19 +342,15 @@ handle_repo_links_file() {
         # ensure they can run a shoreside as well    #
         ##############################################
         if [[ -f ".svn" || -d ".svn" ]]; then
-            ARGS="${FLOW_DOWN_ARGS} -m"
+            ALL_FLOW_DOWN_ARGS="${FLOW_DOWN_ARGS} -m"
         else
-            ARGS="${FLOW_DOWN_ARGS}"
+            ALL_FLOW_DOWN_ARGS="${FLOW_DOWN_ARGS}"
         fi
 
-        if [[ $QUIET == "yes" ]]; then
-            ./$script "${ARGS}" >.build_log.txt 2>&1
-        else
-            ./$script "${ARGS}" >.build_log.txt
-        fi
+        build_script
         BUILD_FAIL=$?
-        if tail -1 ".build_log.txt" | grep -iq "error"; then
-            BUILD_FAIL=1
+        if [[ -z $BUILD_FAIL ]]; then
+            BUILD_FAIL=0
         fi
 
         if [ $BUILD_FAIL -ne 0 ]; then
