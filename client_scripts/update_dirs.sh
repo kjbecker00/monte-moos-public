@@ -210,7 +210,7 @@ build_script() {
         if [[ -f ./clean.sh ]]; then
             ./clean.sh 2>&1
         else 
-            ./$script --clean
+            ./$script --clean 2>&1
         fi
 
         # re-building

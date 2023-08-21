@@ -393,6 +393,7 @@ while [ 1 ]; do
 done
 
 vecho "Part 4: Bringing down the mission... " 2
+ktm >&/dev/null
 killall pAntler >&/dev/null
 ktm >&/dev/null
 sleep 1

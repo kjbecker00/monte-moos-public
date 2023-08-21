@@ -39,7 +39,6 @@ for ARGI; do
         TO_UPDATE="yes"
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
         HOSTLESS="yes"
-        TO_UPDATE="no"
     else
         vexit "Bad Arg: $ARGI " 3
     fi
