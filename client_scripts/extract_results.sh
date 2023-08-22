@@ -129,8 +129,10 @@ fi
 # Adds a hash if not found. Useful if pMissionHash hasn't been added and
 #   no instances of pMarineViewer are running
 if [ -z $hash ]; then
-    current_time=$(date +'%m_%d_%Y__%H_%M_%S')
-    hash="${current_time}"
+    year=${date -f''}
+    current_time=$(date +%y%m%d-%H%M)
+    seconds=$(date +%S)
+    hash="${current_time}-${seconds}-$RANDOM"
 fi
 vecho "Hash = $hash" 1
 if [[ -z $LOCAL_RESULTS_DIR ]]; then

@@ -327,11 +327,6 @@ while [ 1 ]; do
                     break
                 fi
             fi
-
-            # Kill uQueryDB (if still running)
-            vecho "kill uquerydb" 1
-            (disown "$PID") >/dev/null 2>&1
-            (kill "$PID") >/dev/null 2>&1
         else
             vecho "Invalid uQueryDB (failed on first iter)" 1
         fi
