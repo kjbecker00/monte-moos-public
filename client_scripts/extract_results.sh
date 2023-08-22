@@ -129,7 +129,6 @@ fi
 # Adds a hash if not found. Useful if pMissionHash hasn't been added and
 #   no instances of pMarineViewer are running
 if [ -z $hash ]; then
-    year=${date -f''}
     current_time=$(date +%y%m%d-%H%M)
     seconds=$(date +%S)
     hash="${current_time}-${seconds}-$RANDOM"
