@@ -48,7 +48,7 @@ for ARGI; do
         TEST="yes"
     elif [[ "${ARGI}" = "--noffload" || "${ARGI}" = "-no" ]]; then
         OFFLOAD="no"
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -193,14 +193,14 @@ if [ $TEST = "yes" ]; then
     echo "${txtrst}Now, go into the directory: $(tput smul)${txtblu}$LOCAL_JOB_RESULTS_DIR${txtrst}"
     echo "Make ${txtbld}sure${txtrst} that the results look the way you want. Once you are sure,"
     echo "Copy your entire directory to oceanai: "
-    echo "        $(tput smul)${txtblu}rsync -zaPr job_dirs/${yourdir} uname@oceanai.mit.edu:/home/monte/monte-moos/job_dirs/${txtrst}"
+    echo "        $(tput smul)${txtblu}rsync -zaPr job_dirs/${yourdir} oceanai.mit.edu:/home/monte/monte-moos/job_dirs/${txtrst}"
     # echo "    To copy the post processing script: "
-    # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} uname@oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
+    # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
     # echo "    Remember to copy all results.txt scripts as well!: "
-    # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} uname@oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
+    # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
     echo ""
     echo "    Then, add this job to the host_job_queue.txt file on oceanai, and you should be all set!"
-    echo "         ${JOB_DIR} 100 "
+    echo "         ${JOB_DIR} 5 "
     echo ""
 else
     vecho "Results saved to $(tput smul)${txtblu}${LOCAL_JOB_RESULTS_DIR}" 1

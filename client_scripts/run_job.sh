@@ -66,7 +66,7 @@ for ARGI; do
         TEST="yes"
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
         HOSTLESS="yes"
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -176,10 +176,10 @@ echo $txtgrn"      Done updating dirs" $txtrst
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 3c: Run the job file
-vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE -v=$VERBOSE" 1
+vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE" 1
 echo "[3] Running job from file..."
 secho "Running job $JOB_FILE"
-./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE -v=$VERBOSE
+./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE
 EXIT_CODE=$?
 if [[ $EXIT_CODE -eq 2 ]]; then
     echo "Mission timed out. Extracting results anyway..."
@@ -204,7 +204,7 @@ fi
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 3e: Post-process, send the results
-secho "Extracting results_from $JOB_FILE"
+secho "Extracting results from $JOB_FILE"
 if [ "$HOSTLESS" = "yes" ]; then
     vecho "./client_scripts/extract_results.sh -no --job_file=$JOB_FILE" 1
     ./client_scripts/extract_results.sh -no --job_file=$JOB_FILE

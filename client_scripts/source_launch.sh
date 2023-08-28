@@ -89,7 +89,7 @@ for ARGI; do
         BIN_SDIR="${ARGI#*=}"
     elif [[ "${ARGI}" =~ "--libdir=" ]]; then
         LIB_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -175,7 +175,7 @@ cd "$MISSION_DIR" || safe_exit 9
 vecho "./$SCRIPTNAME $FLOW_DOWN_ARGS" 1
 ./$SCRIPTNAME $FLOW_DOWN_ARGS >&/dev/null &
 if [ $? -ne 0 ]; then
-    vexit "Error running $MISSION_DIR/$SCRIPTNAME" 10
+    vexit "Error running $MISSION_DIR/$SCRIPTNAME. Check that the script does not require confirmation before running." 10
 fi
 cd - >/dev/null
 

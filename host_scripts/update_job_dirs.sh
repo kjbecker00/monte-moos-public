@@ -38,7 +38,7 @@ for ARGI; do
         exit 0
     elif [[ "${ARGI}" = "foo" || "${ARGI}" = "bar" ]]; then
         FOOBAR=0
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else

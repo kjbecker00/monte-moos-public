@@ -52,7 +52,7 @@ for ARGI; do
         JOB_FILE="${ARGI#*=}"
     elif [ "${ARGI}" = "--all" -o "${ARGI}" = "-a" ]; then
         ALL="yes"
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else

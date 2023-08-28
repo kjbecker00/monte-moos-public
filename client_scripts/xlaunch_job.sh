@@ -6,7 +6,7 @@
 QUIET="yes"
 UQUERY_TRIES=2
 ME=$(basename "$0")
-VERBOSE=3
+VERBOSE=0
 TIMER_ONLY="no"
 OLD_PATH=$PATH
 OLD_DIRS=$IVP_BEHAVIOR_DIRS
@@ -75,7 +75,7 @@ for ARGI; do
         JOB_FILE="${ARGI#*=}"
     elif [ "${ARGI}" = "--quiet" -o "${ARGI}" = "-q" ]; then
         QUIET="yes"
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -228,6 +228,7 @@ fi
 #  Part 8: Launch vehicles
 #-----------------------------------------------------
 for ((i = 0; i < VEHICLES; i++)); do
+    vecho "Part 1b: Launching vechicle $i..." 1
     vecho "./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}" 2
     ./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" -v=$VERBOSE ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}
     LEXIT_CODE=$?
@@ -293,8 +294,6 @@ first_iter="yes"
 while [ 1 ]; do
 
     rm -f .checkvars
-    vecho "first_iter=$first_iter" 1
-    vecho "VALID_UQUERYDB=$valid_uquerydb" 1
 
     #-----------------------------------------------------
     # Check for halt conditions
@@ -303,15 +302,14 @@ while [ 1 ]; do
         vecho "Timer only mode. Not querying..." 1
         : # no-op. Will get checked later
     else
-        vecho "ELSE" 1
         if [[ $valid_uquerydb = "yes" ]]; then
-            vecho "uQueryDB $SHORE_TARG " 1
+            vecho "uQueryDB $SHORE_TARG " 2
             check_uquerydb #pulls shore_targ from this scope
             QUERY=$?
-            vecho "output of query: $QUERY" 1
+            vecho "output of query: $QUERY" 2
 
             if [ $QUERY -eq 1 ]; then
-                vecho "Continuing mission..." 1
+                vecho "Continuing mission..." 2
             fi
 
             if [ $QUERY -eq 0 ]; then
@@ -320,7 +318,7 @@ while [ 1 ]; do
                 if [ $first_iter = "yes" ]; then
                     valid_uquerydb="no"
                     first_iter="no"
-                    vecho "Empty uQueryDB. Resorting to only using the timer..." 1
+                    vecho "Empty uQueryDB. Resorting to only using the timer..." 2
                 else
                     first_iter="no"
                     echo "${txtgrn}      Mission completed after ${elapsed_time} seconds${txtrst}"
@@ -328,7 +326,7 @@ while [ 1 ]; do
                 fi
             fi
         else
-            vecho "Invalid uQueryDB (failed on first iter)" 1
+            vecho "Invalid uQueryDB (failed on first iter)" 2
         fi
     fi
 
@@ -387,7 +385,7 @@ while [ 1 ]; do
 
 done
 
-vecho "Part 4: Bringing down the mission... " 2
+vecho "Part 4: Bringing down the mission... " 1
 ktm >&/dev/null
 killall pAntler >&/dev/null
 ktm >&/dev/null

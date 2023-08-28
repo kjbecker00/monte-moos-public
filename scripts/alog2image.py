@@ -5,6 +5,14 @@ import sys
 import subprocess
 import matplotlib.pyplot as plt
 
+verbose = False
+
+
+def vprint(string):
+    """Prints a string if the verbose flag is set"""
+    if (verbose):
+        print(string)
+
 
 def populate_xy(input_file):
     """Takes in a csv file and returns a list of x values, y values, and timestamps"""
@@ -226,18 +234,23 @@ def main():
             exit(0)
         if (arg.startswith("--fname=")):
             figname = arg[len("--fname="):]
+            vprint("\tUsing figure name: "+figname)
             continue
         if (arg.startswith("--ftype")):
             file_type = arg[len("--ftype="):]
+            vprint("\tUsing figure type: "+file_type)
             continue
         if (arg.startswith("--ignorehash") or arg.startswith("-i")):
             ignore_hash = True
+            vprint("\tIgnoring mhash")
             continue
         if (arg.startswith("--auto") or arg.startswith("-a")):
             to_find_alogs = True
+            vprint("\tFind alogs...")
             continue
         if (arg.endswith(".alog") or arg.endswith(".csv")):
             alog_files.append(arg)
+            vprint("\tGiven alog file: "+arg)
             continue
         assert False, f"Error: {arg} is not a valid argument. Use -h or --help for usage."
 
