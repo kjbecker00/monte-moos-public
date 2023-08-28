@@ -136,10 +136,14 @@ for ((i = 1; i <= length; i++)); do
         vecho "    $RESULTS_CSV counted $RUNS_COMPILED_CSV lines in the csv out of $NUM_RUNS_CSV results.csv files" 1
         vecho "    $RESULTS_CSV counted $RUNS_COMPILED_WEB out of $NUM_RUNS_WEB web/* dirs copied over" 1
         # vecho "running ./host_scripts/update_results.sh $HOST_RESULTS_DIR/$JOB_PATH" 1
-        echo "        Updating results for job..."
-        ./host_scripts/update_results.sh "$HOST_RESULTS_DIR/$JOB_PATH"
-        EXIT_CODE=$?
-        [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
+        if [ -d $HOST_RESULTS_DIR/$JOB_PATH ]; then
+            echo "        Updating results for job..."
+            ./host_scripts/update_results.sh "$HOST_RESULTS_DIR/$JOB_PATH"
+            EXIT_CODE=$?
+            [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_results.sh returned exit code: $EXIT_CODE" 9; }
+        else
+            echo "        WARNING: counted post-processed runs in $compiled, but directory $HOST_RESULTS_DIR/$JOB_PATH does NOT exist!"
+        fi
     else
         vecho "    $RESULTS_CSV processed $NUM_RUNS_CSV out of $RUNS_COMPILED_CSV results.csv files, and copied $NUM_RUNS_WEB out of $RUNS_COMPILED_WEB web subdirectories. No need to update results..." 1
     fi

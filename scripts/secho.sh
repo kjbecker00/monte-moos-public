@@ -53,6 +53,16 @@ for ARGI; do
     fi
 done
 
+
+#--------------------------------------------------------------
+#  Part 2b: Add temp to print (if it has temp function)
+#--------------------------------------------------------------
+if [ -f /usr/bin/vcgencmd ]; then
+   TEMP=$(sudo /usr/bin/vcgencmd measure_temp | awk -F "[=']" '{print($2 * 1.8)+32}')
+   TO_PRINT="${TO_PRINT} (temp = $TEMP def F)"
+fi
+
+
 #--------------------------------------------------------------
 #  Part 3: Print it regularly
 #--------------------------------------------------------------

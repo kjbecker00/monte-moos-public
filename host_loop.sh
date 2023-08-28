@@ -5,6 +5,7 @@
 
 ME=$(basename "$0")
 VERBOSE=0
+LOOP_TIME=60
 PERPETUAL="no"
 QUEUE_COMPLETE="no"
 txtrst=$(tput sgr0)       # Reset
@@ -115,14 +116,13 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     if [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; then
         echo "Sleeping (as of $(date))" >status.txt # can't seco because -n
         echo -n "${txtltblu}Sleeping${txtrst}"
-        check_sleep 60
+        check_sleep 1
         echo -n "${txtltblu}.${txtrst}"
-        check_sleep 60
+        check_sleep 1
         echo -n "${txtltblu}.${txtrst}"
-        check_sleep 60
+        check_sleep 1
         echo "${txtltblu}.${txtrst}"
-        check_sleep 60
-        check_sleep 60
+        check_sleep $LOOP_TIME
     fi
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
