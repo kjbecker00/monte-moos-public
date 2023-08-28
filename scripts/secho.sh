@@ -55,11 +55,12 @@ done
 
 
 #--------------------------------------------------------------
-#  Part 2b: Add temp to print (if it has temp function)
+#  Part 2b: Add temperature (if PI)
 #--------------------------------------------------------------
 if [ -f /usr/bin/vcgencmd ]; then
-   TEMP=$(sudo /usr/bin/vcgencmd measure_temp | awk -F "[=']" '{print($2 * 1.8)+32}')
-   TO_PRINT="${TO_PRINT} (temp = $TEMP def F)"
+   TEMP=$(sudo /usr/bin/vcgencmd measure_temp)
+   TEMP=$(echo "${TEMP}" | awk -F "[=']" '{print($2 * 1.8)+32}')
+   TO_PRINT="$TO_PRINT (temp = $TEMP def F)"
 fi
 
 
