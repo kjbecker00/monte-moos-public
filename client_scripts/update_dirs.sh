@@ -28,7 +28,7 @@ txtul=$(tput bold)        # Bold
 vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
 wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
 vexit() {
-    echo ${txtred}"$ME: Error $1. Exit Code $2" ${txtrst}
+    ./scripts/secho "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}"
     exit "$2"
 }
 

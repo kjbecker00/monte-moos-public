@@ -55,22 +55,17 @@ done
 
 
 #--------------------------------------------------------------
-#  Part 2b: Add temperature (if PI)
+#  Part 3: Add temperature (if PI)
 #--------------------------------------------------------------
 if [ -f /usr/bin/vcgencmd ]; then
    TEMP=$(sudo /usr/bin/vcgencmd measure_temp)
    TEMP=$(echo "${TEMP}" | awk -F "[=']" '{print($2 * 1.8)+32}')
-   TO_PRINT="$TO_PRINT (temp = $TEMP def F)"
+   TO_PRINT="$TO_PRINT (temp = $TEMP deg F)"
 fi
 
 
 #--------------------------------------------------------------
-#  Part 3: Print it regularly
-#--------------------------------------------------------------
-echo "$TO_PRINT"
-
-#--------------------------------------------------------------
-#  Part 4: Write to status.txt
+#  Part 4: Get name of the client
 #--------------------------------------------------------------
 if [ -f "/home/student2680/pablo-common/bin/get_vname.sh" ]; then
     name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
@@ -78,10 +73,22 @@ else
     name="$(hostname)"
 fi
 echo "$name" >myname.txt
-echo "$TO_PRINT (on ${name} as of $(date))" >status.txt
+
 
 #--------------------------------------------------------------
-#  Part 5: Copy to host
+#  Part 5: Print and write to status.txt
+#--------------------------------------------------------------
+
+echo "$TO_PRINT"
+TO_ADD="$TO_PRINT (on ${name} as of $(date))"
+
+echo "$TO_ADD" > status.tmp
+head -n 20 status.txt >> status.tmp
+mv status.tmp status.txt
+
+
+#--------------------------------------------------------------
+#  Part 6: Copy to host
 #--------------------------------------------------------------
 # Start ssh-agent
 eval $(ssh-agent -s) &>/dev/null

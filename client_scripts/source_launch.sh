@@ -34,7 +34,7 @@ txtbld=$(tput bold)    # Bold
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
 secho() { ./scripts/secho.sh "$1"; } # status echo
 vexit() {
-    secho $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    secho "${txtred}$ME: Error $1. Exit Code $2 $txtrst"
     safe_exit "$2"
 }
 safe_exit() {

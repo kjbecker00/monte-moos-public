@@ -17,7 +17,7 @@ txtgry=$(tput setaf 8) # Grey
 # vecho "message" level_int
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
 vexit() {
-    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    ./scripts/secho.sh "${txtred}${ME}: Error $1. Exit Code $2 ${txtrst}"
     exit "$2"
 }
 
