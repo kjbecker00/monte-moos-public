@@ -52,7 +52,7 @@ if [[ "$TO_UPDATE" == "yes" ]]; then
         rm .built_dirs
     fi
     if [ -f "bad_jobs.txt" ]; then
-        rm "bad_jobs.txt"
+        ./scripts/list_bad_job.sh -d
     fi
     if [ -f repo_links.txt.enc ]; then
         rm repo_links.txt.enc
@@ -228,14 +228,14 @@ if [ "$HOSTLESS" = "no" ]; then
             if [ -f "job_dirs/$JOB_FILE" ]; then
                 vecho "Local copy found. Running..." 1
             else
-                echo "$JOB_FILE" >>"bad_jobs.txt"
+                ./scripts/list_bad_job.sh "${JOB_FILE}"
                 vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
             fi
         # - - - - - - - - - - - - - - - - - - - - -
         # Server error (no file exists on server)
         elif [[ $EXIT_CODE -eq 8 ]]; then # no file on server
             vecho "Job not found on server. Adding to bad_jobs.txt..." 1
-            echo "$JOB_FILE" >>"bad_jobs.txt"
+            ./scripts/list_bad_job.sh "${JOB_FILE}"
         # - - - - - - - - - - - - - - - - - - - - -
         # Unknown error
         else
@@ -268,7 +268,7 @@ EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
     # checks if the job was stopped by ctrl-c
     if [[ $EXIT_CODE -ne 130 ]]; then
-        echo "$JOB_FILE" >>"bad_jobs.txt"
+        ./scripts/list_bad_job.sh "${JOB_FILE}"
         vexit "run_job.sh failed with exit code: $EXIT_CODE" 2
     fi
     vexit "run_job.sh failed with exit code: $EXIT_CODE" 130
