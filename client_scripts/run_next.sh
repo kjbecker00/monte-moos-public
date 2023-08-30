@@ -67,7 +67,7 @@ if [[ "$HOSTLESS" != "yes" ]]; then
     if [[ $EXIT_CODE -ne 0 ]]; then
         echo "$txtylw      wget failed with code $EXIT_CODE. Continuing with local repo_links.txt ...$txtrst"
     else
-        ./encrypt_file.sh repo_links.txt.enc >/dev/null
+        ./scripts/encrypt_file.sh repo_links.txt.enc >/dev/null
         EXIT_CODE=$?
         if [[ "$EXIT_CODE" -ne 0 ]]; then
             vexit "encrypt_file.sh failed do decrypt file repo_links.txt.enc with code $EXIT_CODE" 4
@@ -94,7 +94,7 @@ if [ "$HOSTLESS" = "no" ]; then
     elif [[ ! -f "host_job_queue.txt.enc" ]]; then
         echo "$txtylw      file host_job_queue.txt.enc not found, but wget had no error? Continuing with local repo_links.txt ...$txtrst"
     else
-        ./encrypt_file.sh host_job_queue.txt.enc >/dev/null
+        ./scripts/encrypt_file.sh host_job_queue.txt.enc >/dev/null
         EXIT_CODE=$?
         if [[ "$EXIT_CODE" -ne 0 ]]; then
             vexit "encrypt_file.sh failed do decrypt file host_job_queue.txt.enc with code $EXIT_CODE" 5
@@ -247,7 +247,7 @@ if [ "$HOSTLESS" = "no" ]; then
             mkdir job_dirs
         fi
         mv "$FILE" job_dirs/
-        ./encrypt_file.sh "job_dirs/$FILE" >/dev/null
+        ./scripts/encrypt_file.sh "job_dirs/$FILE" >/dev/null
         EXIT_CODE=$?
         if [[ $EXIT_CODE -ne 0 ]]; then
             vexit "encrypt_file.sh failed do decrypt file job_dirs/$FILE with code $EXIT_CODE" 7
