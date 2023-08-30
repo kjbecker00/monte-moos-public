@@ -29,6 +29,7 @@ job_dirs/*
 # Scratchpads
 scripts/attic/*
 __*
+*/__*
 
 # Documentation
 !docs/*

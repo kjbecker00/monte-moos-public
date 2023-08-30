@@ -59,7 +59,7 @@ done
 #--------------------------------------------------------------
 if [ -f /usr/bin/vcgencmd ]; then
    TEMP=$(sudo /usr/bin/vcgencmd measure_temp)
-   TEMP=$(echo "${TEMP}" | awk -F "[=']" '{print($2 * 1.8)+32}')
+#    TEMP=$(echo "${TEMP}" | awk -F "[=']" '{print($2 * 1.8)+32}')
    TO_PRINT="$TO_PRINT (temp = $TEMP deg F)"
 fi
 
