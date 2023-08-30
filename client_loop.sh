@@ -7,6 +7,7 @@ PERPETUAL=""
 RE_UPDATE="yes"
 IGNORE_WARNING="no"
 HOSTLESS="no"
+SLEEP_TIME=60
 
 txtrst=$(tput sgr0)    # Reset
 txtred=$(tput setaf 1) # Red
@@ -115,13 +116,12 @@ while true; do
             ./clean.sh
             exit 0
         fi
-        secho "Perpetual mode: waiting 30 seconds before checking again..."
-        check_sleep 30
-        RE_UPDATE="yes"
+        secho "Perpetual mode: waiting $SLEEP_TIME seconds before checking again..."
+        check_sleep $SLEEP_TIME
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 2: Job was bad
     elif [ $EXIT -eq 2 ]; then
-        secho "$0 skipping bad job..."
+        echo "Skipping bad job..."
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 130: ctrl-c
     elif [ $EXIT -eq 130 ]; then

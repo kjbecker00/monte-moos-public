@@ -73,11 +73,11 @@ echo "$name" >myname.txt
 #--------------------------------------------------------------
 #  Part 4: Write to bad_jobs.txt
 #--------------------------------------------------------------
-vecho 1 "DELETE=${DELETE}"
 if [[ "${DELETE}" != "yes" ]]; then
   echo "$JOB" >> bad_jobs.txt
 else
   rm bad_jobs.txt
+  vecho 1 "Delete bad_jobs.txt file"
 fi
 
 #--------------------------------------------------------------

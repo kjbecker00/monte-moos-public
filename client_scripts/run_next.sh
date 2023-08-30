@@ -17,7 +17,7 @@ txtgry=$(tput setaf 8) # Grey
 # vecho "message" level_int
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
 vexit() {
-    ./scripts/secho.sh "${txtred}${ME}: Error $1. Exit Code $2 ${txtrst}"
+    echo "${txtred}${ME}: Error $1. Exit Code $2 ${txtrst}"
     exit "$2"
 }
 
@@ -46,6 +46,7 @@ done
 
 # if it should update
 if [[ "$TO_UPDATE" == "yes" ]]; then
+    vecho "UPDATING..." 1
     # remove old cache files
     rm -f .built_dirs
     if [ -f .built_dirs ]; then
@@ -143,7 +144,11 @@ for ((i = 1; i <= length; i++)); do
             vecho "Skipping bad job $JOB_FILE ..." 1
             JOB_FILE=""
             continue
+        else
+            vecho "Job file is good: $JOB_FILE ..." 1
         fi
+    else
+        vecho "No bad_jobs.txt file" 1
     fi
 
     # checks if it has runs left
@@ -191,7 +196,7 @@ RUNS_DES=$GOOD_RUNS_DES
 if [[ -z $JOB_FILE ]]; then
     vecho "No jobs left to run. Exiting..." 1
     if [ "$ALL_JOBS_OK" == "no" ]; then
-        vexit "finished all ok jobs, but some were bad. Fix jobs in bad_jobs.txt and rerun" 1
+        vexit "Finished all ok jobs, but some were bad. Fix jobs in bad_jobs.txt and rerun" 1
     fi
     exit 1
 fi

@@ -90,7 +90,7 @@ done
 #  Part 2: Read parameter files
 #-----------------------------------------------------
 if [ -z $JOB_FILE ]; then
-    vexit "no job file set" 1
+    vexit "No job file set" 1
 fi
 if [ ! -f $JOB_FILE ]; then
     vexit "job file $JOB_FILE not found" 1

@@ -178,9 +178,8 @@ fi
 if [[ "${METADATA}" = "yes" ]]; then
     [ -f .built_dirs ] && rm -f .built_dirs
     [ -f bad_jobs.txt ] && rm -f bad_jobs.txt
-    [ -f bad_jobs.txt ] && rm -f status.txt
+    [ -f status.txt ] && rm -f status.txt
     [ -f myname.txt ] && rm -f myname.txt
-    # [ -f bad_jobs.txt ] && rm -f force_quit
 
     if [ "$(hostname)" != "oceanai" ]; then
         find . -type f -name 'host_job_queue.txt' -exec rm {} \; 2>/dev/null
