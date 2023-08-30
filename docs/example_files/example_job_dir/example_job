@@ -1,0 +1,101 @@
+#!/bin/bash 
+# Kevin Becker, June 9 2023
+#########################################################
+# Job file, used for running one job                    #
+#   the goal is to make these files for various         #
+#   scenarios and run them                              #
+#########################################################
+
+######################################
+# Launching shoreside                #
+######################################
+SHORE_REPO="moos-ivp-extend0"
+SHORE_MISSION="missions/m2_berta_baseline"
+SHORE_FLAGS=" -a 20"  # Add any extra flags required by the shore mission
+
+######################################
+# Launching vehicles                 #
+######################################
+# This section is UNNECESSARY IF YOU ARE LAUNCHING FROM ONE LAUNCH SCRIPT
+# Note: The order of the following arrays must be consistent
+VEHICLES=2
+VEHICLE_REPOS=("moos-ivp-extend1" "moos-ivp-extend2")
+VEHICLE_MISSIONS=("missions/s1_alpha" "missions/m2_berta_baseline")
+SHARED_VEHICLE_FLAGS=" --ip-localhost --shore_pshare=9200 -s -a 20"
+VEHICLE_FLAGS=( "--start=3,3 --vrole=rescue --vname=abe --tmate=ben --mport=9001 --pshare=9201" 
+                "--start=3,2 --vrole=scout  --vname=ben --tmate=abe --mport=9002 --pshare=9202"  
+            )
+
+# How long to wait for the mission to complete before killing it
+#   Note: the timewarp is NOT considered in this timeout
+JOB_TIMEOUT=60
+
+######################################
+# Generating plots                   #
+######################################
+# NOTE: These values MUST match the csv headers in the results.csv file!!!
+# To generate mutliple plots, put ; between the sets of values
+# Each plot can only have one X value, but may have multiple Y values
+# The values in PLOT_Y are comma seperated (what will be plotted in the same plot)
+PLOT_X="Time (s);                   Other_X"
+PLOT_Y="Config Var 1,Config Var 2; Other_y1, Other_y2"
+# TODO: As of right now, it assumes a scatterplot
+# PLOT_TYPES="scatter, histogram" # etc
+
+
+#######################################################################################################
+#  ABOVE THIS LINE IS SUFFICIENT FOR 90% OF USE CASES!
+#######################################################################################################
+
+
+
+
+######################################
+# Optional flags                     #
+######################################
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Targ file for the shoreside
+SHORE_TARG="targ_shoreside.moos" # default
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+ # What to poke shoreside with to start mission. Entries are space seperated
+ # Add to or replace the default START_POKE in the job file
+ #    To replace the START_POKE, use START_POKE="..."
+ #    To append to the START_POKE, use START_POKE+="..." 
+ # Default:
+    # START_POKE="DEPLOY_ALL=true DEPLOY=true MOOS_MANUAL_OVERRIDE_ALL=false "
+    # START_POKE+="MOOS_MANUAL_OVERIDE_ALL=false MOOS_MANUAL_OVERRIDE=false "
+    # START_POKE+="MOOS_MANUAL_OVERIDE=false RETURN_ALL=false RETURN=false "  
+ # Example Appended line:
+    START_POKE+="SURVEY=true SURVEY_ALL=true"
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Delay START_POKE by this many seconds
+DELAY_POKE=5 # default
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Assumes each entry launch_vehicle.sh by default
+VEHICLE_SCRIPTS=("launch_vehicle.sh" "launch_vehicle.sh") # default if VEHICLES = 2
+# Launch script for the shoreside (Note: defaults to "launch.sh" if VEHICLES=0)
+SHORESIDE_SCRIPT="launch_shoreside.sh" # default if VEHICLES > 0
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Any extra repos to source 
+#   Useful if you have binaries in other moos-ivp-extend repos you 
+#   need to source for launching the script
+EXTRA_BIN_REPOS=( "moos-ivp-extend3" "moos-ivp-extend4" ) # adds moos-ivp-extend/bin to PATH
+EXTRA_LIB_REPOS=( "moos-ivp-extend3" "moos-ivp-extend4" ) # adds moos-ivp-extend/lib to IVP_BEHAVIOR_DIRS
+EXTRA_REPOS=( "moos-ivp-extend3" "moos-ivp-extend4" ) # shorthand for adding something to BIN and LIB repos
+
+
+######################################
+#   Other information                #
+######################################
+# Pro tip: You CAN include logic in a job file, since its a bash script
+# which gets run at multiple points when running a job
+# however, since it gets run multiple times, don't include too much here
+# For example, you can set the time warp based on what computer is running it
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    SHORE_FLAGS=" -a 20"
+else
+    # Linux, possibly a PI. Slow down
+    SHORE_FLAGS=" -a 5"
+fi
+
