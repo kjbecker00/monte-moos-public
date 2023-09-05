@@ -177,7 +177,7 @@ fi
 # find . -type f -name '.temp_client_job_queue.txt' -exec rm {} \; 2>/dev/null # Don't clean after every mission!
 if [[ "${METADATA}" = "yes" ]]; then
     [ -f .built_dirs ] && rm -f .built_dirs
-    [ -f bad_jobs.txt ] && rm -f bad_jobs.txt
+    ./scripts/list_bad_job.sh -d
     [ -f status.txt ] && rm -f status.txt
     [ -f myname.txt ] && rm -f myname.txt
 

@@ -59,8 +59,9 @@ done
 #--------------------------------------------------------------
 if [ -f /usr/bin/vcgencmd ]; then
    TEMP=$(sudo /usr/bin/vcgencmd measure_temp)
+   free_memory=$(free -m | awk '/^Mem:/{print $4}')
 #    TEMP=$(echo "${TEMP}" | awk -F "[=']" '{print($2 * 1.8)+32}')
-   TO_PRINT="$TO_PRINT (temp = $TEMP)"
+   TO_PRINT="$TO_PRINT (temp = $TEMP free memory=$free_memory)"
 fi
 
 
