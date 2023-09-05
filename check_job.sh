@@ -133,3 +133,5 @@ echo $txtrst $txtgrn "Job file is good" $txtrst
 if [ $TEST = "yes" ]; then
     vecho "${txtrst}Now try running the job with: $(tput smul)${txtblu}./client_scripts/run_job.sh ${JOB_FILE}${txtrst} " 0
 fi
+
+exit 0

@@ -182,5 +182,5 @@ cd - >/dev/null
 #-------------------------------------------------------
 #  Part 8: Restore the original path to prevent conflicts
 #-------------------------------------------------------
-export PATH=$original_path
-export IVP_BEHAVIOR_DIRS=$original_ivp_behavior_dirs
+
+safe_exit 0

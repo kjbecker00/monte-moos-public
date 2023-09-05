@@ -217,4 +217,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo $txtgrn"      Results extracted" $txtrst
+
 safe_exit 0

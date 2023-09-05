@@ -259,3 +259,5 @@ else
     vecho "Not offloading results" 1
 fi
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+exit 0

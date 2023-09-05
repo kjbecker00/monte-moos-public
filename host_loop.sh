@@ -137,3 +137,5 @@ check_sleep 60
 secho "Updating queue one last time (for accurate count and publish all results)"
 ./host_scripts/update_queue.sh
 secho "${txtgrn}Done${txtrst}"
+
+exit 0

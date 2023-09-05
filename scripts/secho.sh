@@ -9,6 +9,7 @@
 ME=$(basename "$0")
 VERBOSE=0
 TO_PRINT=""
+LINES_TO_KEEP=500
 txtrst=$(tput sgr0)       # Reset
 txtred=$(tput setaf 1)    # Red
 txtgrn=$(tput setaf 2)    # Green
@@ -84,7 +85,7 @@ echo "$TO_PRINT"
 TO_ADD="$TO_PRINT (on ${name} as of $(date))"
 
 echo "$TO_ADD" > status.tmp
-head -n 20 status.txt >> status.tmp
+head -n $LINES_TO_KEEP status.txt >> status.tmp
 mv status.tmp status.txt
 
 

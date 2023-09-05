@@ -443,3 +443,5 @@ done
 if has_built_repo moos-ivp; then
     vexit "has not built moos-ivp" 1
 fi
+
+exit 0

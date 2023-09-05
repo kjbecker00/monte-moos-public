@@ -144,3 +144,6 @@ while true; do
     check_quit
 
 done
+
+
+exit 0

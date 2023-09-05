@@ -206,3 +206,5 @@ if [[ "${JOB_DIRS}" = "yes" ]]; then
     fi
 
 fi
+
+exit 0

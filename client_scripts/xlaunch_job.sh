@@ -392,3 +392,5 @@ ktm >&/dev/null
 sleep 1
 PATH=$OLD_PATH
 export PATH
+
+safe_exit 0
