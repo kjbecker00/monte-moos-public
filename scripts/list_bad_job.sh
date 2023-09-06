@@ -7,7 +7,7 @@
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
 ME=$(basename "$0")
-VERBOSE=1
+VERBOSE=0
 JOB=""
 DELETE=""
 txtrst=$(tput sgr0)       # Reset

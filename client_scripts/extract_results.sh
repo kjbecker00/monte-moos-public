@@ -200,7 +200,7 @@ if [ $TEST = "yes" ]; then
     # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
     echo ""
     echo "    Then, add this job to the host_job_queue.txt file on oceanai, and you should be all set!"
-    echo "         ${JOB_DIR} 5 "
+    echo "         ${JOB_DIR}/${JOB_FILE_NAME} 5 "
     echo ""
 else
     vecho "Results saved to $(tput smul)${txtblu}${LOCAL_JOB_RESULTS_DIR}" 1

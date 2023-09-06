@@ -28,7 +28,9 @@ txtul=$(tput bold)        # Bold
 vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
 wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
 vexit() {
-    ./scripts/secho "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}"
+    [ -f scripts/secho.sh ] &&  ./scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
+    [ -f ../scripts/secho.sh ] && ./../scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
+    [ -f ../../scripts/secho.sh ] &&  ./../../scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
     exit "$2"
 }
 
@@ -123,6 +125,8 @@ extract_repo_name() {
     local repo_name=""
     if [[ $repo_full =~ \.git$ ]]; then
         repo_name=$(basename "$repo_full" .git)
+    elif [[ $repo_full == *github.* || $repo_full == *gitlab.* ]]; then
+        repo_name=$(basename "$repo_full")
     elif [[ "$repo_full" == "~/"* ]] || [[ "$repo_full" == "/"* ]]; then
         # repo_name="${repo_full##*/}" Old version
         repo_name="$(basename $repo_full)"
@@ -278,7 +282,7 @@ handle_repo_links_file() {
 
         #-------------------------------------------------------
         #  Part 4b: Handle mutliple types of repos: git
-        if [[ $repo = *.git ]]; then
+        if [[ $repo == *github* || $repo == *gitlab* ]]; then
             vecho "  $repo_name is a git repo" 2
 
             if [ -d "moos-dirs/$repo_name" ]; then
@@ -420,6 +424,10 @@ done
 #  Part 7: Check that every required repo has been updated
 #-------------------------------------------------------
 # Check that all repos have been built
+vecho "$SHORE_REPO" 1
+if has_built_repo "${SHORE_REPO}"; then
+    vexit "has not built ${SHORE_REPO}" 1
+fi
 for repo in "${VEHICLE_REPOS[@]}"; do
     if has_built_repo $repo; then
         vexit "has not built $repo" 1
