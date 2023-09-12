@@ -195,6 +195,14 @@ skipline() {
     return 1
 }
 build_script() {
+    mydir="$PWD"
+    if [ ! -f $script ]; then
+        if [ -f trunk/$script ]; then
+            cd trunk
+        else
+            vexit "      can't find build script as $PWD/$script or $PWD/$trunk/$script" 1
+        fi
+    fi
     # Quietly try to build the script as is
     if [[ $QUIET == "yes" ]]; then
         ./$script "${ALL_FLOW_DOWN_ARGS}" >.build_log.txt 2>&1
@@ -228,6 +236,7 @@ build_script() {
             BUILD_FAIL=1
         fi
     fi
+    cd $mydir
     return $BUILD_FAIL
 }
 #  Updates all necesary repos in an repo_links.txt file
@@ -366,7 +375,7 @@ handle_repo_links_file() {
         fi
         wait
         echo $txtgrn " built sucessfully" $txtrst
-        cd - >/dev/null || exit 1
+        cd .. >/dev/null || exit 1
         echo "$repo_name" >>.built_dirs
     done <"$repo_links_file"
 }

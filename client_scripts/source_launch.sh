@@ -139,16 +139,25 @@ if [[ ! -d "${MISSION_DIR}" ]]; then
 fi
 if [[ $TO_SOURCE == "yes" ]]; then
     if [[ ! -d "${BIN_DIR}" ]]; then
-        vexit "Binary subdirectory ${BIN_DIR} does exist." 6
+        BIN_DIR="trunk/${BIN_DIR}"
+        if [[ ! -d "${BIN_DIR}" ]]; then
+            vexit "Binary subdirectory ${BIN_DIR} does exist." 6
+        fi
     fi
 fi
 if [[ $TO_ADD_LIB == "yes" ]]; then
     if [[ ! -d "${LIB_DIR}" ]]; then
-        vexit "Library subdirectory ${LIB_DIR} does exist." 7
+        LIB_DIR="trunk/${LIB_DIR}"
+        if [[ ! -d "${LIB_DIR}" ]]; then
+            vexit "Library subdirectory ${LIB_DIR} does exist." 7
+        fi
     fi
 fi
 if [[ ! -f "${MISSION_DIR}/${SCRIPTNAME}" ]]; then
-    vexit "Script ${MISSION_DIR}/${SCRIPTNAME} does exist." 8
+    SCRIPTNAME="trunk/${SCRIPTNAME}"
+    if [[ ! -f "${MISSION_DIR}/${SCRIPTNAME}" ]]; then
+        vexit "Script ${MISSION_DIR}/${SCRIPTNAME} does exist." 8
+    fi
 fi
 
 #-------------------------------------------------------
