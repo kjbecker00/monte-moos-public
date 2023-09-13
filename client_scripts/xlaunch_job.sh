@@ -246,8 +246,8 @@ if [ -z $SHORE_TARG ]; then
 fi
 # Allow some time for the shore targ to generate
 COUNT=0
-while [ "$COUNT" -lt 10 ]; do
-    vecho " Waiting for shore targ to generate... " 1
+while [ "$COUNT" -lt 30 ]; do
+    vecho "   Waiting for shore targ to generate... " 1
     if [ -f $SHORE_TARG ]; then
         break
     fi
@@ -267,6 +267,8 @@ if [ ! -f "$SHORE_TARG" ]; then
     vecho "SHORE_MISSION=$SHORE_MISSION" 1
     vecho "SHORE_TARG=$SHORE_TARG" 1
     vexit "Missing shoreside targ file. Tried ${SHORE_TARG} and moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}" 6
+else
+    vecho "   shore targ $SHORE_TARG found" 1
 fi
 
 if [ -z "$DELAY_POKE" ]; then
@@ -278,9 +280,12 @@ fi
 #-------------------------------------------------------
 vecho "Part 2: Poking/Starting mission in $DELAY_POKE seconds... " 1
 sleep $DELAY_POKE
+vecho "            poking... " 1
 if [ "${QUIET}" = "yes" ]; then
+    vecho "uPokeDB $SHORE_TARG $START_POKE >&/dev/null" 2
     uPokeDB $SHORE_TARG $START_POKE >&/dev/null
 else
+    vecho "uPokeDB $SHORE_TARG $START_POKE" 2
     uPokeDB $SHORE_TARG $START_POKE
 fi
 

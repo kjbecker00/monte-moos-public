@@ -172,7 +172,7 @@ if [[ $TO_SOURCE == "yes" ]]; then
     export PATH=$PATH:$BIN_DIR
 fi
 if [[ $TO_ADD_LIB == "yes" ]]; then
-    vecho "Temporarially adding $LIB_DIR to PATH" 2
+    vecho "Temporarially adding $LIB_DIR to IVP_BEHAVIOR_DIRS" 2
     export IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS:$LIB_DIR
 fi
 
