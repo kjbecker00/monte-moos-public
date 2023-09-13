@@ -331,7 +331,7 @@ handle_repo_links_file() {
 
             echo -n "        Updating..."
             cd moos-dirs/$repo_name || (
-                echo $txtred "$0 Error unable to cd moos-dirs/$repo_name exiting..."
+                echo $txtred "$0 Error unable to cd moos-dirs/$repo_name (currently in $PWD) exiting..."
                 exit 1
             )
             if [ -f ".git" ]; then
@@ -375,7 +375,7 @@ handle_repo_links_file() {
         fi
         wait
         echo $txtgrn " built sucessfully" $txtrst
-        cd .. >/dev/null || exit 1
+        cd ../.. >/dev/null || exit 1
         echo "$repo_name" >>.built_dirs
     done <"$repo_links_file"
 }

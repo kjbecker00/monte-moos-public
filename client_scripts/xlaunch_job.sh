@@ -263,6 +263,9 @@ done
 # If SHORE_TARG is still not found, exit
 if [ ! -f "$SHORE_TARG" ]; then
     ktm
+    vecho "SHORE_REPO=$SHORE_REPO" 1
+    vecho "SHORE_MISSION=$SHORE_MISSION" 1
+    vecho "SHORE_TARG=$SHORE_TARG" 1
     vexit "Missing shoreside targ file. Tried ${SHORE_TARG} and moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}" 6
 fi
 
