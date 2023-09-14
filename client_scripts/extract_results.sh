@@ -106,15 +106,15 @@ JOB_DIR=${JOB_DIR_FULL#*/}
 SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*SHORE*/*.alog 2>/dev/null | head -1)
 if [ -z $SHORE_ALOG ]; then
     SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*/*.alog 2>/dev/null | head -1)
-    [ $? -eq 0 ] || { vexit "No alog found in ${PWD}/${SHORE_MISSION_DIR}" 2; }
+    [ $? -eq 0 ] || { vexit "No alog found in ${PWD}/moos-dirs/${SHORE_REPO}/${SHORE_MISSION}" 2; }
     if [ "$SHORE_ALOG" = "" ]; then
         if [ $TEST = "yes" ]; then
-            vecho "${txtred} Error: No alog found in ${PWD}/${SHORE_MISSION_DIR}" 0
+            vecho "${txtred} Error: No alog found in ${PWD}/moos-dirs/${SHORE_REPO}/${SHORE_MISSION}" 0
             vecho "${txtred} Error: Be sure you have run job first with the following script:" 0
             vecho "${txtred} Error: $(tput smul)./client_scripts/run_job.sh ${JOB_FILE}" 0
             exit 2
         else
-            vexit "No alog found in ${PWD}/${SHORE_MISSION_DIR}" 2
+            vexit "No alog found in ${PWD}/${SHORE_REPO}/${SHORE_MISSION}" 2
         fi
     fi
 fi
