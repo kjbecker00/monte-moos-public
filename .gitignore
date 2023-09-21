@@ -11,6 +11,7 @@ results/*
 force_quit
 .deleted_*
 .deleted_*
+*.tmp
 
 # Private files
 .password
