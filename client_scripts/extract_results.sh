@@ -102,7 +102,8 @@ JOB_DIR=${JOB_DIR_FULL#*/}
 #-------------------------------------------------------
 #  Part 3: Save to a directory on the local machine
 #-------------------------------------------------------
-# assumes the hash is the last mission_hash in the alog
+#  Part 3a: find the shore alog
+#-------------------------------------------------------
 SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*SHORE*/*.alog 2>/dev/null | head -1)
 if [ -z $SHORE_ALOG ]; then
     SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*/*.alog 2>/dev/null | head -1)
@@ -120,14 +121,17 @@ if [ -z $SHORE_ALOG ]; then
 fi
 vecho "Shore alog = $SHORE_ALOG" 1
 
-# SHORE_ALOG=$(ls -t "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*/*.alog | head -1)
+#-------------------------------------------------------
+#  Part 3b: get the hash from the alog, or generate one
+#-------------------------------------------------------
+# Get the hash from the alog
 hash=$(moos-dirs/moos-ivp/ivp/bin/aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
 if [ $? -ne 0 ]; then
     hash=""
     echo "${txtylw}Warning: aloggrep failed to retrieve a hash. Generating a hash${txtrst}"
 fi
-# Adds a hash if not found. Useful if pMissionHash hasn't been added and
-#   no instances of pMarineViewer are running
+#-------------------------------------------------------
+# Makes a hash if not found. Useful if pMissionHash hasn't been added
 if [ -z $hash ]; then
     current_time=$(date +%y%m%d-%H%M)
     seconds=$(date +%S)
@@ -138,6 +142,10 @@ if [[ -z $LOCAL_RESULTS_DIR ]]; then
     LOCAL_RESULTS_DIR="results"
 fi
 
+
+#-------------------------------------------------------
+# Set the results directory on the host
+#-------------------------------------------------------
 if [[ -z $HOST_RESULTS_DIR ]]; then
     HOST_RESULTS_DIR="monte-moos/results"
 fi
@@ -194,10 +202,6 @@ if [ $TEST = "yes" ]; then
     echo "Make ${txtbld}sure${txtrst} that the results look the way you want. Once you are sure,"
     echo "Copy your directory to oceanai: "
     echo "        $(tput smul)${txtblu}rsync -zaPr job_dirs/${yourdir} oceanai.mit.edu:/home/monte/monte-moos/job_dirs/${txtrst}"
-    # echo "    To copy the post processing script: "
-    # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
-    # echo "    Remember to copy all results.txt scripts as well!: "
-    # echo "        $(tput smul)${txtblu}rsync -zaPrv ${results_script_directory} oceanai.mit.edu:/home/monte/monte-moos/${results_script_directory}/post_proces_results.txt${txtrst}"
     echo ""
     echo "    Then, add this job to the host_job_queue.txt file on oceanai, and you should be all set!"
     echo "         ${JOB_DIR}/${JOB_FILE_NAME} 5 "
@@ -210,51 +214,10 @@ fi
 #  Part 5: Send results to host, if desired
 if [[ $OFFLOAD != "no" ]]; then
     vecho "Part 5: Offloading results" 1
-    # Check for ssh key
-    if [ -f ~/.ssh/id_rsa_yco ]; then
-        chmod -R go-rwx ~/.ssh/id_rsa_yco &>/dev/null
-    fi
 
-    # Start ssh-agent
-    eval $(ssh-agent -s) &>/dev/null
-    ps -p $SSH_AGENT_PID &>/dev/null
-    SSH_AGENT_RUNNING=$?
-    if [ ${SSH_AGENT_RUNNING} -ne 0 ]; then
-        vexit "Unable to start ssh-agent" 3
-    fi
-
-    ssh-add -t 7200 ~/.ssh/id_rsa_yco 2>/dev/null
-    EXIT_CODE=$?
-    if [ "$EXIT_CODE" -ne "0" ]; then
-        vexit "ssh agent unable to add yco key" 3
-    fi
-    echo $txtrst"      $LOCAL_JOB_RESULTS_DIR"$txtrst" → "$txtrst"$SSH_HOST:"$txtrst"$HOST_RESULTS_FULL_DIR"$txtrst
-    ssh -n ${SSH_HOST} "mkdir -p $HOST_RESULTS_FULL_DIR" &>/dev/null
-    EXIT_CODE=$?
-    if [ ! $EXIT_CODE -eq "0" ]; then
-        if [ $EXIT_CODE -eq 255 ]; then
-            echo "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst
-        else
-            vexit "ssh -n ${SSH_HOST} mkdir -p $HOST_RESULTS_FULL_DIR had exit code $EXIT_CODE. Could not ssh to $SSH_HOST" 3
-        fi
-    fi
-
-    # rsync only the current job vs rsync the job_dir. Use the job_dir
-    # rsync -zaPr -q ${LOCAL_JOB_RESULTS_DIR} ${SSH_HOST}:$HOST_RESULTS_FULL_DIR
-    rsync -zaPr -q --timeout=$RSYNC_TIMEOUT ${LOCAL_JOB_RESULTS_DIR} ${SSH_HOST}:$HOST_RESULTS_FULL_DIR &>/dev/null
-    EXIT_CODE=$?
-    if [ ! $EXIT_CODE ]; then
-        if [ $EXIT_CODE = 30 ]; then
-            echo $txtylw"      warning: rsync timed out after $RSYNC_TIMEOUT. Continuing..."$txtrst
-        else
-            vexit "rsync -zaPr -q --timeout=120 ${LOCAL_JOB_RESULTS_DIR} ${SSH_HOST}:$HOST_RESULTS_FULL_DIR had exit code $? \n Could not ssh to $SSH_HOST" 3
-        fi
-    else
-        # rsync worked, so delete the local copy
-        rm -rf $LOCAL_JOB_RESULTS_DIR
-        echo "    rsync worked. Link to results: $(tput smul)${txtblu}${LINK_TO_RESULTS} ${txtrst}"
-        : # no-op command (if you comment out rm)
-    fi
+    ./scripts/send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR
+    [ $? -eq 0 ] || { vexit "send2host.sh failed with exit code $?" 3; }
+    
 else
     vecho "Not offloading results" 1
 fi

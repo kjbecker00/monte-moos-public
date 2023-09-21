@@ -129,7 +129,7 @@ while true; do
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code !=0: run next failed for unknown reason
     elif [ $EXIT -ne 0 ]; then
-        vexit "./client_scripts/run_next.sh $FLAGS failed with code $EXIT_CODE" 2
+        vexit "./client_scripts/run_next.sh $FLAGS failed with code $EXIT" 2
     fi
     echo ""
 

@@ -69,10 +69,7 @@ if [[ "$HOSTLESS" != "yes" ]]; then
         echo "$txtylw      wget failed with code $EXIT_CODE. Continuing with local repo_links.txt ...$txtrst"
     else
         ./scripts/encrypt_file.sh repo_links.txt.enc >/dev/null
-        EXIT_CODE=$?
-        if [[ "$EXIT_CODE" -ne 0 ]]; then
-            vexit "encrypt_file.sh failed do decrypt file repo_links.txt.enc with code $EXIT_CODE" 4
-        fi
+        [ "$?" -eq 0 ] || { vexit "encrypt_file.sh failed do decrypt file repo_links.txt.enc with code $EXIT_CODE" 4; }
     fi
 fi
 
@@ -279,32 +276,14 @@ if [[ $EXIT_CODE -ne 0 ]]; then
     vexit "run_job.sh failed with exit code: $EXIT_CODE" 130
 fi
 
-
-
-
-
-
-
-#-------------------------------------------------------
-#  Part 6: Update queue
-#-------------------------------------------------------
-
-echo "GOOD_JOB_FILE $GOOD_JOB_FILE with $JOB_FILE $RUNS_DES $RUNS_ACT"
-
-# replace the line in queue with the newly counted number of runs
+# update the queue file (helpful if trying to run w/o a host)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    echo "sed -i '' \"s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@\" \"$QUEUE_FILE\""
     sed -i '' "s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
+    # sed -i '' 's@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@' "$QUEUE_FILE"
 else
     # Linux
-    sed -i'' "s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
+    sed -i "s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
 fi
-
-
-
-
-
-
 
 exit 0

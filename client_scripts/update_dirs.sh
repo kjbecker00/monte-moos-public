@@ -248,20 +248,8 @@ handle_repo_links_file() {
 
     # Loop through all repos in the file
     while read -r repo || [[ -n "$repo" ]]; do
-        if [[ $repo == "" ]]; then
+        if skipline $repo ; then
             vecho "Skipping blank line... $repo" 10
-            continue
-        fi
-        if [[ -z $repo ]]; then
-            vecho "Skipping blank line (v2)... $repo" 10
-            continue
-        fi
-        if [[ -z "${repo// /}" ]]; then
-            vecho "Skipping blank line (v3)... $repo" 10
-            continue
-        fi
-        if [[ $repo == \#* ]]; then
-            vecho "Skipping comment... $repo" 10
             continue
         fi
         repo_name=$(extract_repo_name $repo)
