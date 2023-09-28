@@ -253,7 +253,7 @@ handle_repo_links_file() {
             continue
         fi
         repo_name=$(extract_repo_name $repo)
-
+        vecho "repo_name=$repo_name" 1
         if [ $ALL != "yes" ]; then
             if [ -f ".built_dirs" ]; then
                 # determines if the repo was found in .built_dirs
@@ -421,7 +421,7 @@ done
 #  Part 7: Check that every required repo has been updated
 #-------------------------------------------------------
 # Check that all repos have been built
-vecho "$SHORE_REPO" 1
+vecho "Checking if $SHORE_REPO has been built..." 1
 if has_built_repo "${SHORE_REPO}"; then
     vexit "has not built ${SHORE_REPO}" 1
 fi

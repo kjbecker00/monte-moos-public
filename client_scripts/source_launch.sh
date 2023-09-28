@@ -190,6 +190,10 @@ vecho "Launching with IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
 
 # Run the launch.sh script with pre-determined flags
 cd "$MISSION_DIR" || safe_exit 9
+if [ -f "clean.sh" ]; then
+    chmod +x clean.sh
+    ./clean.sh
+fi
 vecho "./$SCRIPTNAME $FLOW_DOWN_ARGS" 1
 ./$SCRIPTNAME $FLOW_DOWN_ARGS >&/dev/null &
 if [ $? -ne 0 ]; then

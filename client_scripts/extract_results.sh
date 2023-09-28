@@ -106,20 +106,28 @@ JOB_DIR=${JOB_DIR_FULL#*/}
 #-------------------------------------------------------
 SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*SHORE*/*.alog 2>/dev/null | head -1)
 if [ -z $SHORE_ALOG ]; then
+    vecho "shore alog not found in moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/*SHORE*/*.alog" 2
+
+
     SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*/*.alog 2>/dev/null | head -1)
     if [ -z $SHORE_ALOG ]; then
-        SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}"/*/*.alog 2>/dev/null | head -1)
-        [ $? -eq 0 ] || { vexit "No alog found in ${PWD}/moos-dirs/${SHORE_REPO}/${SHORE_MISSION}" 2; }
-        if [ "$SHORE_ALOG" = "" ]; then
-            if [ $TEST = "yes" ]; then
-                vecho "${txtred} Error: No alog found in ${PWD}/moos-dirs/${SHORE_REPO}/${SHORE_MISSION}" 0
-                vecho "${txtred} Error: Be sure you have run job first with the following script:" 0
-                vecho "${txtred} Error: $(tput smul)./client_scripts/run_job.sh ${JOB_FILE}" 0
-                exit 2
-            else
-                vexit "No alog found in ${PWD}/${SHORE_REPO}/${SHORE_MISSION}" 2
+        vecho "shore alog not found in moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/*/*.alog" 2
+
+
+        # SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/${SHORE_MISSION}"/*/*.alog 2>/dev/null | head -1)
+        # if [ -z $SHORE_ALOG ]; then
+
+            SHORE_ALOG=$(find "moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}"/*/*.alog 2>/dev/null | head -1)
+            if [ "$SHORE_ALOG" = "" ]; then
+                vecho "shore alog not found in moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}/*/*.alog" 2
+                if [ $TEST = "yes" ]; then
+                    vecho "${txtred} Error: No alog found in ${PWD}/moos-dirs/${SHORE_REPO}/${SHORE_MISSION}" 0
+                    vecho "${txtred} Error: Be sure you have run job first with the following script:" 0
+                    vecho "${txtred} Error: $(tput smul)./client_scripts/run_job.sh ${JOB_FILE}" 0
+                    vecho "Continuing anyway, but this may fail later on" 
+                fi
             fi
-        fi
+        # fi
     fi
 fi
 vecho "Shore alog = $SHORE_ALOG" 1
@@ -128,10 +136,12 @@ vecho "Shore alog = $SHORE_ALOG" 1
 #  Part 3b: get the hash from the alog, or generate one
 #-------------------------------------------------------
 # Get the hash from the alog
-hash=$(moos-dirs/moos-ivp/ivp/bin/aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
-if [ $? -ne 0 ]; then
-    hash=""
-    echo "${txtylw}Warning: aloggrep failed to retrieve a hash. Generating a hash${txtrst}"
+if [ -f $SHORE_ALOG ]; then
+    hash=$(moos-dirs/moos-ivp/ivp/bin/aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
+    if [ $? -ne 0 ]; then
+        hash=""
+        echo "${txtylw}Warning: aloggrep failed to retrieve a hash. Generating a hash${txtrst}"
+    fi
 fi
 #-------------------------------------------------------
 # Makes a hash if not found. Useful if pMissionHash hasn't been added
