@@ -61,7 +61,11 @@ else
     vecho "Input is not a file or directory" 1
 fi
 
+
+#######################################################
 # Encrypt or decrypt based on file extension
+#######################################################
+#       DECRYPT
 if [[ $INPUT = *".enc" ]]; then
     echo "Decrypting..."
     INPUT_STRIPPED="${INPUT%.*}"
@@ -71,6 +75,7 @@ if [[ $INPUT = *".enc" ]]; then
     fi
     # decrypt
     openssl enc -pbkdf2 -d -aes-256-cbc -in "$INPUT" -out "$OUTPUT" -pass pass:"$PASSWORD"
+    vecho "Decrypted!" 1
     if [[ $? -ne 0 ]]; then
         vexit "error decrypting input " 4
     fi
@@ -89,6 +94,10 @@ if [[ $INPUT = *".enc" ]]; then
         true
     fi
 
+#######################################################
+# Encrypt or decrypt based on file extension
+#######################################################
+#       ENCRYPT
 else
     echo "Encrypting..."
     if [[ -z $OUTPUT ]]; then

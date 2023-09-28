@@ -1,10 +1,9 @@
 #!/bin/bash
 # Kevin Becker, May 26 2023
 
-# Script used to publish results to the host
+# Script used to publish files to the host
 ME=$(basename "$0")
 VERBOSE=0
-RSYNC_TIMEOUT=120
 
 LOCAL_PATH=""
 HOST_PATH=""
@@ -28,7 +27,7 @@ for ARGI; do
     ALL_ARGS+=$ARGI" "
     if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
         echo "$ME.sh local_dir host_dir [OPTIONS]"
-        echo " Used to publish results to the host. Essentially a wrapper "
+        echo " Used to publish files to the host. Essentially a wrapper "
         echo " for rsync."
         echo "Options:                                                   " 
         echo " --help, -h Show this help message                         " 

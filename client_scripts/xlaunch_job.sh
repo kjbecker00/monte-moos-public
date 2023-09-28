@@ -256,6 +256,11 @@ while [ "$COUNT" -lt 30 ]; do
         SHORE_TARG="moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}"
         break
     fi
+    # Check trunk directory
+    if [ -f "moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}/${SHORE_TARG}" ]; then
+        SHORE_TARG="moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}/${SHORE_TARG}"
+        break
+    fi
     sleep 1
     COUNT=$(($COUNT + 1))
 done
@@ -266,7 +271,7 @@ if [ ! -f "$SHORE_TARG" ]; then
     vecho "SHORE_REPO=$SHORE_REPO" 1
     vecho "SHORE_MISSION=$SHORE_MISSION" 1
     vecho "SHORE_TARG=$SHORE_TARG" 1
-    vexit "Missing shoreside targ file. Tried ${SHORE_TARG} and moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}" 6
+    vexit "Missing shoreside targ file. Tried ${SHORE_TARG} and moos-dirs/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG} and moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}/${SHORE_TARG}" 6
 else
     vecho "   shore targ $SHORE_TARG found" 1
 fi

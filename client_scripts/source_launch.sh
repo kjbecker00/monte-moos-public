@@ -135,21 +135,30 @@ LIB_DIR="${REPO_DIR}/${R_SDIR}/${LIB_SDIR}"
 MISSION_DIR="${REPO_DIR}/${R_SDIR}/${MISSION_SDIR}"
 
 if [[ ! -d "${MISSION_DIR}" ]]; then
-    vexit "Mission subdirectory ${MISSION_DIR} does exist." 5
+    MISSION_DIR2="${REPO_DIR}/${R_SDIR}/trunk/${MISSION_SDIR}"
+    if [[ ! -d "${MISSION_DIR2}" ]]; then
+        vexit "Mission subdirectory ${MISSION_DIR} does exist. ${MISSION_DIR2} was also not found" 5
+    else
+        MISSION_DIR="${MISSION_DIR2}"
+    fi
 fi
 if [[ $TO_SOURCE == "yes" ]]; then
     if [[ ! -d "${BIN_DIR}" ]]; then
-        BIN_DIR="trunk/${BIN_DIR}"
-        if [[ ! -d "${BIN_DIR}" ]]; then
-            vexit "Binary subdirectory ${BIN_DIR} does exist." 6
+        BIN_DIR2="${REPO_DIR}/${R_SDIR}/trunk/${BIN_SDIR}"
+        if [[ ! -d "${BIN_DIR2}" ]]; then
+            vexit "Binary subdirectory ${BIN_DIR} does exist. ${BIN_DIR2} was also not found" 6
+        else
+            BIN_DIR="${BIN_DIR2}"
         fi
     fi
 fi
 if [[ $TO_ADD_LIB == "yes" ]]; then
     if [[ ! -d "${LIB_DIR}" ]]; then
-        LIB_DIR="trunk/${LIB_DIR}"
-        if [[ ! -d "${LIB_DIR}" ]]; then
-            vexit "Library subdirectory ${LIB_DIR} does exist." 7
+        LIB_DIR2="${REPO_DIR}/${R_SDIR}/trunk/${LIB_SDIR}"
+        if [[ ! -d "${LIB_DIR2}" ]]; then
+            vexit "Library subdirectory ${LIB_DIR} does exist. ${LIB_DIR2} was also not found" 7
+        else
+            LIB_DIR="${LIB_DIR2}"
         fi
     fi
 fi

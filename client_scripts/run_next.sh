@@ -62,7 +62,8 @@ fi
 
 if [[ "$HOSTLESS" != "yes" ]]; then
     vecho "Getting host's repo_links..." 1
-    wget -q "https://oceanai.mit.edu/monte/clients/repo_links.txt.enc"
+
+    ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/repo_links.txt.enc"
     EXIT_CODE=$?
     wait
     if [[ $EXIT_CODE -ne 0 ]]; then
@@ -84,7 +85,7 @@ fi
 
 if [ "$HOSTLESS" = "no" ]; then
     vecho "Getting host's job queue..." 1
-    wget -q "https://oceanai.mit.edu/monte/clients/host_job_queue.txt.enc"
+    ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/host_job_queue.txt.enc"
     EXIT_CODE=$?
     wait
     if [[ "$EXIT_CODE" -ne 0 ]]; then
@@ -155,10 +156,10 @@ for ((i = 1; i <= length; i++)); do
         JOB_FILE_NAME=$(basename $JOB_FILE)
         JOB_DIR_FULL=$(dirname ${JOB_FILE})
         JOB_DIR=${JOB_DIR_FULL#*/}
-        JOB_NAME=$(echo "$JOB_DIR_FULL" | cut -d '/' -f 1)
+        KERBS=$(echo "$JOB_DIR_FULL" | cut -d '/' -f 1)
         FILE="$JOB_NAME.tar.gz.enc"
 
-        if [ -z "$JOB_NAME" ]; then
+        if [ -z "$KERBS" ]; then
             vecho "Job not in a directory. Skipping..." 1
             JOB_FILE=""
             continue
@@ -210,8 +211,8 @@ RUNS_ACT=$((RUNS_ACT + 1))
 JOB_FILE_NAME=$(basename $JOB_FILE)
 JOB_DIR_FULL=$(dirname ${JOB_FILE})
 JOB_DIR=${JOB_DIR_FULL#*/}
-JOB_NAME=$(echo "$JOB_DIR_FULL" | cut -d '/' -f 1)
-FILE="$JOB_NAME.tar.gz.enc"
+KERBS=$(echo "$JOB_DIR_FULL" | cut -d '/' -f 1)
+FILE="$KERBS.tar.gz.enc"
 
 if [ -f "$FILE" ]; then
     rm "$FILE"
@@ -219,41 +220,52 @@ fi
 
 if [ "$HOSTLESS" = "no" ]; then
     vecho "Getting job dirs..." 1
-    wget -q "https://oceanai.mit.edu/monte/clients/job_dirs/$FILE"
+    ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/job_dirs/$FILE"
     EXIT_CODE=$?
-    if [[ $EXIT_CODE -ne 0 ]]; then
-        vecho "wget https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE" 1
-        # - - - - - - - - - - - - - - - - - - - - -
-        # Network error
-        if [[ $EXIT_CODE -eq 4 ]]; then
-            echo "$txtylw      wget failed with code $EXIT_CODE. Trying to run a local copy...$txtrst"
-            if [ -f "job_dirs/$JOB_FILE" ]; then
-                vecho "Local copy found. Running..." 1
-            else
-                ./scripts/list_bad_job.sh "${JOB_FILE}"
-                vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
-            fi
-        # - - - - - - - - - - - - - - - - - - - - -
-        # Server error (no file exists on server)
-        elif [[ $EXIT_CODE -eq 8 ]]; then # no file on server
-            vecho "Job not found on server. Adding to bad_jobs.txt..." 1
-            ./scripts/list_bad_job.sh "${JOB_FILE}"
-        # - - - - - - - - - - - - - - - - - - - - -
-        # Unknown error
-        else
-            vexit "wget https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE" 1
-        fi
-    else
+    
+    # Pull from host worked
+    if [[ $EXIT_CODE -eq 0 ]]; then
         # Success, move encrypted file to job_dirs, decrypt it
         if [ ! -d "job_dirs" ]; then
             mkdir job_dirs
         fi
+        vecho "Moving $FILE to job_dirs/..." 1
         mv "$FILE" job_dirs/
+        vecho "Decrypting job_dirs/$FILE ..." 1
+        if [[ -d job_dirs/$KERBS ]]; then
+            vecho "Removing old job_dirs/$KERBS ..." 1
+            rm -rf job_dirs/$KERBS
+        fi
+        if [[ ! -f "job_dirs/$FILE" ]]; then
+            vexit "job_dirs/$FILE does not exist" 1
+        fi
         ./scripts/encrypt_file.sh "job_dirs/$FILE" >/dev/null
         EXIT_CODE=$?
         if [[ $EXIT_CODE -ne 0 ]]; then
             vexit "encrypt_file.sh failed do decrypt file job_dirs/$FILE with code $EXIT_CODE" 7
         fi
+
+        if [[ -d job_dirs/backup_$KERBS ]]; then
+            mv job_dirs/backup_$KERBS job_dirs/$KERBS 
+        fi
+        if [[ ! -d job_dirs/$KERBS ]]; then
+            vexit "after decrypting $FILE, job_dirs/$KERBS still does not exist" 1
+        fi
+
+    # Pull from host failed; network error. Use a local copy if it exists
+    elif [[ $EXIT_CODE -eq 4 ]]; then
+        vecho "./client_scripts/pull_from_host https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE. Checking for local copy..." 1
+        # - - - - - - - - - - - - - - - - - - - - -
+        # Network error
+        if [ -f "job_dirs/$JOB_FILE" ]; then
+            vecho "Local copy found. Running..." 1
+        else
+            ./scripts/list_bad_job.sh "${JOB_FILE}"
+            vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
+        fi
+    # Other failure. Exit
+    else
+        vexit "./client_scripts/pull_from_host https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE" 1
     fi
 fi
 
