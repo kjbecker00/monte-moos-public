@@ -216,7 +216,7 @@ vecho "PATH=$PATH" 3
 #  Part 6.5: Clean directory
 #-----------------------------------------------------
 cd moos-dirs/${SHORE_REPO}/${SHORE_MISSION}
-if [ -f clean.sh ]
+if [ -f clean.sh ]; then
     ./clean.sh
 fi
 cd - >&/dev/null
