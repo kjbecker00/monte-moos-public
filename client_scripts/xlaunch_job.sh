@@ -213,6 +213,16 @@ vecho "IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 2
 vecho "PATH=$PATH" 3
 
 #-----------------------------------------------------
+#  Part 6.5: Clean directory
+#-----------------------------------------------------
+cd moos-dirs/${SHORE_REPO}/${SHORE_MISSION}
+if [ -f clean.sh ]
+    ./clean.sh
+fi
+cd - >&/dev/null
+
+
+#-----------------------------------------------------
 #  Part 7: Launch shoreside
 #-----------------------------------------------------
 
