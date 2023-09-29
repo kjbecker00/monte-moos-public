@@ -358,6 +358,11 @@ while [ 1 ]; do
     elapsed_time=$(($current_time - $start_time))
     vecho "     elapsed time=$elapsed_time (timeout=$JOB_TIMEOUT)" 2
 
+
+    if [ $(( elapsed_time % 60 )) -eq 0 ]; then
+        secho "Running $JOB_FILE. $elapsed_time/$JOB_TIMEOUT seconds elapsed."
+    fi
+
     #-----------------------------------------------------
     # Update timer
     #-----------------------------------------------------
