@@ -181,7 +181,7 @@ skipline() {
             vecho "num of repo=$repo_name in .built_dirs is $display_num" 2
             if [[ ! -z "$num" || "$num" -gt 0 ]]; then
                 echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}"
-                continue
+                return 0
             fi
         fi
         # Determines if the repo is used for the job
