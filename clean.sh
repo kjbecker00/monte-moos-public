@@ -166,8 +166,7 @@ if [[ "${RESULTS}" = "yes" ]]; then
         if [ -d .deleted_results ]; then
             mv .deleted_results .deleted_results_2
         fi
-        mv results/* .deleted_results/
-        rm -rf deleted_results_2/*
+        mv results .deleted_results
     fi
 fi
 
@@ -202,7 +201,6 @@ if [[ "${JOB_DIRS}" = "yes" ]]; then
             mv .deleted_job_dirs .deleted_job_dirs_2
         fi
         mv job_dirs/* .deleted_job_dirs/
-        rm -rf job_dirs/*
     fi
 
 fi
