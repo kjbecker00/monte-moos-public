@@ -360,7 +360,7 @@ while [ 1 ]; do
 
 
     if [ $(( elapsed_time % 60 )) -eq 0 ]; then
-        secho "Running $JOB_FILE ($elapsed_time/$JOB_TIMEOUT seconds elapsed)" >&/dev/null
+        secho "Still runnig $JOB_FILE ($elapsed_time/$JOB_TIMEOUT seconds elapsed)" >&/dev/null
     fi
 
     #-----------------------------------------------------

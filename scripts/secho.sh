@@ -19,7 +19,7 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$1" ]]; then echo ${txtgry}"$ME: $2" ${txtrst}; fi; }
+vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
 wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
 vexit() {
     echo ${txtred}"$ME: Error $2. Exit Code $2" ${txtrst}
