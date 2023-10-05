@@ -183,7 +183,12 @@ fi
 #-------------------------------------------------------
 #********************************************************
 #  Runs job-specific post-processing script here:
-
+# Ensrue aloggrep is in the path (bug fix)
+if [[ -z "$(which aloggrep)" ]]; then
+    secho "Aloggrep not found. Adding moos-ivp to path"
+    PATH+=":$(pwd)/moos-dirs/moos-ivp/bin"
+    export PATH
+fi
 # Step 1: Find the post_process_results.sh script to use
 results_script_directory="job_dirs/${JOB_DIR}"
 while [[ ! -f "${results_script_directory}/post_process_results.sh" && "${results_script_directory}" != "job_dirs" ]]; do

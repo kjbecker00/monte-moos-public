@@ -25,6 +25,7 @@ def plot_csv(input_file, figname, file_type, x_header, y_headers, plot_title):
         header = next(reader)
 
     try:
+        header = [x.strip() for x in header]
         x_column = header.index(x_header)
     except ValueError:
         print(f"Error: {x_header} not found in header")
