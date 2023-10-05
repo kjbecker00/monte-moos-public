@@ -216,8 +216,8 @@ vecho "PATH=$PATH" 3
 #  Part 6.5: Clean directory
 #-----------------------------------------------------
 FULL_MISSION_DIR=moos-dirs/${SHORE_REPO}/${SHORE_MISSION}
-if [[ ! -d $FULL_MISSION_DIR ]]
-    if [[ -d moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION} ]]
+if [[ ! -d $FULL_MISSION_DIR ]]; then
+    if [[ -d moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION} ]]; then
         FULL_MISSION_DIR=moos-dirs/${SHORE_REPO}/trunk/${SHORE_MISSION}
     fi
 fi
