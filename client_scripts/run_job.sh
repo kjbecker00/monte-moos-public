@@ -88,6 +88,7 @@ done
 remove_from_var() {
     INDEX=1
     output_var=""
+    INPUT=$1+":"
     while [ 1 ]; do
         PART=$(echo $1 | cut -d : -f $INDEX)
         if [[ "${PART}" = "" ]]; then
