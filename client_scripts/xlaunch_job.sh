@@ -48,7 +48,7 @@ ctrl_c() {
 
 check_uquerydb(){
     local QUERY_MODE="a"
-
+    SHORE_TARG=$1
     if [[ "${QUERY_MODE}" = "a" ]]; then
         uQueryDB --alias="mm-query" $SHORE_TARG &>/dev/null
         EXIT_CODE=$?
@@ -333,7 +333,7 @@ while [ 1 ]; do
     else
         if [[ $valid_uquerydb = "yes" ]]; then
             vecho "uQueryDB $SHORE_TARG " 2
-            check_uquerydb #pulls shore_targ from this scope
+            uQueryDB $SHORE_TARG &>/dev/null
             QUERY=$?
             vecho "output of query: $QUERY" 2
 

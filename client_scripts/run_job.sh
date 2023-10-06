@@ -90,7 +90,7 @@ remove_from_var() {
     output_var=""
     INPUT=$1+":"
     while [ 1 ]; do
-        PART=$(echo $1 | cut -d : -f $INDEX)
+        PART=$(echo $INPUT | cut -d : -f $INDEX)
         if [[ "${PART}" = "" ]]; then
             break
         elif [[ "${PART}" =~ "$2" ]]; then
