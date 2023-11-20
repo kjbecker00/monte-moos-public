@@ -8,6 +8,7 @@ bad_jobs.txt
 nohup.out
 # Temporary dirs
 results/*
+compiled_results/*
 force_quit
 .deleted_*
 .deleted_*

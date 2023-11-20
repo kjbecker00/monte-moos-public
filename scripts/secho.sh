@@ -84,20 +84,25 @@ echo "$TO_PRINT"
 
 
 TO_ADD="$TO_PRINT ($(date))"
-KEPT_LINES=$(head -n $LINES_TO_KEEP status.txt)
-
-
-# Remove the most recent line if it is almost the same as the new line. Just update the time
-recent_line=$(head -n 1 status.txt)
-recent_subline="${recent_line%%(*}" # remove everything after the first (
-new_subline="${TO_ADD%%(*}" # remove everything after the first (
-if [[ $new_subline == $recent_subline ]]; then
-    # If the last line is the same as the new line, then we replace it
-    vecho "Same as last line" 1
-    KEPT_LINES=$(tail -n +2 status.txt)
+if [ -f status.txt ]; then
+    KEPT_LINES=$(head -n $LINES_TO_KEEP status.txt)
+    # Remove the most recent line if it is almost the same as the new line. Just update the time
+    recent_line=$(head -n 1 status.txt)
+    recent_subline="${recent_line%%(*}" # remove everything after the first (
+    new_subline="${TO_ADD%%(*}" # remove everything after the first (
+    if [[ $new_subline == $recent_subline ]]; then
+        # If the last line is the same as the new line, then we replace it
+        vecho "Same as last line" 1
+        KEPT_LINES=$(tail -n +2 status.txt)
+    else
+        echo "$TO_ADD" >> status.tmp
+    fi
 else
-    echo "$TO_ADD" >> status.tmp
+    KEPT_LINES=""
 fi
+
+
+
 
 echo "$TO_ADD" > status.tmp
 echo "$KEPT_LINES" >> status.tmp
