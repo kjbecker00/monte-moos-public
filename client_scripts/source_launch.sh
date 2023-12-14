@@ -77,19 +77,19 @@ for ARGI; do
         echo "  --verbose, -v        Set verbosity=1                 "
         echo " All other arguments will flow down to the launch script"
         exit 0
-    elif [[ "${ARGI}" =~ "--script=" ]]; then
+    elif [[ "${ARGI}" == "--script="* ]]; then
         SCRIPTNAME="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--repo=" ]]; then
+    elif [[ "${ARGI}" == "--repo="* ]]; then
         R_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--repodir=" ]]; then
+    elif [[ "${ARGI}" == "--repodir="* ]]; then
         REPO_DIR="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--mission=" ]]; then
+    elif [[ "${ARGI}" == "--mission="* ]]; then
         MISSION_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--bindir=" ]]; then
+    elif [[ "${ARGI}" == "--bindir="* ]]; then
         BIN_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--libdir=" ]]; then
+    elif [[ "${ARGI}" == "--libdir="* ]]; then
         LIB_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else

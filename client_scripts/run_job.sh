@@ -60,13 +60,15 @@ for ARGI; do
         echo " --hostless, -nh run everything without the host              "
         echo "    Set verbosity                                     "
         safe_exit 0
-    elif [[ "${ARGI}" =~ "--job_file=" ]]; then
+    elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
+    elif [[ "${ARGI}" == "--job_args="* ]]; then
+        JOB_ARGS="${ARGI#*=}"
     elif [[ "${ARGI}" = "--test" || "${ARGI}" = "-t" ]]; then
         TEST="yes"
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
         HOSTLESS="yes"
-    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -75,6 +77,8 @@ for ARGI; do
     else
         # Job file provided without the flag
         # Assumed running as test
+        # TODO: Figure out how to add job_args to this
+        # Also include this in the tutorial
         if [ -z $JOB_FILE ]; then
             TEST="yes"
             JOB_FILE=$ARGI
@@ -153,11 +157,11 @@ fi
 #  Part 3a: Check job file
 echo -n "[1] Checking job file..."
 if [ "$HOSTLESS" = "yes" ] || [ "$TEST" = "yes" ]; then
-    vecho "./check_job.sh  --job_file=$JOB_FILE" 1
-    ./check_job.sh --job_file=$JOB_FILE
+    vecho "./scripts/check_job.sh  --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\"" 1
+    ./scripts/check_job.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS"
 else
-    vecho "./check_job.sh  --job_file=$JOB_FILE --client" 1
-    ./check_job.sh --job_file=$JOB_FILE --client
+    vecho "./scripts/check_job.sh  --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\" --client" 1
+    ./scripts/check_job.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS" --client
 fi
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
@@ -168,25 +172,25 @@ fi
 #  Part 3b: Update the moos directories
 echo "[2] Updating dirs from job file... "
 secho "Updating_dirs from $JOB_FILE"
-vecho "./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j2" 1
-./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j2
+vecho "./client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\" -j2" 1
+./client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS" -j2
 if [ $? -ne 0 ]; then
-    vexit "updating dirs mentioned in job using: ./client_scripts/update_dirs.sh --job_file=$JOB_FILE -j2" 3
+    vexit "updating dirs mentioned in job using: ./client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\" -j2" 3
 fi
 echo $txtgrn"      Done updating dirs" $txtrst
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 3c: Run the job file
-vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE" 1
+vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\"" 1
 echo "[3] Running job from file..."
-secho "Running job $JOB_FILE"
-./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE
+secho "Running job $JOB_FILE $JOB_ARGS"
+./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS"
 EXIT_CODE=$?
 if [[ $EXIT_CODE -eq 2 ]]; then
     echo "Mission timed out. Extracting results anyway..."
 else
     if [ $EXIT_CODE -ne 0 ]; then
-        vexit "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE exited with exit code: $EXIT_CODE" 5
+        vexit "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\" exited with exit code: $EXIT_CODE" 5
     fi
 fi
 echo $txtgrn"      finished running job" $txtrst
@@ -198,7 +202,7 @@ if [ "$TEST" = "yes" ]; then
     echo "---------------------- TEST MODE ----------------------"
     echo "Skipping post-processing and sending results script."
     echo "Test your post-processing script using the following command: "
-    echo $(tput smul)${txtblu}"./client_scripts/extract_results.sh $JOB_FILE"$txtrst
+    echo $(tput smul)${txtblu}"./client_scripts/extract_results.sh $JOB_FILE --job_args=\"$JOB_ARGS\""$txtrst
     # echo "$(tput bold)Be sure to run $(tput smul)${txtblu}clean.sh${txtrst} $(tput bold)before trying to run again!"
     safe_exit 0
 fi
@@ -208,13 +212,13 @@ fi
 secho "Extracting results from $JOB_FILE"
 if [ "$HOSTLESS" = "yes" ]; then
     vecho "./client_scripts/extract_results.sh -no --job_file=$JOB_FILE" 1
-    ./client_scripts/extract_results.sh -no --job_file=$JOB_FILE
+    ./client_scripts/extract_results.sh -no --job_file=$JOB_FILE  --job_args="$JOB_ARGS"
 else
     vecho "./client_scripts/extract_results.sh --job_file=$JOB_FILE" 1
-    ./client_scripts/extract_results.sh --job_file=$JOB_FILE
+    ./client_scripts/extract_results.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS"
 fi
 if [ $? -ne 0 ]; then
-    vexit "error extracting the results. Recieved exit code $? with ./client_scripts/extract_results.sh -v=$VERBOSE --job_file=$JOB_FILE" 6
+    vexit "error extracting the results. Recieved exit code $? with ./client_scripts/extract_results.sh -v=$VERBOSE --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\"" 6
 fi
 
 echo $txtgrn"      Results extracted" $txtrst

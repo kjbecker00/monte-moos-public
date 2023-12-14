@@ -29,7 +29,7 @@ for ARGI; do
         # echo " --input=       file or dir to be encrypted "
         echo " --output=       "
         exit 0
-    elif [[ "${ARGI}" =~ "--output=" ]]; then
+    elif [[ "${ARGI}" == "--output="* ]]; then
         OUTPUT="${ARGI#*=}"
     else
         INPUT="${ARGI}"

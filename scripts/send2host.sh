@@ -3,7 +3,7 @@
 
 # Script used to publish files to the host
 ME=$(basename "$0")
-VERBOSE=0
+VERBOSE=1
 
 LOCAL_PATH=""
 HOST_PATH=""
@@ -17,13 +17,14 @@ txtblu=$(tput setaf 4) # Blue
 txtgry=$(tput setaf 8) # Grey                     
 txtbld=$(tput bold)    # Bold                             
 # vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi }
+vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
 vexit() { echo $txtred"$ME: Error $1. Exit Code $2" $txtrst; exit "$2" ; }
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
 #-------------------------------------------------------
 for ARGI; do
+    echo "ARGI: $ARGI"
     ALL_ARGS+=$ARGI" "
     if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
         echo "$ME.sh local_dir host_dir [OPTIONS]"
@@ -34,7 +35,7 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         exit 0;
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" == "--verbose"* || "${ARGI}" == "-v"* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else

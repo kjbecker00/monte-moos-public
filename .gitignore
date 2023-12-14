@@ -1,5 +1,6 @@
 # Temporary files
-host_job_queue.txt
+*_job_queue.txt
+*.tmp
 .built_dirs
 .DS_Store
 .extracted_files

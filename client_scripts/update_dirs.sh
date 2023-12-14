@@ -50,11 +50,13 @@ for ARGI; do
         echo " --all, -a      update everything it has a repo_links.txt for"
         echo " All other arguments will flow down to the build script (e.g. -j8 for 8 cores)"
         exit 0
-    elif [[ "${ARGI}" =~ "--job_file=" ]]; then
+    elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
+    elif [[ "${ARGI}" == "--job_args="* ]]; then
+        JOB_ARGS="${ARGI#*=}"
     elif [ "${ARGI}" = "--all" -o "${ARGI}" = "-a" ]; then
         ALL="yes"
-    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -71,7 +73,7 @@ done
 if [ $ALL = "yes" ]; then
     echo $txtblu $(tput bold) "Updating all repos in $repo_links" $txtrst
 else
-    . "$JOB_FILE"
+    . "$JOB_FILE" $JOB_ARGS
 fi
 if [ ! -d moos-dirs ]; then
     mkdir moos-dirs
@@ -89,16 +91,16 @@ is_in_job() {
     if [[ "$SHORE_REPO" == "$this_repo_name" ]]; then
         vecho "$this_repo_name in SHORE_REPO" 3
         return 0
-    elif [[ "${VEHICLE_REPOS[@]}" =~ "$this_repo_name" ]]; then
+    elif [[ "${VEHICLE_REPOS[@]}" == "$this_repo_name"* ]]; then
         vecho "$this_repo_name in VEHICLE_REPOS" 3
         return 0
-    elif [[ "${EXTRA_REPOS[@]}" =~ "$this_repo_name" ]]; then
+    elif [[ "${EXTRA_REPOS[@]}" == "$this_repo_name"* ]]; then
         vecho "$this_repo_name in EXTRA_REPOS" 3
         return 0
-    elif [[ "${EXTRA_LIB_REPOS[@]}" =~ "$this_repo_name" ]]; then
+    elif [[ "${EXTRA_LIB_REPOS[@]}" == "$this_repo_name"* ]]; then
         vecho "$this_repo_name in EXTRA_LIB_REPOS" 3
         return 0
-    elif [[ "${EXTRA_BIN_REPOS[@]}" =~ "$this_repo_name" ]]; then
+    elif [[ "${EXTRA_BIN_REPOS[@]}" == "$this_repo_name"* ]]; then
         vecho "$this_repo_name in EXTRA_BIN_REPOS" 3
         return 0
     fi

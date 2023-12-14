@@ -40,7 +40,7 @@ for ARGI; do
         exit 0;
     elif [[ "${ARGI}" = "--delete" || "${ARGI}" = "-d" ]]; then
         DELETE="yes"
-    elif [[ "${ARGI}" =~ "--verbose" || "${ARGI}" =~ "-v" ]]; then
+    elif [[ "${ARGI}" == "--verbose"* || "${ARGI}" == "-v"* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else

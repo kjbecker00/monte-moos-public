@@ -33,8 +33,10 @@ for ARGI; do
         echo " --job_file=[FILE]    job file to be run"
         echo " --client, -c         check as a client (check ssh-agent)"
         exit 0
-    elif [[ "${ARGI}" =~ "--job_file=" ]]; then
+    elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
+    elif [[ "${ARGI}" == "--job_args="* ]]; then
+        JOB_ARGS="${ARGI#*=}"
     elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
         VERBOSE=1
     elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
@@ -49,7 +51,7 @@ for ARGI; do
             fi
             JOB_FILE=$ARGI
         else
-            vexit "Bad Arg: $ARGI " 1
+            vexit "$ME.sh: Bad Arg: $ARGI " 1
         fi
     fi
 done
@@ -64,7 +66,9 @@ else
 fi
 
 vecho "Attempting to source job file" 1
-. "$JOB_FILE"
+vecho "Job file = $JOB_FILE" 1
+vecho "Job args = $JOB_ARGS" 1
+. "$JOB_FILE" $JOB_ARGS
 if [[ $? -ne 0 ]]; then
     vexit "Sourcing job file yeilded non-zero exit code" 4
 fi
@@ -101,6 +105,7 @@ vecho "Shoreside variables set" 1
 #-------------------------------------------------------
 #  Part 4: Check that there is a job timeout
 #-------------------------------------------------------
+[[ ! -z "$JOB_TIMEOUT" ]] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not set" 12; }
 [ "$JOB_TIMEOUT" -gt 1 ] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not greater than one" 12; }
 vecho "JOB_TIMEOUT set" 1
 
@@ -131,7 +136,11 @@ fi
 #-------------------------------------------------------
 echo $txtrst $txtgrn "Job file is good" $txtrst
 if [ $TEST = "yes" ]; then
-    vecho "${txtrst}Now try running the job with: $(tput smul)${txtblu}./client_scripts/run_job.sh ${JOB_FILE}${txtrst} " 0
+    if [[ $JOB_ARGS == "" ]]; then
+        vecho "${txtrst}Now try running the job with: $(tput smul)${txtblu}./client_scripts/run_job.sh ${JOB_FILE} ${txtrst} " 0
+    else
+        vecho "${txtrst}Now try running the job with: $(tput smul)${txtblu}./client_scripts/run_job.sh ${JOB_FILE} --job_args=\"$JOB_ARGS\"${txtrst} " 0
+    fi
 fi
 
 exit 0

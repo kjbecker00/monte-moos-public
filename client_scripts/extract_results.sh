@@ -5,7 +5,7 @@
 ME=$(basename "$0")
 TEST="no"
 OFFLOAD="yes"
-VERBOSE=0
+VERBOSE=5
 RSYNC_TIMEOUT=120
 txtrst=$(tput sgr0)    # Reset
 txtred=$(tput setaf 1) # Red
@@ -42,13 +42,15 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         exit 0
-    elif [[ "${ARGI}" =~ "--job_file=" ]]; then
+    elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
+    elif [[ "${ARGI}" == "--job_args="* ]]; then
+        JOB_ARGS="${ARGI#*=}"
     elif [[ "${ARGI}" = "--test" || "${ARGI}" = "-t" ]]; then
         TEST="yes"
     elif [[ "${ARGI}" = "--noffload" || "${ARGI}" = "-no" ]]; then
         OFFLOAD="no"
-    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -80,7 +82,7 @@ fi
 if [ ! -f $JOB_FILE ]; then
     vexit "No job file found. Use -h or --help for help with this script" 1
 fi
-. "$JOB_FILE"
+. "$JOB_FILE" $JOB_ARGS
 if [[ $? -ne 0 ]]; then
     vexit "Sourcing job file yeilded non-zero exit code" 4
 fi
@@ -177,6 +179,9 @@ if [[ ! -d $LOCAL_JOB_RESULTS_DIR ]]; then
     mkdir -p $LOCAL_JOB_RESULTS_DIR
 fi
 
+# Writes to an argfile, which saves the job name job args
+echo "$JOB_FILE $JOB_ARGS" >> $LOCAL_JOB_RESULTS_DIR/.argfile
+
 #-------------------------------------------------------
 #  Part 4: Run post-processing script specific
 #          to the job_dir
@@ -203,8 +208,15 @@ chmod +x ${results_script_directory}/post_process_results.sh
 
 # Step 3: Execute the script
 vecho "$(tput bold)${txtylw}Using the script: $(tput smul)${results_script_directory}/post_process_results.sh Ensure this is the correct script" 1
-vecho "Running with these flags: $(tput smul)${results_script_directory}/post_process_results.sh --job_file=$JOB_FILE --local_results_dir=$LOCAL_JOB_RESULTS_DIR" 1
-./${results_script_directory}/post_process_results.sh --job_file="$JOB_FILE" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
+if [[ $JOB_ARGS == "" ]]; then
+    vecho "Running with these flags: $(tput smul)${results_script_directory}/post_process_results.sh --job_file=$JOB_FILE --local_results_dir=$LOCAL_JOB_RESULTS_DIR" 1
+    ./${results_script_directory}/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
+else
+    vecho "Running with these flags: $(tput smul)${results_script_directory}/post_process_results.sh --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\" --local_results_dir=$LOCAL_JOB_RESULTS_DIR" 1
+    ./${results_script_directory}/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
+fi
+
+
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
     vexit "job_dirs/${JOB_DIR}/post_process_results.sh --job_file=\"$JOB_FILE\" --local_results_dir=\"$LOCAL_JOB_RESULTS_DIR\" exited with code: $EXIT_CODE " 2
@@ -232,10 +244,9 @@ fi
 #  Part 5: Send results to host, if desired
 if [[ $OFFLOAD != "no" ]]; then
     vecho "Part 5: Offloading results" 1
-
     ./scripts/send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR
-    [ $? -eq 0 ] || { vexit "send2host.sh failed with exit code $?" 3; }
-    
+    [ $? -eq 0 ] || { vexit "send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR failed with exit code $?" 3; }
+    rm -rf $LOCAL_JOB_RESULTS_DIR
 else
     vecho "Not offloading results" 1
 fi

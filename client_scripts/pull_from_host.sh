@@ -16,7 +16,7 @@ txtbld=$(tput bold)    # Bold
 # vecho "message" level_int
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
 vexit() {
-    ./scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 $txtrst"
+    ./scripts/secho.sh "${txtred}$ME: Error: $1. Exit Code $2 $txtrst"
     exit "$2"
 }
 
@@ -34,7 +34,7 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         exit 0
-    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -53,6 +53,8 @@ if [ -z $LINK_TO_FILE ]; then
     vexit "No file specified" 1
 fi
 
+vecho "Pulling file from host: $LINK_TO_FILE" 1
+
 
 #-------------------------------------------------------
 #  Part 2: Pull the file from the host
@@ -61,26 +63,22 @@ wget -q "$LINK_TO_FILE"
 EXIT_CODE=$?
 # Check for errors, print them out
 if [[ $EXIT_CODE -ne 0 ]]; then
-    vecho "wget $LINK_TO_FILE failed with code $EXIT_CODE" 1
+    vecho "wget $LINK_TO_FILE failed with code $EXIT_CODE" 2
+
     # - - - - - - - - - - - - - - - - - - - - -
     # Network error
     if [[ $EXIT_CODE -eq 4 ]]; then
         vexit "Network error. Check your connection." 4
-        if [ -f "job_dirs/$JOB_FILE" ]; then
-            vecho "Local copy found. Running..." 1
-        else
-            ./scripts/list_bad_job.sh "${JOB_FILE}"
-            vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
-        fi
+
     # - - - - - - - - - - - - - - - - - - - - -
     # Server error (no file exists on server)
     elif [[ $EXIT_CODE -eq 8 ]]; then # no file on server
-        vecho "Job not found on server. Adding to bad_jobs.txt..." 1
+        vexit "File not found on server" 1
         ./scripts/list_bad_job.sh "${JOB_FILE}"
     # - - - - - - - - - - - - - - - - - - - - -
     # Unknown error
     else
-        vexit "wget https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE" 1
+        vexit "wget https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE" 2
     fi
 else
     # No errors

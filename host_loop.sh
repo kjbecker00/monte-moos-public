@@ -104,11 +104,12 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_job_dirs.sh returned exit code: $EXIT_CODE" 2; }
     check_quit
 
-    secho "Updating repo links"
-    ./host_scripts/update_repo_links.sh
-    EXIT_CODE=$?
-    [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_repo_links.sh returned exit code: $EXIT_CODE" 2; }
-    check_quit
+
+    # secho "Updating repo links"
+    # ./host_scripts/update_repo_links.sh
+    # EXIT_CODE=$?
+    # [ $EXIT_CODE -eq 0 ] || { vexit "running ./host_scripts/update_repo_links.sh returned exit code: $EXIT_CODE" 2; }
+    # check_quit
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #  Part 3c: If it will do another loop, wait a bit

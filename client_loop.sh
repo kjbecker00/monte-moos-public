@@ -50,7 +50,7 @@ for ARGI; do
         echo "            when there are no more jobs"
         echo "            remaining in the queue     "
         exit 0
-    elif [[ "${ARGI}" =~ "--job_file=" ]]; then
+    elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
         HOSTLESS="yes"

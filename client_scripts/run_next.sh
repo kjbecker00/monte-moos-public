@@ -1,6 +1,7 @@
 #!/bin/bash
 # Kevin Becker Jun 9 2023
-QUEUE_FILE="host_job_queue.txt"
+
+
 HOSTLESS="no"
 TO_UPDATE="no"
 ALL_JOBS_OK="yes"
@@ -55,23 +56,6 @@ if [[ "$TO_UPDATE" == "yes" ]]; then
     if [ -f "bad_jobs.txt" ]; then
         ./scripts/list_bad_job.sh -d
     fi
-    if [ -f repo_links.txt.enc ]; then
-        rm repo_links.txt.enc
-    fi
-fi
-
-if [[ "$HOSTLESS" != "yes" ]]; then
-    vecho "Getting host's repo_links..." 1
-
-    ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/repo_links.txt.enc"
-    EXIT_CODE=$?
-    wait
-    if [[ $EXIT_CODE -ne 0 ]]; then
-        echo "$txtylw      wget failed with code $EXIT_CODE. Continuing with local repo_links.txt ...$txtrst"
-    else
-        ./scripts/encrypt_file.sh repo_links.txt.enc >/dev/null
-        [ "$?" -eq 0 ] || { vexit "encrypt_file.sh failed do decrypt file repo_links.txt.enc with code $EXIT_CODE" 4; }
-    fi
 fi
 
 echo $(tput bold)"-------------------------------------------------------" $txtrst
@@ -79,125 +63,36 @@ echo $(tput bold)"-------------------------------------------------------" $txtr
 #-------------------------------------------------------
 #  Part 2: Get the host's job queue files and decrypts them
 #-------------------------------------------------------
-if [ -f host_job_queue.txt.enc ]; then
-    rm host_job_queue.txt.enc
-fi
-
-if [ "$HOSTLESS" = "no" ]; then
-    vecho "Getting host's job queue..." 1
-    ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/host_job_queue.txt.enc"
-    EXIT_CODE=$?
-    wait
-    if [[ "$EXIT_CODE" -ne 0 ]]; then
-        echo "$txtylw      wget failed with code $EXIT_CODE. Continuing with local repo_links.txt ...$txtrst"
-    elif [[ ! -f "host_job_queue.txt.enc" ]]; then
-        echo "$txtylw      file host_job_queue.txt.enc not found, but wget had no error? Continuing with local repo_links.txt ...$txtrst"
-    else
-        ./scripts/encrypt_file.sh host_job_queue.txt.enc >/dev/null
-        EXIT_CODE=$?
-        if [[ "$EXIT_CODE" -ne 0 ]]; then
-            vexit "encrypt_file.sh failed do decrypt file host_job_queue.txt.enc with code $EXIT_CODE" 5
-        fi
-    fi
+if [[ "$HOSTLESS" == "yes" ]]; then
+    QUEUE_FILE=$(./client_scripts/select_queue_file.sh -nh)
 else
-    if [ ! -f "host_job_queue.txt" ]; then
-        vexit "could not find host_job_queue.txt" 6
-    fi
+    QUEUE_FILE=$(./client_scripts/select_queue_file.sh)
 fi
+[[ $? -eq 0 ]] || { vexit "unable to pull a queue file from host. Exiting..." 8 ; }
+        
 
 #-------------------------------------------------------
 #  Part 3: Determine which job to run
 #-------------------------------------------------------
-# add newline if not present at end of file
-[ "$(tail -c1 "$QUEUE_FILE")" ] && echo >>"$QUEUE_FILE"
 
-# get length of queue (number of jobs)
-length=$(wc -l "$QUEUE_FILE" | awk '{print $1}')
-for ((i = 1; i <= length; i++)); do
-    # select ith line from the queue
-    line=$(awk -v n=$i 'NR == n {print; exit}' "$QUEUE_FILE")
-    if [[ -z $line ]]; then
-        vecho "Line was empty. Continuing..." 5
-        continue
-    fi
+output=$(./client_scripts/select_job.sh --queue_file="$QUEUE_FILE")
+EXIT_CODE=$?
+# Check the queue by observing the exit code
 
-    # Skips over commented out lines (start with #)
-    if [[ $line == \#* ]]; then
-        vecho "Skipping comment..." 5
-        continue
-    fi
+# 1: no jobs left
+[[ $EXIT_CODE -ne 1 ]] || { vexit "No jobs left to run. Exiting..." 1; }
+# 2: no jobs left, but still has bad jobs
+[[ $EXIT_CODE -ne 2 ]] || { vexit "No jobs left to run, but has bad jobs. Exiting..." 1; }
+# not zero: bad
+[[ $EXIT_CODE -eq 0 ]] || { vexit "running ./client_scripts/select_job.sh returned exit code: $EXIT_CODE" 9; }
 
-    # check number of runs left for that job
-    linearray=($line)
-    JOB_FILE=${linearray[0]}
-    RUNS_DES=${linearray[1]}
-    RUNS_ACT=${linearray[2]}
-    RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
+vecho "queue line: $output" 5
+JOB_FILE=$(./scripts/read_queue.sh -l="$output"  -jf)
+JOB_ARGS=$(./scripts/read_queue.sh -l="$output"  -ja)
+RUNS_DES=$(./scripts/read_queue.sh -l="$output"  -rd)
+RUNS_ACT=$(./scripts/read_queue.sh -l="$output"  -ra)
+RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
 
-    # filters out known bad jobs
-    if [ -f "bad_jobs.txt" ]; then
-        # Checks if the JOB_FILE is in bad_jobs.txt
-        if grep -Fxq "$JOB_FILE" "bad_jobs.txt"; then
-            ALL_JOBS_OK="no"
-            vecho "Skipping bad job $JOB_FILE ..." 1
-            JOB_FILE=""
-            continue
-        else
-            vecho "Job file is good: $JOB_FILE ..." 1
-        fi
-    else
-        vecho "No bad_jobs.txt file" 1
-    fi
-
-    # checks if it has runs left
-    if [[ $RUNS_LEFT -gt 0 ]]; then
-
-        # check that it is in a directory
-        JOB_FILE_NAME=$(basename $JOB_FILE)
-        JOB_DIR_FULL=$(dirname ${JOB_FILE})
-        JOB_DIR=${JOB_DIR_FULL#*/}
-        KERBS=$(echo "$JOB_DIR_FULL" | cut -d '/' -f 1)
-        FILE="$JOB_NAME.tar.gz.enc"
-
-        if [ -z "$KERBS" ]; then
-            vecho "Job not in a directory. Skipping..." 1
-            JOB_FILE=""
-            continue
-        fi
-
-        GOOD_JOB_FILE=$JOB_FILE
-        GOOD_RUNS_DES=$RUNS_DES
-        GOOD_RUNS_ACT=$RUNS_ACT
-        GOOD_RUNS_LEFT=$RUNS_LEFT
-        probability_skip=75
-        RANDOM=$(date '+%N')
-        random_number=$((RANDOM % 100))
-        # Randomly selects this job. Or tries the next one
-        if ((random_number > probability_skip)); then
-            break # takes the job
-        else
-            vecho "Randomly skipping job..." 1
-        fi
-    # No runs left
-    else
-        JOB_FILE=""
-    fi
-done
-
-# Un-cacheing the last known usable job
-JOB_FILE=$GOOD_JOB_FILE
-RUNS_LEFT=$GOOD_RUNS_LEFT
-RUNS_ACT=$GOOD_RUNS_ACT
-RUNS_DES=$GOOD_RUNS_DES
-
-# Ensures a job has been chosen
-if [[ -z $JOB_FILE ]]; then
-    vecho "No jobs left to run. Exiting..." 1
-    if [ "$ALL_JOBS_OK" == "no" ]; then
-        vexit "Finished all ok jobs, but some were bad. Fix jobs in bad_jobs.txt and rerun" 1
-    fi
-    exit 1
-fi
 
 # Notifies user, updates numbers for local copy of queue
 echo $(tput bold)"Running Job $JOB_FILE ($RUNS_LEFT runs left)" $txtrst
@@ -220,6 +115,7 @@ fi
 
 if [ "$HOSTLESS" = "no" ]; then
     vecho "Getting job dirs..." 1
+    vecho "./client_scripts/pull_from_host.sh \"https://oceanai.mit.edu/monte/clients/job_dirs/$FILE\"" 2
     ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/job_dirs/$FILE"
     EXIT_CODE=$?
     
@@ -272,12 +168,15 @@ fi
 #-------------------------------------------------------
 #  Part 5: Run it!
 #-------------------------------------------------------
-
 if [ "$HOSTLESS" = "yes" ]; then
-    ./client_scripts/run_job.sh --job_file="$JOB_FILE" -nh
+    vecho "./client_scripts/run_job.sh --job_file=\"$JOB_FILE\" --job_args=\"$JOB_ARGS\" -nh" 1
+    ./client_scripts/run_job.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" -nh
 else
-    ./client_scripts/run_job.sh --job_file="$JOB_FILE"
+    vecho "./client_scripts/run_job.sh --job_file=\"$JOB_FILE\" --job_args=\"$JOB_ARGS\"" 1
+    ./client_scripts/run_job.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS"
 fi
+
+
 EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
     # checks if the job was stopped by ctrl-c
@@ -291,11 +190,10 @@ fi
 # update the queue file (helpful if trying to run w/o a host)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    sed -i '' "s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
-    # sed -i '' 's@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@' "$QUEUE_FILE"
+    sed -i '' "s@^$JOB_FILE $JOB_ARGS.*@$JOB_FILE $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
 else
     # Linux
-    sed -i "s@^$JOB_FILE.*@$JOB_FILE $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
+    sed -i "s@^$JOB_FILE $JOB_ARGS.*@$JOB_FILE $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$QUEUE_FILE"
 fi
 
 exit 0

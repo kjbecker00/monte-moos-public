@@ -71,11 +71,13 @@ for ARGI; do
         echo "  --verbose=, -v=      Set verbosity                 "
         echo "  --verbose, -v        Set verbosity=1                 "
         safe_exit 0
-    elif [[ "${ARGI}" =~ "--job_file=" ]]; then
+    elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
+    elif [[ "${ARGI}" == "--job_args="* ]]; then
+        JOB_ARGS="${ARGI#*=}"
     elif [ "${ARGI}" = "--quiet" -o "${ARGI}" = "-q" ]; then
         QUIET="yes"
-    elif [[ "${ARGI}" =~ "--verbose=" || "${ARGI}" =~ "-v=" ]]; then
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
         else
@@ -96,7 +98,7 @@ if [ ! -f $JOB_FILE ]; then
     vexit "job file $JOB_FILE not found" 1
 fi
 
-. "$JOB_FILE"
+. "$JOB_FILE" $JOB_ARGS
 if [[ $? -ne 0 ]]; then
     vexit "Sourcing job file yeilded non-zero exit code" 4
 fi
