@@ -156,7 +156,8 @@ find . -name '*.enc.2' -exec rm -rf {} \; 2>/dev/null
 rm -f .old_*_job_queue.txt
 rm -f .temp_queue.txt
 
-[[ -d results ]] && { find results -type d -delete; }
+# Remove empty results folders
+[[ -d results ]] && { find results -type d -delete ; }
 
 #-------------------------------------------------------
 # Part 5: Clean all results folders

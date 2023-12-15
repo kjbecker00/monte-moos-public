@@ -7,7 +7,7 @@ HOST_QUEUE_FILE="host_job_queue.txt"
 MY_QUEUE_FILE="${MYNAME}_job_queue.txt"
 QUEUE_FILE=""
 HOSTLESS="no"
-
+ME=$(basename "$0")
 txtrst=$(tput sgr0)    # Reset
 txtred=$(tput setaf 1) # Red
 txtgrn=$(tput setaf 2) # Green
@@ -54,27 +54,31 @@ if [[ "$HOSTLESS" == "yes" ]]; then
     exit 1 # should never get here, but as a backup
 fi
 
-# Looking at host's files
+# Remove old encrypted versions (prevents bugs)
 rm "${MY_QUEUE_FILE}.enc" 2> /dev/null
 rm "${HOST_QUEUE_FILE}.enc" 2> /dev/null
 
 INCOMING_FILE="${MY_QUEUE_FILE}"
 
+# Attempts to pull one of two files from the host
 ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/${MY_QUEUE_FILE}.enc" >/dev/null
 if [[ $? -eq 0 ]]; then
     INCOMING_FILE="${MY_QUEUE_FILE}"
 else 
     ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/${HOST_QUEUE_FILE}.enc"  >/dev/null 
-    [[ $? -eq 0 ]] || { vexit "unable to pull $MY_QUEUE_FILE or $HOST_QUEUE_FILE from host" ; }
+    [[ $? -eq 0 ]] || { vexit "unable to pull $MY_QUEUE_FILE or $HOST_QUEUE_FILE from host" 5 ; }
     INCOMING_FILE="${HOST_QUEUE_FILE}"
 fi
 
+# Ensure there was a prior version of the INCOMING_FILE
+[[ ! -f "${INCOMING_FILE}" ]] && { touch "${INCOMING_FILE}" ; }
 mv "${INCOMING_FILE}" ".old_${INCOMING_FILE}" 2> /dev/null
 ./scripts/encrypt_file.sh ${INCOMING_FILE}.enc >/dev/null   
 cat ".old_${INCOMING_FILE}" >> $INCOMING_FILE
-./scripts/merge_queue.sh --output=.temp_queue.txt --first_desired $INCOMING_FILE >/dev/null
-mv ".temp_queue.txt" "${INCOMING_FILE}" 2> /dev/null
 rm ".old_${INCOMING_FILE}" 2> /dev/null
+./scripts/merge_queue.sh --output=.temp_queue.txt --first_desired $INCOMING_FILE >/dev/null
+rm "${INCOMING_FILE}" 2> /dev/null
+mv ".temp_queue.txt" "${INCOMING_FILE}" 2> /dev/null
 echo "$INCOMING_FILE" 
 exit 0
     

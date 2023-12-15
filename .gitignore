@@ -14,6 +14,7 @@ force_quit
 .deleted_*
 .deleted_*
 *.tmp
+backup_job_dirs/*
 
 # Private files
 .password

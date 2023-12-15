@@ -165,10 +165,17 @@ while read line; do
         fi
     done < $INPUT_FILE
 
-    # Append line to output file
-    output_line="$job_name $job_args $total_rd $total_ra"
-    vecho "output_line = $output_line" 5
-    echo "$output_line" >> $OUTPUT_FILENAME
+    # Once the client's runs reach runs_desired, it will remove the line
+    # from the file. That way, if the host increases the number of desired_runs,
+    # the number of completed_runs will get reset and
+    # the host will add it back to the client's queue
+    if [[ $total_rd -ge $total_ra ]]; then
+        output_line="$job_name $job_args $total_rd $total_ra"
+        vecho "output_line = $output_line" 5
+        echo "$output_line" >> $OUTPUT_FILENAME
+    else
+        vecho "not adding $job_name $job_args since runs_desired=runs_act" 5
+    fi
     
 done < $INPUT_FILE
 
