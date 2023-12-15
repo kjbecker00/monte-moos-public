@@ -2,7 +2,7 @@
 # Kevin Becker Nov 17 2023
 
 MYNAME=$(cat myname.txt)
-
+VERBOSE=0
 HOST_QUEUE_FILE="host_job_queue.txt"
 MY_QUEUE_FILE="${MYNAME}_job_queue.txt"
 QUEUE_FILE=""
@@ -35,6 +35,12 @@ for ARGI; do
         exit 0
     elif [ "${ARGI}" = "-nh" -o "${ARGI}" = "--nohost" ]; then
         HOSTLESS="yes"
+    elif [[ "${ARGI}" = "--verbose"* || "${ARGI}" = "-v"* ]]; then
+        if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
+            VERBOSE=1
+        else
+            VERBOSE="${ARGI#*=}"
+        fi
     else
         vexit "Bad Arg: $ARGI " 3
     fi
@@ -70,16 +76,16 @@ else
     INCOMING_FILE="${HOST_QUEUE_FILE}"
 fi
 
-# Ensure there was a prior version of the INCOMING_FILE
+# Ensure there was a prior version of the INCOMING_FILE before running mv
 [[ ! -f "${INCOMING_FILE}" ]] && { touch "${INCOMING_FILE}" ; }
 mv "${INCOMING_FILE}" ".old_${INCOMING_FILE}" 2> /dev/null
-./scripts/encrypt_file.sh ${INCOMING_FILE}.enc >/dev/null   
-cat ".old_${INCOMING_FILE}" >> $INCOMING_FILE
+./scripts/encrypt_file.sh ${INCOMING_FILE}.enc >/dev/null 
+
+
+# Merges the two files together into .temp_queue.txt, then overwrirtes the old file
+./scripts/merge_queues.sh --output=.temp_queue.txt -fd $INCOMING_FILE ".old_${INCOMING_FILE}" >/dev/null
 rm ".old_${INCOMING_FILE}" 2> /dev/null
-./scripts/merge_queue.sh --output=.temp_queue.txt --first_desired $INCOMING_FILE >/dev/null
-rm "${INCOMING_FILE}" 2> /dev/null
 mv ".temp_queue.txt" "${INCOMING_FILE}" 2> /dev/null
 echo "$INCOMING_FILE" 
 exit 0
-    
 
