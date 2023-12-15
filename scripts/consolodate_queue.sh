@@ -42,6 +42,9 @@ for ARGI; do
         echo "  --max_desired, -md                                  "
         echo "    When comparing desired runs, take the max         "
         echo "    of the two. Default is to add them together.      "
+        echo "  --add_desired, -ad                                  "
+        echo "    When comparing desired runs, take the sum         "
+        echo "    of the two. Default.      "
         echo "  --first_desired, -fd                                  "
         echo "    When comparing desired runs, take the first        "
         echo "    of the two. Default is to add them together.      "
@@ -57,6 +60,8 @@ for ARGI; do
         RUNS_DES_MERGE_TYPE="first"
     elif [[ "${ARGI}" = "--last_desired" || "${ARGI}" = "-ld" ]]; then
         RUNS_DES_MERGE_TYPE="last"
+    elif [[ "${ARGI}" = "--add_desired" || "${ARGI}" = "-ad" ]]; then
+        RUNS_DES_MERGE_TYPE="add"
     elif [[ "${ARGI}" = "--verbose"* || "${ARGI}" = "-v"* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -88,7 +93,9 @@ touch $OUTPUT_FILENAME
 
 job_runs_des=()
 job_runs_act=()
-# for line in "$(cat $INPUT_FILE)"; do
+
+# Add newline if not present
+[ -n "$(tail -c1 $INPUT_FILE)" ] && printf '\n' >>$INPUT_FILE
 while read line; do
     # Skip comments, empty lines
     [[ "$line" =~ ^# ]] && continue

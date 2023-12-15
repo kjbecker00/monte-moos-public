@@ -65,15 +65,16 @@ if [[ ! -f "$INPUT_FILE" || ! -f "$INPUT_FILE2" ]]; then
 fi
 
 # Copy the file so we don't edit any of the originals
-cp "$INPUT_FILE" ".temp_${INPUT_FILE}"
+cp "$INPUT_FILE" "${INPUT_FILE}.temp"
 
 # To merge we cat the files and then run consolodate_queue.sh
-cat "$INPUT_FILE2" >> $".temp_${INPUT_FILE}"
-./scripts/consolodate_queue.sh --output=$OUTPUT_FILENAME $".temp_${INPUT_FILE}" $FLOW_DOWN_ARGS >/dev/null
+cat "$INPUT_FILE2" >> "${INPUT_FILE}.temp"
+./scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.out_temp $"${INPUT_FILE}.temp" $FLOW_DOWN_ARGS >/dev/null
 EXIT_CODE=$?
 
 # Remove the temp file
-rm ".temp_${INPUT_FILE}" 2> /dev/null
+rm "${INPUT_FILE}.temp" 2> /dev/null
+mv "${OUTPUT_FILENAME}.out_temp" "$OUTPUT_FILENAME"
 
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then
