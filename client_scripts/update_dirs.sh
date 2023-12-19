@@ -47,6 +47,7 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v"
         echo "    Set verbosity                                     "
         echo " --job_file=    set the name of the job file (only updates dirs that apply to this job) "
+        echo " --job_args=    set the arguments to pass to the job "
         echo " --all, -a      update everything it has a repo_links.txt for"
         echo " All other arguments will flow down to the build script (e.g. -j8 for 8 cores)"
         exit 0
@@ -241,6 +242,7 @@ build_script() {
     cd $mydir
     return $BUILD_FAIL
 }
+
 #  Updates all necesary repos in an repo_links.txt file
 handle_repo_links_file() {
     local repo_links_file=$1
@@ -249,7 +251,7 @@ handle_repo_links_file() {
     #-------------------------------------------------------
 
     # Loop through all repos in the file
-    while read -r repo || [[ -n "$repo" ]]; do
+    while read -r repo; do
         if skipline $repo ; then
             vecho "Skipping blank line... $repo" 10
             continue
