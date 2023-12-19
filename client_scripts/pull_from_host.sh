@@ -35,7 +35,7 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         exit 0
-    elif [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
+    elif [[ "${ARGI}" = "--quiet" || "${ARGI}" = "-q" ]]; then
         QUIET=1
     elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
