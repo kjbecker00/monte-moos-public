@@ -234,7 +234,11 @@ cd - >&/dev/null
 #  Part 7: Launch shoreside
 #-----------------------------------------------------
 
-vecho "Part 1: Launching the mission... " 1
+vecho "Part 1: Launching the shoreside mission... " 1
+vecho "             shoreside script: $SHORESIDE_SCRIPT" 1
+vecho "             shoreside repo: $SHORE_REPO" 1
+vecho "             shoreside mission: $SHORE_MISSION" 1
+vecho "             shoreside flags: $SHORE_FLAGS" 1
 vecho "./client_scripts/source_launch.sh --script=${SHORESIDE_SCRIPT} --repo=${SHORE_REPO} --mission=${SHORE_MISSION}  -v=$VERBOSE ${SHORE_FLAGS}" 2
 ./client_scripts/source_launch.sh --script="${SHORESIDE_SCRIPT}" --repo="${SHORE_REPO}" --mission="${SHORE_MISSION}" -v=$VERBOSE ${SHORE_FLAGS}
 LEXIT_CODE=$?
@@ -247,6 +251,11 @@ fi
 #-----------------------------------------------------
 for ((i = 0; i < VEHICLES; i++)); do
     vecho "Part 1b: Launching vechicle $i..." 1
+    vecho "             vehicle script: ${VEHICLE_SCRIPTS[i]}" 1
+    vecho "             vehicle repo: ${VEHICLE_REPOS[i]}" 1
+    vecho "             vehicle mission: ${VEHICLE_MISSIONS[i]}" 1
+    vecho "             vehicle flags: ${VEHICLE_FLAGS[i]}" 1
+    vecho "             shared vehicle flags: $SHARED_VEHICLE_FLAGS" 1
     vecho "./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}" 2
     ./client_scripts/source_launch.sh --script="${VEHICLE_SCRIPTS[i]}" --repo="${VEHICLE_REPOS[i]}" --mission="${VEHICLE_MISSIONS[i]}" -v=$VERBOSE ${VEHICLE_FLAGS[i]} ${SHARED_VEHICLE_FLAGS}
     LEXIT_CODE=$?

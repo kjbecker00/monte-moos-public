@@ -74,11 +74,13 @@ cp "$INPUT_FILE2" "${INPUT_FILE2}.temp"
 
 # Add newline if not present
 [ -n "$(tail -c1 ${INPUT_FILE}.temp)" ] && printf '\n' >>${INPUT_FILE}.temp
-[ -n "$(tail -c1 ${INPUT_FILE2}.temp)" ] && printf '\n' >>${INPUT_FILE}.temp
+[ -n "$(tail -c1 ${INPUT_FILE2}.temp)" ] && printf '\n' >>${INPUT_FILE2}.temp
 
 # Cat the files together
 cat "$INPUT_FILE2.temp" >> "${INPUT_FILE}.temp"
 
+# echo "Press any key to continue, or Ctrl-C to cancel."
+# read -n 1 -s
 
 #--------------------------------------------------------------
 #  Part 4: Mergeing
@@ -86,13 +88,21 @@ cat "$INPUT_FILE2.temp" >> "${INPUT_FILE}.temp"
 # To merge we cat the files and then run consolodate_queue.sh
 # Output uses different suffix to prevent overwriting if INPUT_FILE or INPUT_FILE2
 # are the same as output_filename
-./scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.tmp $"${INPUT_FILE}.temp" $FLOW_DOWN_ARGS >/dev/null
+# vecho "output= ${OUTPUT_FILENAME}.out.tmp" 1
+# vecho "input= ${INPUT_FILE}.temp" 1
+# echo "Press any key to continue, or Ctrl-C to cancel."
+# read -n 1 -s
+./scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.out.tmp "${INPUT_FILE}.temp" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
+
+
+# echo "Press any key to continue, or Ctrl-C to cancel."
+# read -n 1 -s
 
 # Remove the temp file
 rm "${INPUT_FILE}.temp" 2> /dev/null
 rm "${INPUT_FILE2}.temp" 2> /dev/null
-mv "${OUTPUT_FILENAME}.tmp" "$OUTPUT_FILENAME"
+mv "${OUTPUT_FILENAME}.out.tmp" "$OUTPUT_FILENAME"
 
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then

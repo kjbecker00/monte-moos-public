@@ -98,13 +98,14 @@ job_runs_act=()
 # Add newline if not present
 [ -n "$(tail -c1 $INPUT_FILE)" ] && printf '\n' >>$INPUT_FILE
 
+line_num=0
 while read line; do
     # Skip comments, empty lines
     [[ "$line" =~ ^# ]] && continue
     [[ -z "$line" ]] && continue
+    line_num=$((line_num+1))
 
-
-    vecho "Line = $line" 5
+    vecho "Line $line_num= $line" 5
 
     # Skip a line if it contains an error
     job_name=$(./scripts/read_queue.sh --line="$line" -jf)
@@ -141,11 +142,10 @@ while read line; do
         vecho "   next_lines = $next_lines" 5
         next_lines_job_name=$(./scripts/read_queue.sh --line="$next_lines" -jf)
         next_lines_job_args=$(./scripts/read_queue.sh --line="$next_lines" -ja)
-        next_lines_job_rd=$(./scripts/read_queue.sh --line="$next_lines" -rd)
-        next_lines_job_ra=$(./scripts/read_queue.sh --line="$next_lines" -ra)
-
         # If it finds another copy of the file...
         if [[ "$next_lines_job_name" == "$job_name" && "$next_lines_job_args" == "$job_args" ]]; then
+            next_lines_job_rd=$(./scripts/read_queue.sh --line="$next_lines" -rd)
+            next_lines_job_ra=$(./scripts/read_queue.sh --line="$next_lines" -ra)
             vecho "     Found a match!" 5
 
             # Update number of desired runs
