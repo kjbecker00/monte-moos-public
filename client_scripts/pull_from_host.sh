@@ -5,7 +5,7 @@
 ME=$(basename "$0")
 VERBOSE=0
 LINK_TO_FILE=""
-
+QUIET=0
 txtrst=$(tput sgr0)    # Reset
 txtred=$(tput setaf 1) # Red
 txtgrn=$(tput setaf 2) # Green
@@ -30,10 +30,13 @@ for ARGI; do
         echo " This is a script used to pull a given file from the host.    "
         echo " with the current setup, it's a wrapper around wget. "
         echo "Options:                                                   "
-        echo " --help, -h Show this help message                         "
+        echo " --help, -h  Show this help message                         "
+        echo " --quiet, -q Don't secho anything                         "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         exit 0
+    elif [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
+        QUIET=1
     elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -49,15 +52,22 @@ for ARGI; do
     fi
 done
 
+
+#-------------------------------------------------------
+#  Part 2: Checks
+#-------------------------------------------------------
 if [ -z $LINK_TO_FILE ]; then
     vexit "No file specified" 1
 fi
+
+ping -c 1 oceanai.mit.edu >/dev/null 
+[[ $? -eq 0 ]] || { vexit "Cannot find host" 5 ; }
 
 vecho "Pulling file from host: $LINK_TO_FILE" 1
 
 
 #-------------------------------------------------------
-#  Part 2: Pull the file from the host
+#  Part 3: Pull the file from the host
 #-------------------------------------------------------
 wget -q "$LINK_TO_FILE"
 EXIT_CODE=$?
@@ -73,12 +83,16 @@ if [[ $EXIT_CODE -ne 0 ]]; then
     # - - - - - - - - - - - - - - - - - - - - -
     # Server error (no file exists on server)
     elif [[ $EXIT_CODE -eq 8 ]]; then # no file on server
-        vexit "File not found on server" 1
-        ./scripts/list_bad_job.sh "${JOB_FILE}"
+        if [[ $QUIET -eq 0 ]]; then
+            echo "${txtred}$ME: File $LINK_TO_FILE not found on server $txtrst"
+            exit 1
+        else
+            vexit "File $LINK_TO_FILE not found on server" 1
+        fi
     # - - - - - - - - - - - - - - - - - - - - -
     # Unknown error
     else
-        vexit "wget https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE" 2
+        vexit "wget -q $LINK_TO_FILE failed with code $EXIT_CODE" 2
     fi
 else
     # No errors

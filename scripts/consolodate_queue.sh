@@ -21,7 +21,7 @@ txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
 vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi }
 wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
-vexit() { echo ${txtred}"$ME: Error $2. Exit Code $2" ${txtrst} ; exit "$1" ; }
+vexit() { echo ${txtred}"$ME: Error $1. Exit Code $2" ${txtrst} ; exit "$2" ; }
 INPUT_FILE=""
 RUNS_DES_MERGE_TYPE="add"
 
@@ -80,9 +80,10 @@ for ARGI; do
 done
 
 # Check if output_filename exists already. But delete default output file if it exists
-rm -f "merged_queue.txt"
-if [ -f "$OUTPUT_FILENAME" ]; then
-    vexit "Output file exists already" 1
+if [ "$OUTPUT_FILENAME" == "merged_queue.txt" ]; then
+    rm -f "merged_queue.txt"
+elif [ -f "$OUTPUT_FILENAME" ]; then
+    vexit "Output file exists already" 2
 fi
 touch $OUTPUT_FILENAME
 
@@ -96,6 +97,7 @@ job_runs_act=()
 
 # Add newline if not present
 [ -n "$(tail -c1 $INPUT_FILE)" ] && printf '\n' >>$INPUT_FILE
+
 while read line; do
     # Skip comments, empty lines
     [[ "$line" =~ ^# ]] && continue
@@ -104,10 +106,15 @@ while read line; do
 
     vecho "Line = $line" 5
 
+    # Skip a line if it contains an error
     job_name=$(./scripts/read_queue.sh --line="$line" -jf)
+    [[ $? -eq 0 ]] || { continue ; }
     job_args=$(./scripts/read_queue.sh --line="$line" -ja)
+    [[ $? -eq 0 ]] || { continue ; }
     job_rd=$(./scripts/read_queue.sh --line="$line" -rd)
+    [[ $? -eq 0 ]] || { continue ; }
     job_ra=$(./scripts/read_queue.sh --line="$line" -ra)
+    [[ $? -eq 0 ]] || { continue ; }
 
     vecho "job_name = $job_name" 5
     vecho "job_args = $job_args" 5

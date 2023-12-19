@@ -80,9 +80,9 @@ EXIT_CODE=$?
 # Check the queue by observing the exit code
 
 # 1: no jobs left
-[[ $EXIT_CODE -ne 1 ]] || { vexit "No jobs left to run. Exiting..." 1; }
+[[ $EXIT_CODE -ne 1 ]] || { echo "No jobs left to run..." ; exit 1; }
 # 2: no jobs left, but still has bad jobs
-[[ $EXIT_CODE -ne 2 ]] || { vexit "No jobs left to run, but has bad jobs. Exiting..." 1; }
+[[ $EXIT_CODE -ne 2 ]] || { echo "No jobs left to run, $(txtred) but has bad jobs... $(txtrst)" exit 1;  }
 # not zero: bad
 [[ $EXIT_CODE -eq 0 ]] || { vexit "running ./client_scripts/select_job.sh returned exit code: $EXIT_CODE" 9; }
 
@@ -150,7 +150,8 @@ if [ "$HOSTLESS" = "no" ]; then
 
     # Pull from host failed; network error. Use a local copy if it exists
     elif [[ $EXIT_CODE -eq 4 ]]; then
-        vecho "./client_scripts/pull_from_host https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE. Checking for local copy..." 1
+        secho "./client_scripts/pull_from_host https://oceanai.mit.edu/monte/clients/job_dirs/$FILE failed with code $EXIT_CODE. Checking for local copy..."
+       
         # - - - - - - - - - - - - - - - - - - - - -
         # Network error
         if [ -f "job_dirs/$JOB_FILE" ]; then

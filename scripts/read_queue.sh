@@ -118,7 +118,7 @@ read -ra linearray <<<"$line"
 
 JOB_FILE=${linearray[0]}
 JOB_ARGS=""
-RUNS_DES="0"
+RUNS_DES=""
 RUNS_ACT="0"
 for j in "${linearray[@]}"; do
     if [[ "$j" == "$JOB_FILE" ]]; then
@@ -129,7 +129,7 @@ for j in "${linearray[@]}"; do
         else
             JOB_ARGS="${j}"
         fi
-    elif [[ $RUNS_DES -eq "" ]]; then
+    elif [[ $RUNS_DES == "" ]]; then
         RUNS_DES=$j
     else
         RUNS_ACT=$j
@@ -140,6 +140,12 @@ done
 #--------------------------------------------------------------
 #  Part 5: Return values
 #--------------------------------------------------------------
+
+# Check for errors
+# Checks that RUN_DES and RUN_ACT are integers > 0
+[[ "${RUNS_DES//[^0-9]/}" = "$RUNS_DES" ]] || { exit 2 ; }
+[[ "${RUNS_ACT//[^0-9]/}" = "$RUNS_ACT" ]] || { exit 2 ; }
+
 if [[ $TO_RETURN = "job_file" ]]; then
     echo "$JOB_FILE"
 elif [[ "$TO_RETURN" == "job_args" ]]; then

@@ -7,6 +7,7 @@
 .built_directories.txt
 bad_jobs.txt
 nohup.out
+
 # Temporary dirs
 results/*
 compiled_results/*
@@ -14,6 +15,7 @@ force_quit
 .deleted_*
 .deleted_*
 *.tmp
+*.temp
 backup_job_dirs/*
 
 # Private files

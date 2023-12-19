@@ -59,6 +59,10 @@ for ARGI; do
 done
 
 
+
+#--------------------------------------------------------------
+#  Part 3: Pre-flight Checks
+#--------------------------------------------------------------
 # Check that the files exist
 if [[ ! -f "$INPUT_FILE" || ! -f "$INPUT_FILE2" ]]; then
     vexit "Check input files, one or more may not exist" 1
@@ -66,15 +70,29 @@ fi
 
 # Copy the file so we don't edit any of the originals
 cp "$INPUT_FILE" "${INPUT_FILE}.temp"
+cp "$INPUT_FILE2" "${INPUT_FILE2}.temp"
 
+# Add newline if not present
+[ -n "$(tail -c1 ${INPUT_FILE}.temp)" ] && printf '\n' >>${INPUT_FILE}.temp
+[ -n "$(tail -c1 ${INPUT_FILE2}.temp)" ] && printf '\n' >>${INPUT_FILE}.temp
+
+# Cat the files together
+cat "$INPUT_FILE2.temp" >> "${INPUT_FILE}.temp"
+
+
+#--------------------------------------------------------------
+#  Part 4: Mergeing
+#--------------------------------------------------------------
 # To merge we cat the files and then run consolodate_queue.sh
-cat "$INPUT_FILE2" >> "${INPUT_FILE}.temp"
-./scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.out_temp $"${INPUT_FILE}.temp" $FLOW_DOWN_ARGS >/dev/null
+# Output uses different suffix to prevent overwriting if INPUT_FILE or INPUT_FILE2
+# are the same as output_filename
+./scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.tmp $"${INPUT_FILE}.temp" $FLOW_DOWN_ARGS >/dev/null
 EXIT_CODE=$?
 
 # Remove the temp file
 rm "${INPUT_FILE}.temp" 2> /dev/null
-mv "${OUTPUT_FILENAME}.out_temp" "$OUTPUT_FILENAME"
+rm "${INPUT_FILE2}.temp" 2> /dev/null
+mv "${OUTPUT_FILENAME}.tmp" "$OUTPUT_FILENAME"
 
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then

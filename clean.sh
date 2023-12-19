@@ -96,6 +96,14 @@ fi
 # Part 4: Clean each moos-dir directory
 #          binaries, logs, temp files, and other junk
 #-------------------------------------------------------
+
+# Start by removing old moos-dirs (older than 30 days)
+if [[ $(hostname) != "oceanai" ]]; then
+    echo "Removing moos-dirs older than 30 days..."
+    find moos-dirs/ -type d -mtime +30 -exec echo "     Removing: {}" \; -exec rm -r {} \;
+fi
+
+
 if [ -d moos-dirs ]; then
     cd moos-dirs || vexit "Error with cd" 1
     if find . -maxdepth 1 -type d -name 'moos-ivp-*' | read; then
@@ -151,6 +159,8 @@ fi
 find . -name '*.enc' -exec rm -rf {} \; 2>/dev/null
 find . -name '*.enc.1' -exec rm -rf {} \; 2>/dev/null
 find . -name '*.enc.2' -exec rm -rf {} \; 2>/dev/null
+find . -name '*.enc.3' -exec rm -rf {} \; 2>/dev/null
+find . -name '*.enc.4' -exec rm -rf {} \; 2>/dev/null
 
 # Always remove temporary files
 rm -f .old_*_job_queue.txt
@@ -180,7 +190,7 @@ fi
 #-------------------------------------------------------
 # Part 6: Clean all metadata (queues, statuses, etc.)
 #-------------------------------------------------------
-# find . -type f -name '.temp_client_job_queue.txt' -exec rm {} \; 2>/dev/null # Don't clean after every mission!
+# find . -type f -name '.temp_client_job_queue.txt' -exec rm {} \; 2>/dev/null 
 if [[ "${METADATA}" = "yes" ]]; then
     [ -f .built_dirs ] && rm -f .built_dirs
     ./scripts/list_bad_job.sh -d
@@ -198,17 +208,14 @@ fi
 # Part 7: Clean all job dirs
 #-------------------------------------------------------
 if [[ "${JOB_DIRS}" = "yes" ]]; then
-    # safety check
-    if [ "$(hostname)" != "oceanai" ]; then
-        # Keeps backups of last two deleted job dirs, just in case
-        if [ -d .deleted_job_dirs_2 ]; then
-            rm -rf .deleted_job_dirs_2/
-        fi
-        if [ -d .deleted_job_dirs ]; then
-            mv .deleted_job_dirs .deleted_job_dirs_2
-        fi
-        mv job_dirs/* .deleted_job_dirs/
+    # Keeps backups of last two deleted job dirs, just in case
+    if [ -d .deleted_job_dirs_2 ]; then
+        rm -rf .deleted_job_dirs_2/
     fi
+    if [ -d .deleted_job_dirs ]; then
+        mv .deleted_job_dirs .deleted_job_dirs_2
+    fi
+    mv job_dirs/* .deleted_job_dirs/
 
 fi
 

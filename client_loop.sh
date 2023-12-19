@@ -110,7 +110,6 @@ while true; do
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 1: Queue is empty
     if [ $EXIT -eq 1 ]; then
-        echo "$0: No more jobs to run"
         if [ -z "$PERPETUAL" ]; then
             secho "No more jobs to run, and not in perpetual mode. Exiting..."
             ./clean.sh

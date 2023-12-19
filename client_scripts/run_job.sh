@@ -181,10 +181,10 @@ echo $txtgrn"      Done updating dirs" $txtrst
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 3c: Run the job file
-vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\"" 1
+vecho "./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\"  -v=$VERBOSE" 1
 echo "[3] Running job from file..."
 secho "Running job $JOB_FILE $JOB_ARGS"
-./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS"
+./client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS" -v=$VERBOSE
 EXIT_CODE=$?
 if [[ $EXIT_CODE -eq 2 ]]; then
     echo "Mission timed out. Extracting results anyway..."

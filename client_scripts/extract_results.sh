@@ -231,9 +231,9 @@ if [ $TEST = "yes" ]; then
     echo "${txtrst}Now, go into the directory: $(tput smul)${txtblu}$(pwd)/$LOCAL_JOB_RESULTS_DIR${txtrst}"
     echo "Make ${txtbld}sure${txtrst} that the results look the way you want. Once you are sure,"
     echo "Copy your directory to oceanai: "
-    echo "        $(tput smul)${txtblu}rsync -zaPr job_dirs/${yourdir} oceanai.mit.edu:/home/monte/monte-moos/job_dirs/${txtrst}"
+    echo "        $(tput smul)${txtblu}rsync -zaPr job_dirs/${yourdir} oceanai.mit.edu:/home/monte/public_job_dirs/${txtrst}"
     echo ""
-    echo "    Then, add this job to the host_job_queue.txt file on oceanai, and you should be all set!"
+    echo "    Then, add this job to your oceanai.mit.edu:/home/monte/public_queue_files/KERBS/_job_queue.txt file on oceanai, and you should be all set!"
     echo "         ${JOB_DIR}/${JOB_FILE_NAME} 5 "
     echo ""
 else

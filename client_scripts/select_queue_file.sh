@@ -67,11 +67,11 @@ rm "${HOST_QUEUE_FILE}.enc" 2> /dev/null
 INCOMING_FILE="${MY_QUEUE_FILE}"
 
 # Attempts to pull one of two files from the host
-./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/${MY_QUEUE_FILE}.enc" >/dev/null
+./client_scripts/pull_from_host.sh -q "https://oceanai.mit.edu/monte/clients/${MY_QUEUE_FILE}.enc" >/dev/null
 if [[ $? -eq 0 ]]; then
     INCOMING_FILE="${MY_QUEUE_FILE}"
 else 
-    ./client_scripts/pull_from_host.sh "https://oceanai.mit.edu/monte/clients/${HOST_QUEUE_FILE}.enc"  >/dev/null 
+    ./client_scripts/pull_from_host.sh -q "https://oceanai.mit.edu/monte/clients/${HOST_QUEUE_FILE}.enc"  >/dev/null 
     [[ $? -eq 0 ]] || { vexit "unable to pull $MY_QUEUE_FILE or $HOST_QUEUE_FILE from host" 5 ; }
     INCOMING_FILE="${HOST_QUEUE_FILE}"
 fi

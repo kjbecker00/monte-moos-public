@@ -211,8 +211,8 @@ for ((i = 0; i < EXTRA_LIB_COUNT; i++)); do
         vexit "Missing ${repo}/bin from moos-dirs. Try adding this repo to $(tput smul)repo_links.txt$(tput rmul)" 7
     fi
 done
-vecho "IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 2
-vecho "PATH=$PATH" 3
+vecho "IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
+vecho "PATH=$PATH" 2
 
 #-----------------------------------------------------
 #  Part 6.5: Clean directory
@@ -424,7 +424,9 @@ done
 vecho "Part 4: Bringing down the mission... " 1
 ktm >&/dev/null
 killall pAntler >&/dev/null
-ktm >&/dev/null
+sleep 1
+# Kills ALL child processes
+pkill -P $$
 sleep 1
 PATH=$OLD_PATH
 export PATH
