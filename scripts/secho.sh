@@ -118,5 +118,5 @@ mv status.tmp ${CARLO_DIR_LOCATION}/status.txt
 #--------------------------------------------------------------
 #  Part 6: Copy to host
 #--------------------------------------------------------------
-./scripts/send2host.sh "${CARLO_DIR_LOCATION}/status.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/status/${name}.txt" >&/dev/null
+${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh "${CARLO_DIR_LOCATION}/status.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/status/${name}.txt" >&/dev/null
 
