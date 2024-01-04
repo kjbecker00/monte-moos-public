@@ -159,7 +159,7 @@ if [ -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
     #-------------------------------------------------------
     # Always clean all moos-ivp missions
     if [ -d moos-ivp ]; then
-        if [[ ! -d moos-ivp/trunk ]]; then
+        if [[ -d moos-ivp/trunk ]]; then
             cd moos-ivp/trunk/ivp/missions || vexit "Error with cd from $(pwd) to moos-ivp/trunk/ivp/missions" 1
         else 
             cd moos-ivp/ivp/missions || vexit "Error with cd from $(pwd) to moos-ivp/ivp/missions" 1
