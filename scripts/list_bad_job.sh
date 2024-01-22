@@ -7,21 +7,10 @@
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
 ME="list_bad_job.sh"
-VERBOSE=0
 JOB=""
 DELETE=""
-txtrst=$(tput sgr0)       # Reset
-txtred=$(tput setaf 1)    # Red
-txtgrn=$(tput setaf 2)    # Green
-txtylw=$(tput setaf 3)    # Yellow
-txtblu=$(tput setaf 4)    # Blue
-txtltblu=$(tput setaf 75) # Light Blue
-txtgry=$(tput setaf 8)    # Grey
-txtul=$(tput smul)        # Underline
-txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$1" ]]; then echo ${txtgry}"$ME: $2" ${txtrst}; fi }
-wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
-vexit() { echo ${txtred}"$ME: Error $2. Exit Code $2" ${txtrst} ; exit "$1" ; }
+
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments

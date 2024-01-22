@@ -7,19 +7,9 @@
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
 ME="merge_queues.sh"
-VERBOSE=0
-txtrst=$(tput sgr0)       # Reset
-txtred=$(tput setaf 1)    # Red
-txtgrn=$(tput setaf 2)    # Green
-txtylw=$(tput setaf 3)    # Yellow
-txtblu=$(tput setaf 4)    # Blue
-txtltblu=$(tput setaf 75) # Light Blue
-txtgry=$(tput setaf 8)    # Grey
-txtul=$(tput smul)        # Underline
-txtul=$(tput bold)        # Bold
-vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi }
-wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
-vexit() { echo ${txtred}"$ME: Error $1. Exit Code $2" ${txtrst} ; exit "$2" ; }
+
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+
 INPUT_FILE=""
 INPUT_FILE2=""
 FLOW_DOWN_ARGS=""

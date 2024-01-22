@@ -7,20 +7,8 @@
 # Part 0: Convenience functions, defaults
 #--------------------------------------------------------------
 ME="monte_compile_results.sh"
-VERBOSE=0
 TYPE="cp"              # cp for copy, ln for link
-txtrst=$(tput sgr0)    # Reset
-txtred=$(tput setaf 1) # Red
-# txtgrn=$(tput setaf 2) # Green
-txtylw=$(tput setaf 3) # Yellow
-# txtblu=$(tput setaf 4) # Blue
-txtgry=$(tput setaf 8) # Grey
-# vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo "$(tput setaf 245)$ME: $1 $txtrst"; fi; }
-vexit() {
-    echo "$txtred $ME: Error $1. Exit Code $2 $txtrst"
-    exit "$2"
-}
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 if [[ $MONTE_MOOS_HOST == $(cat "${CARLO_DIR_LOCATION}"/myname.txt) ]]; then
     OUTPUT_BASE_DIR="${MONTE_MOOS_HOST_WEB_ROOT_DIR}/results"

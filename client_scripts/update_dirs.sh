@@ -7,7 +7,6 @@
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
 ME="update_dirs.sh"
-VERBOSE=0
 # build script name (indluce any flags here or as flow-down args)
 script="build.sh"
 repo_links="${MONTE_MOOS_BASE_REPO_LINKS}"
@@ -17,22 +16,7 @@ FLOW_DOWN_ARGS=""
 QUIET="yes"
 ALL="no"
 PROMPT_TIMEOUT=20
-txtrst=$(tput sgr0)       # Reset
-txtred=$(tput setaf 1)    # Red
-txtgrn=$(tput setaf 2)    # Green
-txtylw=$(tput setaf 3)    # Yellow
-txtblu=$(tput setaf 4)    # Blue
-txtltblu=$(tput setaf 75) # Light Blue
-txtgry=$(tput setaf 8)    # Grey
-txtul=$(tput smul)        # Underline
-txtul=$(tput bold)        # Bold
-secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
-vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
-wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
-vexit() {
-    secho "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
-    exit "$2"
-}
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 #-------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments

@@ -4,36 +4,14 @@
 # This script is used to update the queue of jobs to run
 
 ME="monte_host_loop.sh"
-VERBOSE=0
 LOOP_TIME=60
 PERPETUAL="no"
 QUEUE_COMPLETE="no"
-txtrst=$(tput sgr0)       # Reset
-txtred=$(tput setaf 1)    # Red
-txtgrn=$(tput setaf 2)    # Green
-txtblu=$(tput setaf 4)    # Blue
-txtltblu=$(tput setaf 75) # Light blue
-txtgry=$(tput setaf 8)    # Grey
+
 # Ensure status file exists
 [[ -f ${CARLO_DIR_LOCATION}/status.txt ]] || { touch ${CARLO_DIR_LOCATION}/status.txt ; }
-# Status echo
-secho() {
-    echo "$1"
-    echo "$1 (as of $(date)). To quit, make the file 'force_quit' in this directory $(pwd)" > ${CARLO_DIR_LOCATION}/status.txt
-}
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then secho $(tput setaf 245)"$ME: $1" $txtrst; fi; }
-vexit() {
-    secho $txtred"$ME: Error $1. Exit Code $2" $txtrst
-    exit "$2"
-}
-check_quit() { if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
-    secho "${CARLO_DIR_LOCATION}/force_quit file found. Exiting"
-    exit 0
-fi; }
-check_sleep() { for i in $(seq 1 1 $1); do
-    check_quit
-    sleep 1
-done; }
+
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments

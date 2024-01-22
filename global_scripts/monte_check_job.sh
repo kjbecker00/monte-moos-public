@@ -2,21 +2,9 @@
 # Kevin Becker Jun 9 2023
 
 ME="monte_check_job.sh"
-VERBOSE=0
 CLIENT="no"
 TEST="no"
-txtrst=$(tput sgr0)    # Reset
-txtred=$(tput setaf 1) # Red
-txtgrn=$(tput setaf 2) # Green
-txtylw=$(tput setaf 3) # Yellow
-txtblu=$(tput setaf 4) # Blue
-txtgry=$(tput setaf 8) # Grey
-# vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
-vexit() {
-    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
-    exit "$2"
-}
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 #-------------------------------------------------------
 #  Part 0: Check for and handle command-line arguments

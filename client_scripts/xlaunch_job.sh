@@ -6,42 +6,13 @@
 QUIET="no"
 UQUERY_TRIES=2
 ME="xlaunch_job.sh"
-VERBOSE=0
 TIMER_ONLY="no"
 USE_MISSION_CLEAN_SCRIPT="yes"
-OLD_PATH=$PATH
-OLD_DIRS=$IVP_BEHAVIOR_DIRS
-txtrst=$(tput sgr0)    # Reset
-txtred=$(tput setaf 1) # Red
-txtgrn=$(tput setaf 2) # Green
-txtylw=$(tput setaf 3) # Yellow
-txtblu=$(tput setaf 4) # Blue
-txtgry=$(tput setaf 8) # Grey
-
-# Initial poke to start the mission
 START_POKE="DEPLOY_ALL=true DEPLOY=true MOOS_MANUAL_OVERRIDE_ALL=false "
 START_POKE+="MOOS_MANUAL_OVERIDE_ALL=false MOOS_MANUAL_OVERRIDE=false "
 START_POKE+="MOOS_MANUAL_OVERIDE=false RETURN_ALL=false RETURN=false "
 
-# vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
-secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
-vexit() {
-    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
-    safe_exit "$2"
-}
-safe_exit() {
-    PATH=$OLD_PATH
-    IVP_BEHAVIOR_DIRS=$OLD_IVP_BEHAVIOR_DIRS
-    export PATH
-    export IVP_BEHAVIOR_DIRS
-    if [ $1 -ne 0 ]; then
-        echo ""
-        echo "${txtred}$ME Exiting safely. Resetting PATH and IVP_BEHAVIOR_DIRS and running ktm... ${txtrst}"
-        ktm >&/dev/null
-    fi
-    exit $1
-}
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 trap ctrl_c INT
 ctrl_c() {
     safe_exit 130
@@ -114,7 +85,6 @@ if type MOOSDB >/dev/null 2>&1; then
     true
 else
     vecho "Adding ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin, scripts, ivp/scripts to $PATH..." 1
-    OLD_PATH=$PATH
     if [[ -d ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin ]]; then
         PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin
         PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/scripts

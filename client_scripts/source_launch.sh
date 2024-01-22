@@ -18,36 +18,9 @@ FLOW_DOWN_ARGS=""           # Get the mission name from the third argument
 REPO_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}" 
 TO_SOURCE="yes"             # if the script should add repo/bin to the path
 TO_ADD_LIB="yes"            # if the script should add repo/lib to IVP_BEHAVIOR_DIRS
-original_ivp_behavior_dirs=$PATH
-original_ivp_behavior_dirs=$IVP_BEHAVIOR_DIRS
 
 ME="source_launch.sh"
-VERBOSE=0
-txtrst=$(tput sgr0)    # Reset
-txtred=$(tput setaf 1) # Red
-txtgrn=$(tput setaf 2) # Green
-txtylw=$(tput setaf 3) # Yellow
-txtblu=$(tput setaf 4) # Blue
-txtgry=$(tput setaf 8) # Grey
-txtbld=$(tput bold)    # Bold
-# vecho "message" level_int
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
-secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
-vexit() {
-    secho "${txtred}$ME: Error $1. Exit Code $2 $txtrst"
-    safe_exit "$2"
-}
-safe_exit() {
-    PATH=$original_ivp_behavior_dirs
-    IVP_BEHAVIOR_DIRS=$original_ivp_behavior_dirs
-    export PATH
-    export IVP_BEHAVIOR_DIRS
-    if [ $1 -ne 0 ]; then
-        echo ""
-        echo "${txtred}$ME Exiting safely. Resetting PATH and IVP_BEHAVIOR_DIRS... ${txtrst}"
-    fi
-    exit $1
-}
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 trap ctrl_c INT
 ctrl_c() {
     safe_exit 130
@@ -172,11 +145,8 @@ if [[ ! -f "${MISSION_DIR}/${SCRIPTNAME}" ]]; then
 fi
 
 #-------------------------------------------------------
-#  Part 6: Save old values of PATH and IVP_BEHAVIOR_DIRS
-#    Source path, add behavior dirs, run the script
+#  Part 6:  Source path, add behavior dirs, run the script
 #-------------------------------------------------------
-original_path=$PATH
-original_ivp_behavior_dirs=$IVP_BEHAVIOR_DIRS
 
 if [[ $TO_SOURCE == "yes" ]]; then
     vecho "Temporarially adding $BIN_DIR to PATH" 2

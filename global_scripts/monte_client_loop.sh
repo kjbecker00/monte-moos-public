@@ -2,35 +2,13 @@
 # Kevin Becker Jun 9 2023
 
 ME="monte_client_loop.sh"
-VERBOSE=0
 PERPETUAL=""
 RE_UPDATE="yes"
 IGNORE_WARNING="no"
 HOSTLESS="no"
 SLEEP_TIME=60
 
-txtrst=$(tput sgr0)    # Reset
-txtred=$(tput setaf 1) # Red
-txtgrn=$(tput setaf 2) # Green
-txtylw=$(tput setaf 3) # Yellow
-txtblu=$(tput setaf 4) # Blue
-txtgry=$(tput setaf 8) # Grey
-txtbld=$(tput bold)    # Bold
-# vecho "message" level_int
-secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
-vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
-vexit() {
-    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
-    exit "$2"
-}
-check_quit() { if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
-    secho "${CARLO_DIR_LOCATION}/force_quit file found. Exiting"
-    exit 0
-fi; }
-check_sleep() { for i in $(seq 1 1 $1); do
-    check_quit
-    sleep 1
-done; }
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 # Updates once per day
 day_of_last_update=$(date +%u) # current day
@@ -82,7 +60,6 @@ if [ -d "job_dirs" ] && [ "$(hostname)" != "$MONTE_MOOS_HOST" ]; then
         read -n 1 -s
     fi
 fi
-
 
 #  Part 1c: Check if this is the host
 if [ "$(hostname)" = "$MONTE_MOOS_HOST" ]; then
@@ -167,6 +144,5 @@ while true; do
     check_quit
 
 done
-
 
 exit 0
