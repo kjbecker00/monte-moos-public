@@ -6,7 +6,7 @@
 #--------------------------------------------------------------
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
-ME=$(basename "$0")
+ME="secho.sh"
 VERBOSE=0
 TO_PRINT=""
 LINES_TO_KEEP=500

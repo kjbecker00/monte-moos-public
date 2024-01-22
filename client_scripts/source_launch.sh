@@ -21,7 +21,7 @@ TO_ADD_LIB="yes"            # if the script should add repo/lib to IVP_BEHAVIOR_
 original_ivp_behavior_dirs=$PATH
 original_ivp_behavior_dirs=$IVP_BEHAVIOR_DIRS
 
-ME=$(basename "$0")
+ME="source_launch.sh"
 VERBOSE=0
 txtrst=$(tput sgr0)    # Reset
 txtred=$(tput setaf 1) # Red
@@ -192,10 +192,7 @@ vecho "Launching with IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
 
 # Run the launch.sh script with pre-determined flags
 cd "$MISSION_DIR" || safe_exit 9
-if [ -f "clean.sh" ]; then
-    chmod +x clean.sh
-    ./clean.sh
-fi
+
 vecho "./$SCRIPTNAME $FLOW_DOWN_ARGS" 1
 ./$SCRIPTNAME $FLOW_DOWN_ARGS >&/dev/null &
 if [ $? -ne 0 ]; then

@@ -3,7 +3,7 @@
 
 # This script is used to update the queue of jobs to run
 
-ME=$(basename "$0")
+ME="monte_host_loop.sh"
 VERBOSE=0
 LOOP_TIME=60
 PERPETUAL="no"

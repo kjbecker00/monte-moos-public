@@ -2,7 +2,7 @@
 # Kevin Becker, May 26 2023
 # Script used to encrypt/decrypt files
 
-ME=$(basename "$0")
+ME="encrypt_file.sh"
 VERBOSE=0
 txtrst=$(tput sgr0)    # Reset
 txtred=$(tput setaf 1) # Red

@@ -6,7 +6,7 @@
 #--------------------------------------------------------------
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
-ME=$(basename "$0")
+ME="list_bad_job.sh"
 VERBOSE=0
 JOB=""
 DELETE=""

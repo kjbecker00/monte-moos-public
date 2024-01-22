@@ -1,7 +1,7 @@
 #!/bin/bash
 # Kevin Becker Jun 9 2023
 
-ME=$(basename "$0")
+ME="monte_run_job.sh"
 VERBOSE=0
 TEST=""
 HOSTLESS="no"

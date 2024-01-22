@@ -6,7 +6,7 @@
 #--------------------------------------------------------------
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
-ME=$(basename "$0")
+ME="merge_queues.sh"
 VERBOSE=0
 txtrst=$(tput sgr0)       # Reset
 txtred=$(tput setaf 1)    # Red

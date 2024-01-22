@@ -6,7 +6,7 @@
 #--------------------------------------------------------------
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
-ME=$(basename "$0")
+ME="consolodate_queue.sh"
 VERBOSE=0
 OUTPUT_FILENAME="merged_queue.txt"
 rm -f $OUTPUT_FILENAME    # Delete default output file if it exists

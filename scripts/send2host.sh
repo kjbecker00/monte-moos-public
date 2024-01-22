@@ -2,7 +2,7 @@
 # Kevin Becker, May 26 2023
 
 # Script used to publish files to the host
-ME=$(basename "$0")
+ME="send2host.sh"
 VERBOSE=0
 
 LOCAL_PATH=""

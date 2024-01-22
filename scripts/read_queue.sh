@@ -6,7 +6,7 @@
 #--------------------------------------------------------------
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
-ME=$(basename "$0")
+ME="read_queue.sh"
 VERBOSE=0
 TO_RETURN=""
 LINE_NUM=0

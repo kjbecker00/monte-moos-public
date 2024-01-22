@@ -6,7 +6,7 @@
 #--------------------------------------------------------------
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
-ME=$(basename "$0")
+ME="update_dirs.sh"
 VERBOSE=0
 # build script name (indluce any flags here or as flow-down args)
 script="build.sh"
@@ -26,12 +26,11 @@ txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
 txtul=$(tput bold)        # Bold
+secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
 vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
 wecho() { echo ${txtylw}"$ME: $1" ${txtrst}; }
 vexit() {
-    /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
-    # [ -f ../scripts/secho.sh ] && ./../scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
-    # [ -f ../../scripts/secho.sh ] &&  ./../../scripts/secho.sh "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
+    secho "${txtred}$ME: Error $1. Exit Code $2 ${txtrst}" ;
     exit "$2"
 }
 
@@ -199,7 +198,7 @@ skipline() {
     return 0
 }
 build_script() {
-    mydir="$PWD"
+    starting_dir="$PWD"
     if [ ! -f $script ]; then
         if [ -f trunk/$script ]; then
             cd trunk
@@ -207,6 +206,10 @@ build_script() {
             vexit "      can't find build script as $PWD/$script or $PWD/$trunk/$script" 1
         fi
     fi
+
+    # Remove old build log, if it exists
+    rm -f .build_log.txt
+
     # Quietly try to build the script as is
     if [[ $QUIET == "yes" ]]; then
         ./$script "${ALL_FLOW_DOWN_ARGS}" >.build_log.txt 2>&1
@@ -240,7 +243,7 @@ build_script() {
             BUILD_FAIL=1
         fi
     fi
-    cd $mydir
+    cd $starting_dir
     return $BUILD_FAIL
 }
 
@@ -404,7 +407,7 @@ handle_repo_links_file "${MONTE_MOOS_BASE_REPO_LINKS}"
 # fi
 
 SEARCH_DIR=$(dirname $JOB_FILE)
-SEARCH_DIR_BASE="${SEARCH_DIR%%/*}"
+SEARCH_DIR_BASE="${SEARCH_DIR%%/*}/../.."
 vecho "Starting search with $SEARCH_DIR, going to $SEARCH_DIR_BASE" 1
 
 while [[ "$SEARCH_DIR" != "$SEARCH_DIR_BASE" && "$SEARCH_DIR" != "$LAST_SEARCH_DIR" ]]; do

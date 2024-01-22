@@ -2,7 +2,7 @@
 # Kevin Becker, May 26 2023
 
 # Script used to extract results from a job.
-ME=$(basename "$0")
+ME="pull_from_host.sh"
 VERBOSE=0
 LINK_TO_FILE=""
 QUIET=0
@@ -15,8 +15,9 @@ txtgry=$(tput setaf 8) # Grey
 txtbld=$(tput bold)    # Bold
 # vecho "message" level_int
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
+secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
 vexit() {
-    /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "${txtred}$ME: Error: $1. Exit Code $2 $txtrst"
+    secho "${txtred}$ME: Error: $1. Exit Code $2 $txtrst"
     exit "$2"
 }
 
@@ -88,7 +89,7 @@ if [[ $EXIT_CODE -ne 0 ]]; then
     # - - - - - - - - - - - - - - - - - - - - -
     # Network error
     if [[ $EXIT_CODE -eq 4 ]]; then
-        vexit "Network error. Check your connection." 4
+        vexit "wget $LINK_TO_FILE resulted in network error. Check your connection." 4
 
     # - - - - - - - - - - - - - - - - - - - - -
     # Server error (no file exists on server)

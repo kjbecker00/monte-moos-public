@@ -9,13 +9,27 @@ verbose = False
 
 
 def vprint(string):
-    """Prints a string if the verbose flag is set"""
+    """
+    The vprint function is a wrapper for the print function that only prints if
+    the verbose flag is set.
+
+    :param string: Print a string if the verbose flag is set
+    :return: None
+    :doc-author: Trelent
+    """
     if (verbose):
         print(string)
 
 
 def populate_xy(input_file):
-    """Takes in a csv file and returns a list of x values, y values, and timestamps"""
+    """
+    The populate_xy function takes in a csv file and returns a list of x values, y values, and timestamps.
+
+
+    :param input_file: Specify the file that we want to read from
+    :return: A list of x values, y values, and timestamps
+    :doc-author: Trelent
+    """
     x = []
     y = []
     t = []
@@ -31,7 +45,13 @@ def populate_xy(input_file):
 
 
 def remove_extension(fname):
-    '''Removes the .alog or .csv extension from a file name'''
+    """
+    The remove_extension function takes a file name as an argument and returns the same file name with the extension removed.
+
+    :param fname: Specify the file name that we want to remove the extension from
+    :return: A string without the file extension
+    :doc-author: Trelent
+    """
     last_dot_index = fname.rfind(".")
     if last_dot_index != -1:
         fname = fname[:last_dot_index]
@@ -39,9 +59,26 @@ def remove_extension(fname):
 
 
 def prepare_alog(input_file):
-    """Runs aloggrep to process an alog file into a csv file"""
+    """
+    The prepare_alog function takes in an alog file and runs the aloggrep command on it to process it into a csv file.
+    It then returns the name of this new csv file. If the input is already a csv, then prepare_alog just returns that same
+    file.
+
+    :param input_file: Specify the alog file to process
+    :return: The input file if it is a csv file and returns the output of aloggrep if it is an alog file
+    :doc-author: Trelent
+    """
+
     # Determines if a file is an alog file or a csv file (checks the header)
     def is_alog(fname):
+        """Determines if a file is an alog file (checks the header for a %)
+
+        Args:
+            fname (string): file name
+
+        Returns:
+            bool: if the file is an alog, return true
+        """
         return open(fname, 'r', encoding="utf-8").readline().startswith('%')
 
     # If the file is an alog file, run aloggrep to process it into a csv file
@@ -60,7 +97,13 @@ def prepare_alog(input_file):
 
 
 def find_alogs():
-    """Finds all alog files in the current directory"""
+    """
+    The find_alogs function searches the current directory for all alog files.
+    It then returns a list of strings containing the full path to each alog file.
+
+    :return: A list of alog files in the current directory
+    :doc-author: Trelent
+    """
     alog_files = []
     path = os.getcwd()
     for root, dirs, files in os.walk(path):
@@ -80,7 +123,13 @@ def find_alogs():
 
 
 def alog_vname(alog_file):
-    """Returns the vehicle name from an alog file"""
+    """
+    The alog_vname function returns the vehicle name from an alog file.
+
+    :param alog_file: Specify the alog file to be used
+    :return: The vehicle name from an alog file
+    :doc-author: Trelent
+    """
     script = f"aloggrep {alog_file} NODE_REPORT_LOCAL --v --final --format=val --subpat=name"
     vname = subprocess.run(
         script, shell=True, capture_output=True, check=True).stdout.decode('utf-8')
@@ -91,7 +140,14 @@ def alog_vname(alog_file):
 
 
 def alog_mhash(alog_file):
-    """Returns the mission hash"""
+    """Returns mission hash from alog
+
+    Args:
+        alog_file (string): input file name
+
+    Returns:
+        string: mission hash
+    """    """Returns the mission hash"""
     script = f"aloggrep {alog_file} MISSION_HASH --v --final --format=val --subpat=mhash"
     hash = subprocess.run(script, shell=True,
                           capture_output=True, check=True).stdout.decode('utf-8').strip()
@@ -103,7 +159,11 @@ def alog_mhash(alog_file):
 
 
 def extract_files():
-    """Finds all alog files or uses the ones provided"""
+    """Finds all algo files (or uses the ones provided)
+
+    Returns:
+        list of strings, string: paths to each file, figure name
+    """
     files = []
     figname = "figure.png"
     for (i, arg) in enumerate(sys.argv):
@@ -121,7 +181,15 @@ def extract_files():
 
 
 def handle_no_alogs(to_find_alogs):
-    """Attempts to find alogs if the user specified it"""
+    """
+    The handle_no_alogs function is used to find alog files in the current directory.
+    If no alogs are found, it will print an error message and exit with a status of 1.
+    Otherwise, it will return a list of all the alog files found.
+
+    :param to_find_alogs: Determine if the user wants to find alogs or not
+    :return: A list of alog files
+    :doc-author: Trelent
+    """
     alog_files = []
     if (to_find_alogs):
         alog_files = find_alogs()
@@ -140,7 +208,19 @@ def handle_no_alogs(to_find_alogs):
 
 
 def plot_alogs(alogs, figname, ignore_hash, file_type):
-    """Plots the alog files, saves the plots"""
+    """
+    The plot_alogs function takes in a list of alog files and plots them.
+    It will also save the plot as a file with the name specified by figname.
+    If no figure name is given, it will use the mission hash (if all alogs have same hash) or &quot;figure&quot; if not.
+    The function can take in multiple arguments for alogs, but they must be separated by spaces.
+
+    :param alogs: Pass in the alog files to be plotted
+    :param figname: Set the name of the figure
+    :param ignore_hash: Ignore the hash of the alog files
+    :param file_type: Determine the file type of the output figure
+    :return: A tuple of the mission hash and figure name
+    :doc-author: Trelent
+    """
     mhash = ""
 
     if (file_type == ""):
@@ -192,7 +272,8 @@ def plot_alogs(alogs, figname, ignore_hash, file_type):
 
 
 def display_help():
-    """Prints out all help info."""
+    """Prints out all help info.
+    """
     print(
         "Usage: alog2png.py --fname=figure [OPTIONS] [file1] [file2] ... [fileN] ")
     print("     This python script will input several alog files, read the local   ")
@@ -217,7 +298,13 @@ def display_help():
 
 
 def main():
-    """Run on command line, sets args"""
+    """
+    The main function is the entry point of this program.
+    It takes in command line arguments and plots the data from alog files.
+
+    :return: Nothing
+    :doc-author: Trelent
+    """
     arg = []
     alog_files = []
     figname = ""
@@ -252,7 +339,7 @@ def main():
             alog_files.append(arg)
             vprint("\tGiven alog file: "+arg)
             continue
-        assert False, f"Error: {arg} is not a valid argument. Use -h or --help for usage."
+        assert False, f"alog2image.py error: {arg} is not a valid argument. Use -h or --help for usage."
 
     if len(alog_files) == 0:
         alog_files = handle_no_alogs(to_find_alogs)
@@ -260,4 +347,6 @@ def main():
 
 
 if __name__ == '__main__':
+    """Main function
+    """
     main()

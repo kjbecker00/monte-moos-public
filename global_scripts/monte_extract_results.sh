@@ -2,7 +2,7 @@
 # Kevin Becker, May 26 2023
 
 # Script used to extract results from a job.
-ME=$(basename "$0")
+ME="monte_extract_results.sh"
 TEST="no"
 OFFLOAD="yes"
 VERBOSE=0
@@ -110,9 +110,9 @@ if [[ "$JOB_DIR" -eq "$JOB_FILE_NAME" || "$JOB_DIR_FULL" -eq "$FULL_JOB_PATH" ]]
     JOB_DIR="misc_jobs"
 fi
 vecho "FULL_JOB_PATH=$FULL_JOB_PATH" 1
-vecho "JOB_PATH=$JOB_PATH" 1
-vecho "JOB_DIR_FULL=$JOB_DIR_FULL" 1
-vecho "JOB_DIR=$JOB_DIR" 1
+vecho "JOB_PATH=$JOB_PATH" 2
+vecho "JOB_DIR_FULL=$JOB_DIR_FULL" 2
+vecho "JOB_DIR=$JOB_DIR" 2
 
 
 
@@ -121,15 +121,15 @@ vecho "JOB_DIR=$JOB_DIR" 1
 #-------------------------------------------------------
 #  Part 3a: find the shore alog
 #-------------------------------------------------------
-SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 3 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
+SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
 if [ ! -f "$SHORE_ALOG" ]; then
-    vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 3 -type f -iname *SHORE*.alog" 2
-    SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 3 -type f -iname "*.alog" 2>/dev/null | head -1)
+    vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 4 -type f -iname *SHORE*.alog" 2
+    SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*.alog" 2>/dev/null | head -1)
     if [ ! -f "$SHORE_ALOG" ]; then
-        vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 3 -type f -iname *.alog" 2
-        SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}"  -maxdepth 3 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
+        vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 4 -type f -iname *.alog" 2
+        SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}"  -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
         if [ ! -f "$SHORE_ALOG" ]; then
-            vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION} -maxdepth 3 -type f -iname \"*SHORE*.alog\"" 2
+            vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION} -maxdepth 4 -type f -iname \"*SHORE*.alog\"" 2
             if [ $TEST = "yes" ]; then
                 vecho "${txtred} Error: No alog found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" 0
                 vecho "${txtred} Error: Be sure you have run job first with the following script:" 0
@@ -242,9 +242,9 @@ if [ $TEST = "yes" ]; then
     echo "${txtrst}Now, go into the directory: $(tput smul)${txtblu}$LOCAL_JOB_RESULTS_DIR${txtrst}"
     echo "Make ${txtbld}sure${txtrst} that the results look the way you want. Once you are sure,"
     echo "Copy your directory to $MONTE_MOOS_HOST: "
-    echo "        $(tput smul)${txtblu}rsync -zaPr job_dirs/${yourdir} ${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_JOB_DIRS}/kerbs/desired/path ${txtrst}"
+    echo "        $(tput smul)${txtblu}rsync -zaPr $(dirname $JOB_FILE) ${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_JOB_DIRS}/kerbs/desired/path ${txtrst}"
     echo ""
-    echo "    Then, add this job to your ${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_QUEUE_FILES}/KERBS_job_queue.txt file on the host, and you should be all set!"
+    echo "    Then, add this line to your ${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_QUEUE_FILES}/KERBS_job_queue.txt file on the host, and you should be all set!"
     echo "         ${JOB_DIR}/${JOB_FILE_NAME} 5 "
     echo ""
 else

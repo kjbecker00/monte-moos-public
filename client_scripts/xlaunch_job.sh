@@ -5,9 +5,10 @@
 #-----------------------------------------------------
 QUIET="no"
 UQUERY_TRIES=2
-ME=$(basename "$0")
+ME="xlaunch_job.sh"
 VERBOSE=0
 TIMER_ONLY="no"
+USE_MISSION_CLEAN_SCRIPT="yes"
 OLD_PATH=$PATH
 OLD_DIRS=$IVP_BEHAVIOR_DIRS
 txtrst=$(tput sgr0)    # Reset
@@ -26,7 +27,7 @@ START_POKE+="MOOS_MANUAL_OVERIDE=false RETURN_ALL=false RETURN=false "
 vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$ME: $1" $txtrst; fi; }
 secho() { /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "$1"; } # status echo
 vexit() {
-    secho $txtred"$ME: Error $1. Exit Code $2" $txtrst
+    echo $txtred"$ME: Error $1. Exit Code $2" $txtrst
     safe_exit "$2"
 }
 safe_exit() {
@@ -146,9 +147,8 @@ if [ -z $VEHICLE_SCRIPTS ]; then
     for ((i = 0; i < $VEHICLES; i++)); do
         VEHICLE_SCRIPTS+=("launch_vehicle.sh")
     done
-
 fi
-REPO_DIR="${PWD}/${MONTE_MOOS_CLIENT_REPOS_DIR}/"
+REPO_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}/"
 
 #-----------------------------------------------------
 #  Part 5: Check job parameter file
@@ -234,7 +234,7 @@ if [[ ! -d $FULL_MISSION_DIR ]]; then
     fi
 fi
 cd $FULL_MISSION_DIR
-if [ -f clean.sh ]; then
+if [ -f clean.sh && USE_MISSION_CLEAN_SCRIPT == "yes" ]; then
     ./clean.sh
 fi
 
@@ -284,19 +284,15 @@ if [ -z $SHORE_TARG ]; then
 fi
 # Allow some time for the shore targ to generate
 COUNT=0
+
 while [ "$COUNT" -lt 30 ]; do
-    vecho "    Waiting for shore targ to generate... "0
+    vecho "    Waiting for shore targ to generate in $(pwd)/${SHORE_TARG} or "${FULL_MISSION_DIR}/${SHORE_TARG}"... "0
     if [ -f $SHORE_TARG ]; then
         break
     fi
     # If SHORE_TARG is not found, check the shoreside mission directory
-    if [ -f "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}" ]; then
+    if [ -f "${FULL_MISSION_DIR}/${SHORE_TARG}" ]; then
         SHORE_TARG="${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}"
-        break
-    fi
-    # Check trunk directory
-    if [ -f "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}/${SHORE_TARG}" ]; then
-        SHORE_TARG="${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}/${SHORE_TARG}"
         break
     fi
     sleep 1
@@ -309,7 +305,7 @@ if [ ! -f "$SHORE_TARG" ]; then
     vecho "SHORE_REPO=$SHORE_REPO" 1
     vecho "SHORE_MISSION=$SHORE_MISSION" 1
     vecho "SHORE_TARG=$SHORE_TARG" 1
-    vexit "Missing shoreside targ file. Tried ${SHORE_TARG} and ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG} and ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}/${SHORE_TARG}" 6
+    vexit "Missing shoreside targ file. Tried ${SHORE_TARG} and ${FULL_MISSION_DIR}/${SHORE_TARG}" 6
 else
     vecho "   shore targ $SHORE_TARG found" 1
 fi
@@ -330,17 +326,25 @@ if [[ $? -ne 0 ]]; then
     vexit "uPokeDB not found in PATH=$PATH" 7
 fi
 
-if [ $VERBOSE -lt 2 ]; then
+# Poke the mission
+if [[ -z NUM_REPEAT_POKES ]]; then
+    NUM_REPEAT_POKES=1
+fi
+for ((i = 0; i < NUM_REPEAT_POKES; i++)); do
+    if [ $VERBOSE -lt 2 ]; then
     vecho "uPokeDB $SHORE_TARG $START_POKE >&/dev/null" 2
     uPokeDB $SHORE_TARG $START_POKE >&/dev/null
-else
-    vecho "uPokeDB $SHORE_TARG $START_POKE" 2
-    uPokeDB $SHORE_TARG $START_POKE
-fi
-EXIT_CODE=$?
-if [ $EXIT_CODE != 0 ]; then
-    vexit "uPokeDB $SHORE_TARG $START_POKE returned non-zero exit code:  $EXIT_CODE" 4
-fi
+    else
+        vecho "uPokeDB $SHORE_TARG $START_POKE" 2
+        uPokeDB $SHORE_TARG $START_POKE
+    fi
+    EXIT_CODE=$?
+    if [ $EXIT_CODE != 0 ]; then
+        vexit "uPokeDB $SHORE_TARG $START_POKE returned non-zero exit code:  $EXIT_CODE" 4
+    fi
+    sleep 0.1
+done
+
 
 #-------------------------------------------------------
 #  Part 11: Keep checking if the mission until it is done
