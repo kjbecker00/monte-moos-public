@@ -84,6 +84,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Add all the extra repos to the path
+add_repo "moos-ivp"
 add_extra_repos_to_path
 add_repo "$SHORE_REPO"
 
@@ -187,12 +188,6 @@ echo "$JOB_FILE $JOB_ARGS" >> $LOCAL_JOB_RESULTS_DIR/.argfile
 #-------------------------------------------------------
 #********************************************************
 #  Runs job-specific post-processing script here:
-# Ensrue aloggrep is in the path (bug fix)
-if [[ -z "$(which aloggrep)" ]]; then
-    /${MONTE_MOOS_BASE_DIR}/scripts/secho.sh "Aloggrep not found. Adding moos-ivp to path"
-    PATH+=":${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin"
-    export PATH
-fi
 # Step 1: Find the post_process_results.sh script to use
 results_script_directory="${JOB_PATH}"
 while [[ ! -f "${results_script_directory}/post_process_results.sh" && "${results_script_directory}" != "job_dirs" ]]; do
