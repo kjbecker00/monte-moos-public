@@ -1,5 +1,8 @@
 #!/bin/bash
 # Kevin Becker, Jan 22 2024
+#--------------------------------------------------------------
+# This initalizes many variables used by other scripts
+#--------------------------------------------------------------
 
 VERBOSE=0
 original_path=$PATH

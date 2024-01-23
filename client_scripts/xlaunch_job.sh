@@ -5,6 +5,7 @@
 #-----------------------------------------------------
 QUIET="no"
 UQUERY_TRIES=2
+DELAY_REPEAT_POKE=1 # Default
 ME="xlaunch_job.sh"
 TIMER_ONLY="no"
 USE_MISSION_CLEAN_SCRIPT="yes"
@@ -84,19 +85,7 @@ fi
 if type MOOSDB >/dev/null 2>&1; then
     true
 else
-    vecho "Adding ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin, scripts, ivp/scripts to $PATH..." 1
-    if [[ -d ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin ]]; then
-        PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin
-        PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/scripts
-        PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/ivp/scripts
-    elif [[ -d ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/bin ]]; then
-        PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/bin
-        PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/scripts
-        PATH=$PATH:${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/ivp/scripts
-    else
-        vexit "unable to find ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/bin or ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/bin" 1
-    fi
-    export PATH
+    add_repo "moos-ivp"
 fi
 
 #-----------------------------------------------------
@@ -118,7 +107,6 @@ if [ -z $VEHICLE_SCRIPTS ]; then
         VEHICLE_SCRIPTS+=("launch_vehicle.sh")
     done
 fi
-REPO_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}/"
 
 #-----------------------------------------------------
 #  Part 5: Check job parameter file
@@ -135,67 +123,14 @@ if (($VEHICLES > 0)); then
     fi
 fi
 
-#-----------------------------------------------------
-#  Part 6: Source additional repos before launch
-#-----------------------------------------------------
-#  Part 6a: EXTRA_REPOS
-EXTRA_REPO_COUNT=${#EXTRA_REPOS[@]}
-for ((i = 0; i < EXTRA_REPO_COUNT; i++)); do
-    vecho "Sourcing ${EXTRA_REPOS[i]}..." 1
-    repo="${EXTRA_REPOS[i]}"
-    if [[ "$repo" == "~/"* ]]; then
-        repo="${repo/#\~/$HOME}"
-    else
-        repo="${REPO_DIR}${repo}"
-    fi
-    if [ -d ${repo}/bin ]; then
-        PATH+=":${repo}/bin"
-    else
-        vexit "Missing ${repo}/bin from ${MONTE_MOOS_CLIENT_REPOS_DIR}. Try adding this repo to $(tput smul)${MONTE_MOOS_BASE_REPO_LINKS}$(tput rmul)" 7
-    fi
-    if [ -d ${repo}/lib ]; then
-        IVP_BEHAVIOR_DIRS+=":${repo}/lib"
-    else
-        vexit "Missing ${repo}/bin from ${MONTE_MOOS_CLIENT_REPOS_DIR}. Try adding this repo to $(tput smul)${MONTE_MOOS_BASE_REPO_LINKS}$(tput rmul)" 7
-    fi
-done
-#  Part 6b: Extra binaries
-EXTRA_BIN_COUNT=${#EXTRA_BIN_REPOS[@]}
-for ((i = 0; i < EXTRA_BIN_COUNT; i++)); do
-    vecho "Sourcing ${EXTRA_BIN_REPOS[i]}..." 1
-    repo="${EXTRA_BIN_REPOS[i]}"
-    if [[ "$repo" == "~/"* ]]; then
-        repo="${repo/#\~/$HOME}"
-    else
-        repo="${REPO_DIR}${repo}"
-    fi
-    if [ -d ${repo}/bin ]; then
-        PATH+=":${repo}/bin"
-    else
-        vexit "Missing ${repo}/bin from ${MONTE_MOOS_CLIENT_REPOS_DIR}. Try adding this repo to $(tput smul)repo_links.txt$(tput rmul)" 7
-    fi
-done
-#  Part 6c: Extra libraries for ivp behaviors
-EXTRA_LIB_COUNT=${#EXTRA_LIB_REPOS[@]}
-for ((i = 0; i < EXTRA_LIB_COUNT; i++)); do
-    vecho "Sourcing ${EXTRA_LIB_REPOS[i]}..." 1
-    repo="${EXTRA_LIB_REPOS[i]}"
-    if [[ "$repo" == "~/"* ]]; then
-        repo="${repo/#\~/$HOME}"
-    else
-        repo="${REPO_DIR}${repo}"
-    fi
-    if [ -d ${repo}/lib ]; then
-        IVP_BEHAVIOR_DIRS+=":${repo}/lib"
-    else
-        vexit "Missing ${repo}/bin from ${MONTE_MOOS_CLIENT_REPOS_DIR}. Try adding this repo to $(tput smul)repo_links.txt$(tput rmul)" 7
-    fi
-done
+# Add all job repos to the path
+add_extra_repos_to_path
+
 vecho "IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
 vecho "PATH=$PATH" 2
 
 #-----------------------------------------------------
-#  Part 6.5: Clean directory
+#  Part 6: Clean directory
 #-----------------------------------------------------
 FULL_MISSION_DIR=${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}
 if [[ ! -d $FULL_MISSION_DIR ]]; then
@@ -204,7 +139,7 @@ if [[ ! -d $FULL_MISSION_DIR ]]; then
     fi
 fi
 cd $FULL_MISSION_DIR
-if [ -f clean.sh && USE_MISSION_CLEAN_SCRIPT == "yes" ]; then
+if [[ -f clean.sh && USE_MISSION_CLEAN_SCRIPT == "yes" ]]; then
     ./clean.sh
 fi
 
@@ -312,7 +247,7 @@ for ((i = 0; i < NUM_REPEAT_POKES; i++)); do
     if [ $EXIT_CODE != 0 ]; then
         vexit "uPokeDB $SHORE_TARG $START_POKE returned non-zero exit code:  $EXIT_CODE" 4
     fi
-    sleep 0.1
+    sleep $DELAY_REPEAT_POKE
 done
 
 
@@ -432,7 +367,7 @@ sleep 1
 # Kills ALL child processes
 pkill -P $$
 sleep 1
-PATH=$OLD_PATH
+PATH=$OLD_PATH # from lib_include.sh
 export PATH
 
 safe_exit 0

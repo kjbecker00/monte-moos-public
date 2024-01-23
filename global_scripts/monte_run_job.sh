@@ -73,31 +73,6 @@ if [ $? -ne 0 ]; then
 fi
 
 
-# Removes something from a path-like variable
-remove_from_var() {
-    INDEX=0
-    output_var=":"
-    # Uses ##END_OF_PATH## because sometimes 
-    # two ':'s are put next to each other in the path
-    INPUT="${1}:##END_OF_PATH##"
-    while [ 1 ]; do
-        INDEX=$((INDEX + 1))
-        PART=$(echo $INPUT | cut -d : -f $INDEX)
-        vecho "$PART" 30
-        if [[ "${PART}" = "##END_OF_PATH##" ]]; then
-            break
-        elif [[ "${PART}" = $2 ]]; then
-            vecho "   SKIPPING" 30
-            continue
-        else
-            vecho "ADDING..." 30
-            output_var+="$PART:"
-        fi
-    done
-    output_var="${output_var%:}"
-    echo "$output_var"
-}
-
 #-------------------------------------------------------
 #  Part 1b: Set up test mode
 #-------------------------------------------------------
@@ -118,17 +93,14 @@ fi
 #-------------------------------------------------------
 #  Part 1c: Clear extraneous paths and dirs
 #-------------------------------------------------------
-OLD_PATH=$PATH
-OLD_DIRS=$IVP_BEHAVIOR_DIRS
 # removes all paths containing moos-ivp- as part of the path
 vecho "$ME: Temporarially removing moos-ivp-* from PATH and IVP_BEHAVIOR_DIRS" 1
-vecho "$ME: OLD_PATH: $OLD_PATH" 1
-PATH=$(remove_from_var "$PATH" "*/moos-ivp-*/bin")
-PATH=$(remove_from_var "$PATH" "*/moos-ivp-*/trunk/bin")
-PATH=$(remove_from_var "$PATH" "*/moos-ivp-*/scripts")
-PATH=$(remove_from_var "$PATH" "*/moos-ivp-*/trunk/scripts")
-IVP_BEHAVIOR_DIRS=$(remove_from_var "$IVP_BEHAVIOR_DIRS" "*/moos-ivp-*/lib")
-IVP_BEHAVIOR_DIRS=$(remove_from_var "$IVP_BEHAVIOR_DIRS" "*/moos-ivp-*/trunk/lib")
+PATH=$(remove_from_pathlike_string "$PATH" "*/moos-ivp-*/bin")
+PATH=$(remove_from_pathlike_string "$PATH" "*/moos-ivp-*/trunk/bin")
+PATH=$(remove_from_pathlike_string "$PATH" "*/moos-ivp-*/scripts")
+PATH=$(remove_from_pathlike_string "$PATH" "*/moos-ivp-*/trunk/scripts")
+IVP_BEHAVIOR_DIRS=$(remove_from_pathlike_string "$IVP_BEHAVIOR_DIRS" "*/moos-ivp-*/lib")
+IVP_BEHAVIOR_DIRS=$(remove_from_pathlike_string "$IVP_BEHAVIOR_DIRS" "*/moos-ivp-*/trunk/lib")
 export PATH
 export IVP_BEHAVIOR_DIRS
 vecho "$ME: PATH after removing all instances of */moos-ivp-*/bin/* and */moos-ivp-*/scripts/*:   $PATH" 1

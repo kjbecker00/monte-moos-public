@@ -83,6 +83,10 @@ if [[ $? -ne 0 ]]; then
     vexit "Sourcing job file yeilded non-zero exit code" 4
 fi
 
+# Add all the extra repos to the path
+add_extra_repos_to_path
+add_repo "$SHORE_REPO"
+
 #-------------------------------------------------------
 # Part 2.5: Determine the job directory (to put the results in)
 #-------------------------------------------------------
