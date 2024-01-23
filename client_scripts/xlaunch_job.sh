@@ -80,7 +80,6 @@ fi
 
 #-------------------------------------------------------
 #  Part 3: Add MOOS-IVP to path, export DIRS
-#          needed if run in ssh
 #-------------------------------------------------------
 if type MOOSDB >/dev/null 2>&1; then
     true

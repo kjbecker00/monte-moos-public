@@ -54,46 +54,12 @@ done
 #  Part 3: Write to bad_jobs.txt
 #--------------------------------------------------------------
 if [[ "${DELETE}" != "yes" ]]; then
-  echo "$JOB" >> bad_jobs.txt
+  echo "$JOB" >> ${CARLO_DIR_LOCATION}/bad_jobs.txt
+  ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${CARLO_DIR_LOCATION}/bad_jobs.txt ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt
 else
-  rm bad_jobs.txt
-  vecho 1 "Delete bad_jobs.txt file"
+  [[ -f ${CARLO_DIR_LOCATION}/bad_jobs.txt ]] || { rm ${CARLO_DIR_LOCATION}/bad_jobs.txt ; }
+  ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt --delete
+  vecho "Delete bad_jobs.txt file" 1
 fi
-
-#--------------------------------------------------------------
-#  Part 5: Start ssh agent, create dir
-#--------------------------------------------------------------
-# Start ssh-agent
-eval $(ssh-agent -s) &>/dev/null
-ps -p $SSH_AGENT_PID &>/dev/null
-SSH_AGENT_RUNNING=$?
-[ ${SSH_AGENT_RUNNING} -eq 0 ] || { vecho "Unable to start ssh-agent" 3; }
-ssh-add -t 7200 ~/.ssh/id_rsa_yco 2>/dev/null
-[ "$?" -eq "0" ] || { vexit "ssh agent unable to add yco key" 3; }
-ssh -n "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}" "mkdir -p ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs" &>/dev/null
-EXIT_CODE=$?
-if [ ! $EXIT_CODE -eq "0" ]; then
-    if [ $EXIT_CODE -eq 255 ]; then
-        vecho "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst 0
-    fi
-fi
-
-
-#--------------------------------------------------------------
-#  Part 6: Write to host or delete the file from the host
-#--------------------------------------------------------------
-if [[ "${DELETE}" = "yes" ]]; then
-    ssh -n "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}" "rm -f ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt" &>/dev/null
-else
-    rsync -zaPr -q bad_jobs.txt "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt" # &>/dev/null
-fi
-# Check exit code for errors
-EXIT_CODE=$?
-if [ ! $EXIT_CODE -eq "0" ]; then
-    if [ $EXIT_CODE -eq 255 ]; then
-        vecho "$txtylw Warning: ssh unable to connect. Continuing..."$txtrst 0
-    fi
-fi
-
 
 

@@ -35,7 +35,7 @@ for ARGI; do
         # Assumed running as test
         if [ -z $JOB_FILE ]; then
             TEST="yes"
-            if [ $VERBOSE -eq 0 ]; then
+            if [[ $VERBOSE -eq 0 ]]; then
                 VERBOSE=1
             fi
             JOB_FILE=$ARGI
@@ -52,7 +52,6 @@ done
 #-------------------------------------------------------
 
 # Check if monte-moos was added to path and carlo dir has been sourced
-vecho "Checking enviornment" 1
 [[ -d $MONTE_MOOS_BASE_DIR ]] || { echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) Does not exist. Should be set in ~/.bashrc or equivalent"; exit 30; }
 throwaway="$(which monte_check_job.sh)"
 [[ "$?" -eq 0 ]] || { echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) not added to path" ; exit 31; }
@@ -147,25 +146,14 @@ vecho "Shoreside variables set" 1
 vecho "JOB_TIMEOUT set" 1
 
 #-------------------------------------------------------
-#  Part 5: Checking ssh agent
+#  Part 5: Checking ssh
 #-------------------------------------------------------
 if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
-    # Check for ssh key
-    if [ -f $MONTE_MOOS_HOST_SSH_KEY ]; then
-        chmod -R go-rwx $MONTE_MOOS_HOST_SSH_KEY &>/dev/null
-    else
-        vexit "Unable to find ssh key. Make sure it is saved to $MONTE_MOOS_HOST_SSH_KEY. If you are not using the current computer as the client, feel free to continue" 14
+    ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh --test
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -ne 0 ]; then
+        vexit " with ssh (exit code $EXIT_CODE). If you are not using the current computer as the client, feel free to continue" 14
     fi
-    # Start ssh-agent
-    eval $(ssh-agent -s) &>/dev/null
-    ps -p $SSH_AGENT_PID &>/dev/null
-    SSH_AGENT_RUNNING=$?
-    if [ ${SSH_AGENT_RUNNING} -ne 0 ]; then
-        vexit "Unable to start ssh-agent. If you are not using the current computer as the client, feel free to continue" 16
-    fi
-    vecho "ssh-agent working" 1
-# else
-    # echo "${txtylw}$0: Assuming current machine is not a client (skipping ssh-agent check). Add -c to check as a client"
 fi
 
 #-------------------------------------------------------

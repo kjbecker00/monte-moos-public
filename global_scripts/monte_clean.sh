@@ -108,7 +108,7 @@ fi
 # Part 4: Remove old moos-dirs (older than 30 days)
 #-------------------------------------------------------
 if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
-    echo "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}"
+    vecho "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
     find ${MONTE_MOOS_CLIENT_REPOS_DIR} -type d -mtime +30 -exec echo "     Removing: {}" \; -exec rm -r {} \;
     echo "done"
 fi
