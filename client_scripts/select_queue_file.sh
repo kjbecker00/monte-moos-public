@@ -1,7 +1,6 @@
 #!/bin/bash
 # Kevin Becker Nov 17 2023
 
-[[ -f myname.txt ]] || { echo "$(hostname)" > myname.txt ; }
 HOST_QUEUE_FILE="host_job_queue.txt"
 MY_QUEUE_FILE="${MYNAME}_job_queue.txt"
 QUEUE_FILE=""

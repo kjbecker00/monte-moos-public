@@ -32,7 +32,6 @@ for ARGI; do
         echo " the line to be secho'd, then just the time is updated.    "
         echo " The secho.txt file retains the first $LINES_TO_KEEP lines. "
         echo "                                                          "
-        echo "Also generate myname.txt"
         echo "Options:                                              "
         echo "  --help, -h                                          "
         echo "    Display this help message                         "
@@ -63,18 +62,9 @@ if [ -f /usr/bin/vcgencmd ]; then
     TO_PRINT="$TO_PRINT (temp = $TEMP free memory=$free_memory)"
 fi
 
-#--------------------------------------------------------------
-#  Part 4: Get name of the client
-#--------------------------------------------------------------
-if [ -f "/home/student2680/pablo-common/bin/get_vname.sh" ]; then
-    name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
-else
-    name="$(hostname)"
-fi
-echo "$name" >"${CARLO_DIR_LOCATION}/myname.txt"
 
 #--------------------------------------------------------------
-#  Part 5: Print and write to status.txt
+#  Part 4: Print and write to status.txt
 #--------------------------------------------------------------
 
 echo "$TO_PRINT"
@@ -102,6 +92,6 @@ echo "$KEPT_LINES" >>status.tmp
 mv status.tmp ${CARLO_DIR_LOCATION}/status.txt
 
 #--------------------------------------------------------------
-#  Part 6: Copy to host
+#  Part 5: Copy to host
 #--------------------------------------------------------------
-${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh "${CARLO_DIR_LOCATION}/status.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/status/${name}.txt" >&/dev/null
+${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh "${CARLO_DIR_LOCATION}/status.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/status/${MYNAME}.txt" >&/dev/null

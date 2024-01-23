@@ -2,9 +2,8 @@
 # Kevin Becker Jun 9 2023
 
 ME="monte_check_job.sh"
-CLIENT="no"
+# CLIENT="no"
 TEST="no"
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 #-------------------------------------------------------
 #  Part 0: Check for and handle command-line arguments
@@ -21,7 +20,7 @@ for ARGI; do
         echo "Options:                                                  "
         echo " --help, -h Show this help message                        "
         echo " --job_file=[FILE]    job file to be run"
-        echo " --client, -c         check as a client (check ssh-agent)"
+        # echo " --client, -c         check as a client (check ssh-agent)"
         exit 0
     elif [[ "${ARGI}" == "--job_file="* ]]; then
         JOB_FILE="${ARGI#*=}"
@@ -29,8 +28,8 @@ for ARGI; do
         JOB_ARGS="${ARGI#*=}"
     elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
         VERBOSE=1
-    elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
-        CLIENT="yes"
+    # elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
+    #     CLIENT="yes"
     else
         # Job file provided without the flag
         # Assumed running as test
@@ -41,7 +40,8 @@ for ARGI; do
             fi
             JOB_FILE=$ARGI
         else
-            vexit "$ME.sh: Bad Arg: $ARGI " 1
+            echo "$ME.sh: Bad Arg: $ARGI " 
+            exit 1
         fi
     fi
 done
@@ -53,9 +53,17 @@ done
 
 # Check if monte-moos was added to path and carlo dir has been sourced
 vecho "Checking enviornment" 1
-[[ -d $MONTE_MOOS_BASE_DIR ]] || { vexit "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) Does not exist. Should be set in ~/.bashrc or equivalent" 30; }
+[[ -d $MONTE_MOOS_BASE_DIR ]] || { echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) Does not exist. Should be set in ~/.bashrc or equivalent"; exit 30; }
 throwaway="$(which monte_check_job.sh)"
-[[ "$?" -eq 0 ]] || { vexit "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) not added to path" 31; }
+[[ "$?" -eq 0 ]] || { echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) not added to path" ; exit 31; }
+
+#-------------------------------------------------------
+# Now that the path is set, we can import the proper 
+# utils
+#-------------------------------------------------------
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+
+
 # Variables to be set for BOTH the host and the client
 [[ -d $CARLO_DIR_LOCATION ]] || { vexit "CARLO_DIR_LOCATION ($CARLO_DIR_LOCATION) does not exist. Should be set in ~/.bashrc or equivalent" 30; }
 [[ ! -z $MONTE_MOOS_HOST ]] || { vexit "MONTE_MOOS_HOST ($MONTE_MOOS_HOST) not set. Did you add \"source ${CARLO_DIR_LOCATION}/monte_info\" to your ~/.bashrc or equivalent?" 30; }
@@ -63,7 +71,7 @@ throwaway="$(which monte_check_job.sh)"
 [[ ! -z $MONTE_MOOS_HOST_JOB_DIRS ]] || { vexit "MONTE_MOOS_HOST_JOB_DIRS ($MONTE_MOOS_HOST_JOB_DIRS) not set" 30; }
 [[ ! -z $MONTE_MOOS_HOST_QUEUE_FILES ]] || { vexit "MONTE_MOOS_HOST_QUEUE_FILES ($MONTE_MOOS_HOST_QUEUE_FILES) not set" 30; }
 
-if [[ $(hostname) == $MONTE_MOOS_HOST ]]; then
+if [[ $MYNAME == $MONTE_MOOS_HOST ]]; then
     vecho "Checking as host" 1
     # Variables to be set for the HOST only
     [[ ! -z $MONTE_MOOS_HOST_WEB_ROOT_DIR ]] || { vexit "MONTE_MOOS_HOST_WEB_ROOT_DIR ($MONTE_MOOS_HOST_WEB_ROOT_DIR) not set" 30; }
@@ -141,12 +149,12 @@ vecho "JOB_TIMEOUT set" 1
 #-------------------------------------------------------
 #  Part 5: Checking ssh agent
 #-------------------------------------------------------
-if [ "$(hostname)" != "$MONTE_MOOS_HOST" ] && [ "$CLIENT" == "yes" ]; then
+if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     # Check for ssh key
-    if [ -f ~/.ssh/id_rsa_yco ]; then
-        chmod -R go-rwx ~/.ssh/id_rsa_yco &>/dev/null
+    if [ -f $MONTE_MOOS_HOST_SSH_KEY ]; then
+        chmod -R go-rwx $MONTE_MOOS_HOST_SSH_KEY &>/dev/null
     else
-        vexit "Unable to find ssh key. Make sure it is saved to ~/.ssh/id_rsa_yco. If you are not using the current computer as the client, feel free to continue" 14
+        vexit "Unable to find ssh key. Make sure it is saved to $MONTE_MOOS_HOST_SSH_KEY. If you are not using the current computer as the client, feel free to continue" 14
     fi
     # Start ssh-agent
     eval $(ssh-agent -s) &>/dev/null
@@ -156,8 +164,8 @@ if [ "$(hostname)" != "$MONTE_MOOS_HOST" ] && [ "$CLIENT" == "yes" ]; then
         vexit "Unable to start ssh-agent. If you are not using the current computer as the client, feel free to continue" 16
     fi
     vecho "ssh-agent working" 1
-else
-    echo "${txtylw}$0: Assuming current machine is not a client (skipping ssh-agent check). Add -c to check as a client"
+# else
+    # echo "${txtylw}$0: Assuming current machine is not a client (skipping ssh-agent check). Add -c to check as a client"
 fi
 
 #-------------------------------------------------------

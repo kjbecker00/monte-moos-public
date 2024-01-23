@@ -10,7 +10,7 @@ ME="monte_compile_results.sh"
 TYPE="cp"              # cp for copy, ln for link
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
-if [[ $MONTE_MOOS_HOST == $(cat "${CARLO_DIR_LOCATION}"/myname.txt) ]]; then
+if [[ $MONTE_MOOS_HOST == $MYNAME ]]; then
     OUTPUT_BASE_DIR="${MONTE_MOOS_HOST_WEB_ROOT_DIR}/results"
 else
     OUTPUT_BASE_DIR="${CARLO_DIR_LOCATION}/compiled_results"
@@ -76,7 +76,7 @@ fi
 JOB_NAME=$(basename "$PATH_TO_JOB_FILE") # The name of the job_file itself
 
 # Remove the job_dirs/ from the front of the path
-if [[ $MONTE_MOOS_HOST == $(cat "${CARLO_DIR_LOCATION}"/myname.txt) ]]; then
+if [[ $MONTE_MOOS_HOST == $MYNAME ]]; then
     job_dir=${PATH_TO_JOB_FILE#"$MONTE_MOOS_HOST_JOB_DIRS"/}
 else
     job_dir=${PATH_TO_JOB_FILE#job_dirs/}
@@ -137,7 +137,7 @@ EXIT_CODE=$?
 #  Part 4: Copy the web subdirectories (only for host)
 #--------------------------------------------------------------
 # Loop through every run of the job
-# if [[ $MONTE_MOOS_HOST == $(cat "${CARLO_DIR_LOCATION}"/myname.txt) ]]; then
+# if [[ $MONTE_MOOS_HOST == $MYNAME ]]; then
 for job_result in "$INPUT_JOB_RESULTS_DIR"/*; do
     if [ -d "$job_result" ]; then
         JOB_ID="${job_result#"$INPUT_JOB_RESULTS_DIR"/}" # JOB_ID format: job_name_hash

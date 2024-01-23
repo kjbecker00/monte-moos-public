@@ -51,7 +51,7 @@ fi
 
 #-------------------------------------------------------
 #  Part 1b: Warn the user about loosing files
-if [ -d "job_dirs" ] && [ "$(hostname)" != "$MONTE_MOOS_HOST" ]; then
+if [ -d "job_dirs" ] && [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     if [ "$IGNORE_WARNING" != "yes" ]; then
         echo "WARNING: All results files. If you are pulling from the host,"
         echo "any new job files may be overwritten with the host's. Be sure "
@@ -62,7 +62,7 @@ if [ -d "job_dirs" ] && [ "$(hostname)" != "$MONTE_MOOS_HOST" ]; then
 fi
 
 #  Part 1c: Check if this is the host
-if [ "$(hostname)" = "$MONTE_MOOS_HOST" ]; then
+if [ "$MYNAME" = "$MONTE_MOOS_HOST" ]; then
     vexit "This script should only be run on a client" 1
 fi
 

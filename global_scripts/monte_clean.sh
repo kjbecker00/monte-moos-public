@@ -83,7 +83,7 @@ if [ $ALL = "yes" ]; then
         read -n 1 -s
         OVERRIDE_CHECKS="yes"
     fi
-    if [ "$(hostname)" == "$MONTE_MOOS_HOST" ]; then
+    if [ "$MYNAME" == "$MONTE_MOOS_HOST" ]; then
         METADATA="yes"
     else
         RESULTS="yes"
@@ -107,7 +107,7 @@ fi
 #-------------------------------------------------------
 # Part 4: Remove old moos-dirs (older than 30 days)
 #-------------------------------------------------------
-if [[ $(hostname) != "$MONTE_MOOS_HOST" ]]; then
+if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
     echo "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}"
     find ${MONTE_MOOS_CLIENT_REPOS_DIR} -type d -mtime +30 -exec echo "     Removing: {}" \; -exec rm -r {} \;
     echo "done"
@@ -189,7 +189,7 @@ fi
 #-------------------------------------------------------
 if [[ "${RESULTS}" = "yes" ]]; then
     vecho "Cleaning results" 1
-    if [ "$(hostname)" == "$MONTE_MOOS_HOST" ]; then
+    if [ "$MYNAME" == "$MONTE_MOOS_HOST" ]; then
         echo "Host is $MONTE_MOOS_HOST. Not cleaning results."
         : # <-- No-op. Durring dev, it would do: # rm -rf /home/web/monte/results/* >/dev/null
     else

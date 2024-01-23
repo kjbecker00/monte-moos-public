@@ -50,22 +50,8 @@ for ARGI; do
 done
 
 
-
-
-
 #--------------------------------------------------------------
-#  Part 3: Get name of the client
-#--------------------------------------------------------------
-if [ -f "/home/student2680/pablo-common/bin/get_vname.sh" ]; then
-    name="$(/home/student2680/pablo-common/bin/get_vname.sh)"
-else
-    name="$(hostname)"
-fi
-echo "$name" >myname.txt
-
-
-#--------------------------------------------------------------
-#  Part 4: Write to bad_jobs.txt
+#  Part 3: Write to bad_jobs.txt
 #--------------------------------------------------------------
 if [[ "${DELETE}" != "yes" ]]; then
   echo "$JOB" >> bad_jobs.txt
@@ -97,9 +83,9 @@ fi
 #  Part 6: Write to host or delete the file from the host
 #--------------------------------------------------------------
 if [[ "${DELETE}" = "yes" ]]; then
-    ssh -n "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}" "rm -f ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${name}.txt" &>/dev/null
+    ssh -n "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}" "rm -f ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt" &>/dev/null
 else
-    rsync -zaPr -q bad_jobs.txt "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${name}.txt" # &>/dev/null
+    rsync -zaPr -q bad_jobs.txt "${MONTE_MOOS_USERNAME}@${MONTE_MOOS_HOSTNAME_SSH}:${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt" # &>/dev/null
 fi
 # Check exit code for errors
 EXIT_CODE=$?

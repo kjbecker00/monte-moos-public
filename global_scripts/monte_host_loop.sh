@@ -50,7 +50,7 @@ fi
 #-------------------------------------------------------
 #  Part 2: Error handling
 #-------------------------------------------------------
-if [ "$(hostname)" != "$MONTE_MOOS_HOST" ]; then
+if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     vexit "This script should only be run on the host" 1
 fi
 if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
