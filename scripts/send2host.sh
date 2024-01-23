@@ -113,7 +113,7 @@ if [[ $DELETE != "yes" ]]; then
         DIR_TO_MAKE="$(dirname $HOST_PATH)"
     fi
     vecho "making dir $DIR_TO_MAKE on host" 2
-    ssh -n ${SSH_HOST} "mkdir -p $DIR_TO_MAKE" &>/dev/null
+    ssh -n ${SSH_HOST} "mkdir -p $DIR_TO_MAKE" 
     EXIT_CODE=$?
     if [ ! $EXIT_CODE -eq "0" ]; then
         if [ $EXIT_CODE -eq 255 ]; then
@@ -154,7 +154,7 @@ else
     fi
 
     # Delete file/dir on host
-    ssh -n ${SSH_HOST} "rm -r $HOST_PATH" &>/dev/null
+    ssh -n ${SSH_HOST} "rm -rf $HOST_PATH" &>/dev/null
 
     # Check exit code
     EXIT_CODE=$?
@@ -162,7 +162,7 @@ else
         if [ $EXIT_CODE -eq 255 ]; then
             echo $txtylw"      warning: ssh unable to connect. Continuing..."$txtrst
         else
-            vexit "ssh -n ${SSH_HOST} \"rm -r $HOST_PATH\" had exit code $EXIT_CODE. Could not ssh to $SSH_HOST" 3
+            vexit "ssh -n ${SSH_HOST} \"rm -rf $HOST_PATH\" had exit code $EXIT_CODE. Could not ssh to $SSH_HOST" 3
         fi
     fi
 fi

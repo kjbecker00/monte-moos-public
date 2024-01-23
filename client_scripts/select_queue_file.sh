@@ -2,11 +2,11 @@
 # Kevin Becker Nov 17 2023
 
 HOST_QUEUE_FILE="host_job_queue.txt"
-MY_QUEUE_FILE="${MYNAME}_job_queue.txt"
 QUEUE_FILE=""
 HOSTLESS="no"
 ME="select_queue_file.sh"
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+MY_QUEUE_FILE="${MYNAME}_job_queue.txt"
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments

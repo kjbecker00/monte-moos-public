@@ -41,15 +41,16 @@ for ARGI; do
     fi
 done
 
+
+#-------------------------------------------------------
+#  Part 2: Error handling
+#-------------------------------------------------------
 # Check the shell enviornment
 monte_check_job.sh
 if [ $? -ne 0 ]; then
     vexit "Enviornment has errors. Please fix them before running this script." 1
 fi
-
-#-------------------------------------------------------
-#  Part 2: Error handling
-#-------------------------------------------------------
+# Basic error handling
 if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     vexit "This script should only be run on the host" 1
 fi
