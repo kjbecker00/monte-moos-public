@@ -105,7 +105,7 @@ if [ $METADATA = "yes" ] && [ $OVERRIDE_CHECKS != "yes" ]; then
 fi
 
 #-------------------------------------------------------
-# Part 4: Remove old moos-dirs (older than 30 days)
+# Part 4: ALWAYS Remove old moos-dirs (older than 30 days)
 #-------------------------------------------------------
 if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
     vecho "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
@@ -147,7 +147,7 @@ if [ -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
                     find . -name '.build_log.txt' -exec rm -rf {} \; 2>/dev/null
                 fi
 
-                # Always remove temporary files, logs, and other junk
+                # ALWAYS remove temporary files, alogs, and other junk
                 rm -f .DS_Store
                 rm -f missions/*/.LastOpenedMOOSLogDirectory
                 find . -name '*~' -exec rm -rf {} \; 2>/dev/null
@@ -168,7 +168,7 @@ if [ -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
     fi
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Part 5b: Always clean moos-ivp/ivp/missions
+    # Part 5b: ALWAYS clean moos-ivp/ivp/missions
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Always clean all moos-ivp missions
     if [ -d moos-ivp ]; then
@@ -231,7 +231,7 @@ if [[ "${CACHE}" = "yes" ]]; then
 fi
 
 #-------------------------------------------------------
-# Part 9: Always do the following
+# Part 9: ALWAYS do the following
 #-------------------------------------------------------
 # Always clean all remaining .enc files
 vecho "Cleaning all remaining files" 3

@@ -60,6 +60,13 @@ if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
 fi
 
 #-------------------------------------------------------
+#  Part 2b: Clean up any old monte processes
+#-------------------------------------------------------
+cd ${CARLO_DIR_LOCATION}
+monte_clean.sh --cache
+cd - >/dev/null
+
+#-------------------------------------------------------
 #  Part 3: Looping thru the queue
 #-------------------------------------------------------
 while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
@@ -111,6 +118,9 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     # An easy way to exit without knowing the PID
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     check_quit
+
+    # Clean up any old alogs, artifacts, etc
+    monte_clean.sh
 
 done
 
