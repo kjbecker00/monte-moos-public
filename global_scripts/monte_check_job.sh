@@ -28,8 +28,8 @@ for ARGI; do
         JOB_ARGS="${ARGI#*=}"
     elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
         VERBOSE=1
-    # elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
-    #     CLIENT="yes"
+    elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
+        CLIENT="yes"
     else
         # Job file provided without the flag
         # Assumed running as test
