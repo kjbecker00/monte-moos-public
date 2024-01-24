@@ -141,7 +141,7 @@ RUNS_ACT=$((RUNS_ACT + 1))
 vecho "New run_act=$RUNS_ACT" 1
 
 
-
+cd ${CARLO_DIR_LOCATION}
 if [ "$HOSTLESS" = "no" ]; then
     vecho "Getting job dirs..." 1
     vecho "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh \"${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_WGET_BASE_DIR}/clients/job_dirs/$JOB_DIR_FILE\"" 2
