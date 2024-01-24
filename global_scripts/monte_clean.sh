@@ -231,8 +231,8 @@ if [[ "${CACHE}" = "yes" ]]; then
     [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
     if [[ $MYNAME != $MONTE_MOOS_HOST ]]; then
         /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
+        find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null  
     fi
-    find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
 fi
 
 #-------------------------------------------------------

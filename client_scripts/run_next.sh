@@ -176,18 +176,18 @@ if [ "$HOSTLESS" = "no" ]; then
             vexit "after decrypting $JOB_DIR_NAME, ${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME still does not exist" 1
         fi
 
-    # Pull from host failed; network error. Use a local copy if it exists
-    elif [[ $EXIT_CODE -eq 4 ]]; then
-        secho "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh ${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_HOST_CLIENT_DIR}/job_dirs/$JOB_DIR_NAME failed with code $EXIT_CODE. Checking for local copy..."
+    # # Pull from host failed; network error. Use a local copy if it exists
+    # elif [[ $EXIT_CODE -eq 4 ]]; then
+    #     secho "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh ${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_HOST_CLIENT_DIR}/job_dirs/$JOB_DIR_NAME failed with code $EXIT_CODE. Checking for local copy..."
        
-        # - - - - - - - - - - - - - - - - - - - - -
-        # Network error
-        if [ -f "job_dirs/$JOB_FILE_NO_PREFIX" ]; then
-            vecho "Local copy found. Running..." 1
-        else
-            /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh "${JOB_FILE}"
-            vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
-        fi
+    #     # - - - - - - - - - - - - - - - - - - - - -
+    #     # Network error
+    #     if [ -f "job_dirs/$JOB_FILE_NO_PREFIX" ]; then
+    #         vecho "Local copy found. Running..." 1
+    #     else
+    #         /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh "${JOB_FILE}"
+    #         vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
+    #     fi
     # Other failure. Exit
     else
         vexit "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh ${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_HOST_CLIENT_DIR}/job_dirs/$JOB_DIR_NAME failed with code $EXIT_CODE" 1

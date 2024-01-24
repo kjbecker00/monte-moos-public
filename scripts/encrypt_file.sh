@@ -78,6 +78,16 @@ if [[ $INPUT = *".enc" ]]; then
         fi
         vecho "Decompressed $INPUT_STRIPPED to $OUTPUT. Removing $INPUT_STRIPPED" 1
         rm "$INPUT_STRIPPED"
+
+        INPUT_STRIPPED_STRIPPED="$(basename $INPUT)"
+        INPUT_STRIPPED_STRIPPED="${INPUT_STRIPPED_STRIPPED%%.*}" 
+        vecho "Checking if ${OUTPUT}/${INPUT_STRIPPED_STRIPPED}_backup exists..." 1
+
+        # Rename, as consistent with send2host.sh
+        if [[ -d "${OUTPUT}/${INPUT_STRIPPED_STRIPPED}_backup" ]]; then
+            vecho "${OUTPUT}/${INPUT_STRIPPED_STRIPPED}_backup exists. Moving to $OUTPUT/$INPUT_STRIPPED_STRIPPED" 1
+            mv "${OUTPUT}/${INPUT_STRIPPED_STRIPPED}_backup" "$OUTPUT/$INPUT_STRIPPED_STRIPPED"
+        fi
     else
         vecho "not compressed, good to go" 1
         true
