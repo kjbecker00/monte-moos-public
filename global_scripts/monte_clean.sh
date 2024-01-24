@@ -122,7 +122,7 @@ fi
 
 if [[ "${BINARIES}" = "yes" ]]; then
     vecho "Cleaning binaries..." 1
-    [ -f .built_dirs ] && rm -f .built_dirs
+    [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
 fi
 
 if [ -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
@@ -216,8 +216,8 @@ fi
 #-------------------------------------------------------
 if [[ "${METADATA}" = "yes" ]]; then
     vecho "Cleaning metadata (status.txt and myname.txt)" 1
-    [ -f status.txt ] && rm -f status.txt
-    [ -f myname.txt ] && rm -f myname.txt
+    [ -f ${CARLO_DIR_LOCATION}/status.txt ] && rm -f ${CARLO_DIR_LOCATION}/status.txt
+    [ -f ${CARLO_DIR_LOCATION}/myname.txt ] && rm -f ${CARLO_DIR_LOCATION}/myname.txt
 fi
 
 #-------------------------------------------------------
@@ -228,9 +228,11 @@ fi
 #-------------------------------------------------------
 if [[ "${CACHE}" = "yes" ]]; then
     vecho "Cleaning cache (.build_dirs, bad_jobs.txt, *_job_queue.txt)" 1
-    [ -f .built_dirs ] && rm -f .built_dirs
-    /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
-    find . -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
+    [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
+    if [[ $MYNAME != $MONTE_MOOS_HOST ]]; then
+        /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
+    fi
+    find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
 fi
 
 #-------------------------------------------------------
@@ -238,12 +240,12 @@ fi
 #-------------------------------------------------------
 # Always clean all remaining .enc files
 vecho "Cleaning all remaining files" 3
-find . -name '*.enc' -exec rm -rf {} \; 2>/dev/null
-find . -name '*.enc.*' -exec rm -rf {} \; 2>/dev/null
+find ${CARLO_DIR_LOCATION} -name '*.enc' -exec rm -rf {} \; 2>/dev/null
+find ${CARLO_DIR_LOCATION} -name '*.enc.*' -exec rm -rf {} \; 2>/dev/null
 # Always remove temporary files
-[ -f .old_*_job_queue.txt ] && rm -f .old_*_job_queue.txt
-[ -f .temp_queue.txt ] && rm -f .temp_queue.txt
+[ -f ${CARLO_DIR_LOCATION}/.old_*_job_queue.txt ] && rm -f ${CARLO_DIR_LOCATION}/.old_*_job_queue.txt
+[ -f ${CARLO_DIR_LOCATION}/.temp_queue.txt ] && rm -f ${CARLO_DIR_LOCATION}/.temp_queue.txt
 # Remove empty results folders
-[[ -d results ]] && { find results -type d -delete 2>/dev/null; }
+[[ -d ${CARLO_DIR_LOCATION}/results ]] && { find ${CARLO_DIR_LOCATION}/results -type d -delete 2>/dev/null; }
 
 exit 0
