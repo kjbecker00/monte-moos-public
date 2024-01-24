@@ -9,6 +9,7 @@
 
 BINARIES="no"
 RESULTS="no"
+CACHE="no"
 MOOS_DIRS="no"
 OVERRIDE_CHECKS="no"
 METADATA="no"
@@ -46,6 +47,8 @@ for ARGI; do
         VERBOSE=1
     elif [ "${ARGI}" = "--binaries" -o "${ARGI}" = "-b" ]; then
         BINARIES="yes"
+    elif [ "${ARGI}" = "--cache" -o "${ARGI}" = "-c" ]; then
+        CACHE="yes"
     elif [ "${ARGI}" = "--metadata" -o "${ARGI}" = "-m" ]; then
         METADATA="yes"
     elif [ "${ARGI}" = "--results" ]; then
