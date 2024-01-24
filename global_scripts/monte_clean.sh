@@ -229,7 +229,7 @@ fi
 if [[ "${CACHE}" = "yes" ]]; then
     vecho "Cleaning cache (.build_dirs, bad_jobs.txt, *_job_queue.txt)" 1
     [ -f .built_dirs ] && rm -f .built_dirs
-    ./${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
+    /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
     find . -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
 fi
 
