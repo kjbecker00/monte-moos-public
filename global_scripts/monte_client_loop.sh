@@ -49,8 +49,9 @@ if [ $? -ne 0 ]; then
     vexit "Enviornment has errors. Please fix them before running this script." 1
 fi
 
-#-------------------------------------------------------
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 1b: Warn the user about loosing files
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -d "job_dirs" ] && [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     if [ "$IGNORE_WARNING" != "yes" ]; then
         echo "WARNING: All results files. If you are pulling from the host,"
@@ -61,18 +62,24 @@ if [ -d "job_dirs" ] && [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     fi
 fi
 
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 1c: Check if this is the host
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ "$MYNAME" = "$MONTE_MOOS_HOST" ]; then
     vexit "This script should only be run on a client" 1
 fi
 
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 1d: Check for force_quit file
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
     secho "${CARLO_DIR_LOCATION}/force_quit file found. Not starting up until this is manually deleted."
     exit 0
 fi
 
-# Set the flags for run_next.sh
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
+# Part 1e: Set the flags for run_next.sh
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
 FLAGS=""
 if [ "$RE_UPDATE" = "yes" ]; then
     RE_UPDATE=""
@@ -89,6 +96,11 @@ if [ "$HOSTLESS" = "yes" ]; then
         fi
     fi
 fi
+
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
+# Part 1f: Clean cache (bad_jobs.txt, .built_dirs)
+#- - - - - - - - - - - - - - - - - - - - - - - - - -
+monte_clean.sh --cache
 
 #-------------------------------------------------------
 #  Part 2: Run, and (sometimes) update
