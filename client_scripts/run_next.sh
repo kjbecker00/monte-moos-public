@@ -53,9 +53,6 @@ if [[ "$TO_UPDATE" == "yes" ]]; then
     if [ -f .built_dirs ]; then
         rm .built_dirs
     fi
-    if [ -f "bad_jobs.txt" ]; then
-        /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
-    fi
 fi
 
 echo $(tput bold)"-------------------------------------------------------" $txtrst
@@ -204,7 +201,7 @@ if [[ $EXIT_CODE -ne 0 ]]; then
     # checks if the job was stopped by ctrl-c
     if [[ $EXIT_CODE -ne 130 ]]; then
         /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh "${JOB_FILE_NO_PREFIX}"
-        vexit "run_job.sh failed with exit code: $EXIT_CODE" 2
+        vexit "run_job.sh failed with exit code: $EXIT_CODE. Listing bad job using:    /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh ${JOB_FILE_NO_PREFIX}     " 2
     fi
     vexit "run_job.sh failed with exit code: $EXIT_CODE" 130
 fi
