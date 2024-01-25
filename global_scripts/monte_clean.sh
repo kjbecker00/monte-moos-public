@@ -218,20 +218,19 @@ if [[ "${METADATA}" = "yes" ]]; then
     vecho "Cleaning metadata (status.txt and myname.txt)" 1
     [ -f ${CARLO_DIR_LOCATION}/status.txt ] && rm -f ${CARLO_DIR_LOCATION}/status.txt
     [ -f ${CARLO_DIR_LOCATION}/myname.txt ] && rm -f ${CARLO_DIR_LOCATION}/myname.txt
+    find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null  
 fi
 
 #-------------------------------------------------------
 # Part 8: Clean all cache files:
 #           - bulit_dirs
 #           - bad_jobs
-#           - queues files
 #-------------------------------------------------------
 if [[ "${CACHE}" = "yes" ]]; then
-    vecho "Cleaning cache (.build_dirs, bad_jobs.txt, *_job_queue.txt)" 1
+    vecho "Cleaning cache (.build_dirs, bad_jobs.txt)" 1
     [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
     if [[ $MYNAME != $MONTE_MOOS_HOST ]]; then
         /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
-        find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null  
     fi
 fi
 

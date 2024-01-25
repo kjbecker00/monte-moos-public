@@ -100,10 +100,10 @@ for ((i = 1; i <= length; i++)); do
     if [[ $RUNS_LEFT -gt 0 ]]; then
 
         # check that it is in a directory
-        JOB_FILE_NAME=$(basename $JOB_FILE)
-        JOB_DIR_FULL=$(dirname ${JOB_FILE})
-        JOB_DIR=${JOB_DIR_FULL#*/}
-        KERBS=$(echo "$JOB_DIR_FULL" | cut -d '/' -f 1)
+        JOB_FILE_NAME=$(job_filename $JOB_FILE)
+        JOB_PATH=$(job_path ${JOB_FILE})
+        JOB_DIR=$(job_dirname ${JOB_FILE})
+        KERBS=$(echo "$JOB_PATH" | cut -d '/' -f 1)
         FILE="$JOB_NAME.tar.gz.enc"
 
         if [ -z "$KERBS" ]; then

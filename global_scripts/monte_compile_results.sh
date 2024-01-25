@@ -73,27 +73,19 @@ done
 if [[ -z $PATH_TO_JOB_FILE ]]; then
     vexit "No job file given. Please specify a job file with --job_file=job_dirs/.../job_file" 2
 fi
-JOB_NAME=$(basename "$PATH_TO_JOB_FILE") # The name of the job_file itself
+JOB_NAME=$(job_filename "$PATH_TO_JOB_FILE") # The name of the job_file itself
+job_dir=$(job_dirname "$job_dir")
 
-# Remove the job_dirs/ from the front of the path
-if [[ $MONTE_MOOS_HOST == $MYNAME ]]; then
-    job_dir=${PATH_TO_JOB_FILE#"$MONTE_MOOS_HOST_JOB_DIRS"/}
-else
-    job_dir=${PATH_TO_JOB_FILE#job_dirs/}
-    job_dir=${job_dir#local_job_dirs/}
-fi
-job_dir=$(dirname "$job_dir")
-
+# Set default input results directory
 if [[ -z $INPUT_JOB_RESULTS_DIR ]]; then
     if [[ -d "${CARLO_DIR_LOCATION}/results/$job_dir/$JOB_NAME" ]]; then
         INPUT_JOB_RESULTS_DIR="${CARLO_DIR_LOCATION}/results/$job_dir/$JOB_NAME"
-    elif [[ -d "${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME" ]]; then
-        INPUT_JOB_RESULTS_DIR="${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME"
-        job_dir="misc_jobs"
     else
         vexit "No input results directory given or found at: ${CARLO_DIR_LOCATION}/results/$job_dir/$JOB_NAME or ${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME. Please specify a directory with --input_results=" 2
     fi
 fi
+
+# Ensure input results directory exists
 if [[ ! -d $INPUT_JOB_RESULTS_DIR ]]; then
     vexit "Input results directory $INPUT_JOB_RESULTS_DIR not found" 2
 fi

@@ -92,18 +92,17 @@ add_repo "$SHORE_REPO"
 # Part 2.5: Determine the job directory (to put the results in)
 #-------------------------------------------------------
 FULL_JOB_PATH=$(pwd)/$JOB_FILE
-JOB_PATH=$JOB_FILE
-JOB_FILE_NAME=$(basename $JOB_FILE)
-JOB_DIR_FULL="${FULL_JOB_PATH#*/job_dirs/}"
-JOB_DIR=${JOB_DIR_FULL%%/*}
+JOB_FILE_NAME=$(job_filename $JOB_FILE)
+JOB_PATH="$(job_path $FULL_JOB_PATH)"
+JOB_DIR="$(job_dirname $JOB_FILE)"
 
 # If there is no parent directory named "job_dirs", then classify it as a misc job
-if [[ "$JOB_DIR" -eq "$JOB_FILE_NAME" || "$JOB_DIR_FULL" -eq "$FULL_JOB_PATH" ]]; then
+if [[ "$JOB_DIR" -eq "$JOB_FILE_NAME" || "$JOB_PATH" -eq "$FULL_JOB_PATH" ]]; then
     JOB_DIR="misc_jobs"
 fi
 vecho "FULL_JOB_PATH=$FULL_JOB_PATH" 1
+vecho "JOB_FILE=$JOB_FILE" 2
 vecho "JOB_PATH=$JOB_PATH" 2
-vecho "JOB_DIR_FULL=$JOB_DIR_FULL" 2
 vecho "JOB_DIR=$JOB_DIR" 2
 
 
@@ -173,7 +172,7 @@ LOCAL_RESULTS_DIR="${CARLO_DIR_LOCATION}/results"
 #-------------------------------------------------------
 
 LOCAL_JOB_RESULTS_DIR="${LOCAL_RESULTS_DIR}/${JOB_DIR}/${JOB_FILE_NAME}/${JOB_FILE_NAME}_${hash}"
-HOST_RESULTS_FULL_DIR="${MONTE_MOOS_HOST_RECIEVE_DIR}/results/${JOB_DIR_FULL}/${JOB_FILE_NAME}/"
+HOST_RESULTS_FULL_DIR="${MONTE_MOOS_HOST_RECIEVE_DIR}/results/${JOB_PATH}"
 # Just for display purposes
 LINK_TO_RESULTS="$MONTE_MOOS_HOSTNAME_FULL/${MONTE_MOOS_HOST_RESULTS_DIR}/${JOB_DIR}"
 
@@ -196,7 +195,7 @@ echo "$JOB_FILE $JOB_ARGS" >> $LOCAL_JOB_RESULTS_DIR/.argfile
 #********************************************************
 #  Runs job-specific post-processing script here:
 # Step 1: Find the post_process_results.sh script to use
-results_script_directory="${JOB_PATH}"
+results_script_directory="${JOB_FILE}"
 while [[ ! -f "${results_script_directory}/post_process_results.sh" && "${results_script_directory}" != "job_dirs" ]]; do
     results_script_directory=$(dirname ${results_script_directory})
     if [[ $results_script_directory == $(dirname ${results_script_directory}) ]]; then
@@ -247,7 +246,7 @@ fi
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 5: Send results to host, if desired
 if [[ $OFFLOAD != "no" ]]; then
-    vecho "Part 5: Offloading results" 1
+    vecho "Part 5: Offloading results $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR " 5
     /${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR
     [ $? -eq 0 ] || { vexit "send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR failed with exit code $?" 3; }
     rm -rf $LOCAL_JOB_RESULTS_DIR

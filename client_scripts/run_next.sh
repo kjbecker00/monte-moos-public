@@ -65,7 +65,7 @@ if [[ "$HOSTLESS" == "yes" ]]; then
 else
     OUTPUT=$(/${MONTE_MOOS_BASE_DIR}/client_scripts/select_queue_file.sh)
 fi
-[[ $? -eq 0 ]] || { vexit "unable to pull a queue file. Exiting..." 8; }
+[[ $? -eq 0 ]] || { vexit "unable to pull a queue file (hostless=$HOSTLESS). Exiting..." 8; }
 
 QUEUE_FILE=$(echo "$OUTPUT" | tail -n 1)
 echo "$OUTPUT" | awk '{if (a) print a; a=b; b=c; c=$0}'
@@ -107,25 +107,15 @@ vecho "Initial run_act=$RUNS_ACT" 1
 
 # Ensures JOB_FILE begins with job_dirs/___
 # retrieves the job_dir (the subdirectory within carlo_dir/job_dirs that contains the job)
-JOB_DIR_NAME=$(echo "$JOB_FILE" | cut -d '/' -f 1)
-if [[ "$JOB_DIR_NAME" == "job_dirs" ]]; then
-    JOB_DIR_NAME=$(echo "$JOB_FILE" | cut -d '/' -f 2)
-else
-    JOB_FILE="job_dirs/$JOB_FILE"
-fi
-
-# Gets the job file without the job_dir (how it is in the queue)
-JOB_FILE_NO_PREFIX=$(echo "$JOB_FILE" | cut -d '/' -f 2-)
-
-# retrieves the path to the job file
-PATH_TO_JOB=$(dirname ${JOB_FILE})
+JOB_DIR_NAME=$(job_dirname "$JOB_FILE")
+JOB_PATH=$(job_path "$JOB_FILE")
 # name of the zipped and encrypted job_dir
 JOB_DIR_FILE="$JOB_DIR_NAME.tar.gz.enc"
 # FULL path, to the job file
-FULL_JOB_PATH=${CARLO_DIR_LOCATION}/$JOB_FILE
+FULL_JOB_PATH=${CARLO_DIR_LOCATION}/job_dirs/$JOB_PATH
 
 vecho "JOB_FILE: $JOB_FILE" 5
-vecho "PATH_TO_JOB: $PATH_TO_JOB" 5
+vecho "JOB_PATH: $JOB_PATH" 5
 vecho "FULL_JOB_PATH: $FULL_JOB_PATH" 5
 vecho "JOB_DIR_NAME: $JOB_DIR_NAME" 5
 # vecho "JOB_DIR_NAME: $JOB_DIR_NAME" 5
@@ -200,22 +190,22 @@ EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
     # checks if the job was stopped by ctrl-c
     if [[ $EXIT_CODE -ne 130 ]]; then
-        /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh "${JOB_FILE_NO_PREFIX}"
-        vexit "run_job.sh failed with exit code: $EXIT_CODE. Listing bad job using:    /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh ${JOB_FILE_NO_PREFIX}     " 2
+        /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh "${JOB_PATH}"
+        vexit "run_job.sh failed with exit code: $EXIT_CODE. Listing bad job using:    /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh ${JOB_PATH}     " 2
     fi
     vexit "run_job.sh failed with exit code: $EXIT_CODE" 130
 fi
 
 # update the queue file (helpful if trying to run w/o a host)
 vecho "Updating queue file $FULL_QUEUE_FILE" 1
-vecho " $JOB_FILE_NO_PREFIX $JOB_ARGS $RUNS_DES $RUNS_ACT" 1
+vecho " $JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT" 1
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    sed -i '' "s@^$JOB_FILE_NO_PREFIX $JOB_ARGS.*@$JOB_FILE_NO_PREFIX $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
-    vecho "sed -i '' \"s@^$JOB_FILE_NO_PREFIX $JOB_ARGS.*@$JOB_FILE_NO_PREFIX $JOB_ARGS $RUNS_DES $RUNS_ACT@\" \"$FULL_QUEUE_FILE\"" 1
+    sed -i '' "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    vecho "sed -i '' \"s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@\" \"$FULL_QUEUE_FILE\"" 1
 else
     # Linux
-    sed -i "s@^$JOB_FILE_NO_PREFIX $JOB_ARGS.*@$JOB_FILE_NO_PREFIX $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    sed -i "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
 fi
 
 # cat $QUEUE_FILE
