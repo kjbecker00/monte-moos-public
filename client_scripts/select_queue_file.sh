@@ -80,7 +80,8 @@ fi
 # Ensure there was a prior version of the INCOMING_FILE before running mv
 [[ ! -f "${INCOMING_FILE}" ]] && { touch "${INCOMING_FILE}" ; }
 mv "${INCOMING_FILE}" ".old_${INCOMING_FILE}" 2> /dev/null
-/${MONTE_MOOS_BASE_DIR}/scripts/encrypt_file.sh ${INCOMING_FILE}.enc >/dev/null 
+/${MONTE_MOOS_BASE_DIR}/scripts/decrypt.sh ${INCOMING_FILE}.enc -d -o
+[[ $? -eq 0 ]] || { vexit "unable to decrypt ${INCOMING_FILE}.enc" 5 ; }
 # Remove the encrypted version of the file
 rm "${INCOMING_FILE}.enc" 2> /dev/null
 

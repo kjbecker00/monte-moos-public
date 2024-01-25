@@ -8,7 +8,7 @@
 #--------------------------------------------------------------
 ME="consolodate_queue.sh"
 OUTPUT_FILENAME="merged_queue.txt"
-rm -f $OUTPUT_FILENAME    # Delete default output file if it exists
+rm -f $OUTPUT_FILENAME # Delete default output file if it exists
 
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_scripts.sh
 INPUT_FILE=""
@@ -55,7 +55,7 @@ for ARGI; do
         echo "  --last_desired, -ld or --last_actual, -la           "
         echo "    When comparing runs, take the last                "
         echo "    of the two. Default is to add them together.      "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" = "--output="* || "${ARGI}" = "-o="* ]]; then
         OUTPUT_FILENAME="${ARGI#*=}"
     elif [[ "${ARGI}" = "--verbose"* || "${ARGI}" = "-v"* ]]; then
@@ -96,7 +96,7 @@ for ARGI; do
         if [ -z $INPUT_FILE ]; then
             INPUT_FILE=$ARGI
         else
-	        vexit "Bad Arg: $ARGI or $INPUT_FILE" 1
+            vexit "Bad Arg: $ARGI or $INPUT_FILE" 1
         fi
     fi
 done
@@ -109,7 +109,6 @@ fi
 # Delete the output file first
 rm -f "$OUTPUT_FILENAME"
 touch $OUTPUT_FILENAME
-
 
 #--------------------------------------------------------------
 #  Part 3: Loop through file 1, getting all job names with & args
@@ -126,34 +125,37 @@ while read line; do
     # Skip comments, empty lines
     [[ "$line" =~ ^# ]] && continue
     [[ -z "$line" ]] && continue
-    line_num=$((line_num+1))
+    line_num=$((line_num + 1))
 
     vecho "Line $line_num= $line" 5
 
     # Always skip over the breakpoint string
-    if [[ "$line" == "$BREAKPOINT_STRING" ]] ; then 
-        if [[ $ignore_breakpoint != "yes" ]] ; then
+    if [[ "$line" == "$BREAKPOINT_STRING" ]]; then
+        if [[ $ignore_breakpoint != "yes" ]]; then
             break
         else
             continue
         fi
     fi
 
-    [[ $ignore_breakpoint != "yes" && "$line" == "$BREAKPOINT_STRING" ]] && { vecho "Reached breakpoint. Stopping..." 5 ; break ; }
+    [[ $ignore_breakpoint != "yes" && "$line" == "$BREAKPOINT_STRING" ]] && {
+        vecho "Reached breakpoint. Stopping..." 5
+        break
+    }
 
     # Skip a line if it contains an error
     job_name=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -jf)
-    [[ $? -eq 0 ]] || { continue ; }
+    [[ $? -eq 0 ]] || { continue; }
     job_args=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -ja)
-    [[ $? -eq 0 ]] || { continue ; }
+    [[ $? -eq 0 ]] || { continue; }
     job_rd=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -rd)
-    [[ $? -eq 0 ]] || { continue ; }
+    [[ $? -eq 0 ]] || { continue; }
     job_ra=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -ra)
-    [[ $? -eq 0 ]] || { continue ; }
+    [[ $? -eq 0 ]] || { continue; }
 
     vecho "job_name = $job_name" 5
     vecho "job_args = $job_args" 5
-    vecho "job_rd = $job_rd" 5 
+    vecho "job_rd = $job_rd" 5
     vecho "job_ra = $job_ra" 5
     vecho "" 5
     vecho "" 5
@@ -164,7 +166,6 @@ while read line; do
         vecho "     This has already been added to queue. Continuing..." 5
         continue
     fi
-
 
     # Count the number of runs_desired and runs_actual in both files
     total_rd=0
@@ -179,10 +180,10 @@ while read line; do
         [[ -z "$next_lines" ]] && continue
 
         # Skip breakpoint
-        if [[ "$next_lines" = "$BREAKPOINT_STRING" ]] ; then 
-          [[ $ignore_breakpoint != "yes" ]] && { next_lines_reached_breakpoint="yes" ; }
-          vecho "Reached breakpoint" 5 
-          continue
+        if [[ "$next_lines" = "$BREAKPOINT_STRING" ]]; then
+            [[ $ignore_breakpoint != "yes" ]] && { next_lines_reached_breakpoint="yes"; }
+            vecho "Reached breakpoint" 5
+            continue
         fi
 
         vecho "" 15
@@ -240,7 +241,7 @@ while read line; do
         else
             vecho "   NOT a match!" 5
         fi
-    done < $INPUT_FILE
+    done <$INPUT_FILE
 
     # Once the client's runs reach runs_desired, it will remove the line
     # from the file. That way, if the host increases the number of desired_runs,
@@ -249,14 +250,12 @@ while read line; do
     if [[ $total_rd -gt $total_ra ]]; then
         output_line="$job_name $job_args $total_rd $total_ra"
         vecho "output_line = $output_line" 5
-        echo "$output_line" >> $OUTPUT_FILENAME
+        echo "$output_line" >>$OUTPUT_FILENAME
     else
         vecho "not adding $job_name $job_args since runs_desired=runs_act" 5
     fi
-    
-done < $INPUT_FILE
 
-
+done <$INPUT_FILE
 
 #--------------------------------------------------------------
 #  Part 5: Print out the merged queue
@@ -267,9 +266,3 @@ touch $OUTPUT_FILENAME
 for key in "${!job_runs_des[@]}"; do
     echo "$key ${job_runs_des[$key]} ${job_runs_act[$key]}"
 done
-
-
-
-
-
-

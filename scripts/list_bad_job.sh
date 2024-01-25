@@ -31,7 +31,7 @@ for ARGI; do
         echo "    delete the bad_jobs.txt file on the host          "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" = "--delete" || "${ARGI}" = "-d" ]]; then
         DELETE="yes"
     elif [[ "${ARGI}" == "--verbose"* || "${ARGI}" == "-v"* ]]; then
@@ -49,17 +49,14 @@ for ARGI; do
     fi
 done
 
-
 #--------------------------------------------------------------
 #  Part 3: Write to bad_jobs.txt
 #--------------------------------------------------------------
 if [[ "${DELETE}" != "yes" ]]; then
-  echo "$JOB" >> ${CARLO_DIR_LOCATION}/bad_jobs.txt
-  ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${CARLO_DIR_LOCATION}/bad_jobs.txt ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt
+    echo "$JOB" >>${CARLO_DIR_LOCATION}/bad_jobs.txt
+    ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${CARLO_DIR_LOCATION}/bad_jobs.txt ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt
 else
-  [[ -f ${CARLO_DIR_LOCATION}/bad_jobs.txt ]] || { rm ${CARLO_DIR_LOCATION}/bad_jobs.txt ; }
-  ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt --delete
-  vecho "Delete bad_jobs.txt file" 1
+    [[ -f ${CARLO_DIR_LOCATION}/bad_jobs.txt ]] || { rm ${CARLO_DIR_LOCATION}/bad_jobs.txt; }
+    ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt --delete
+    vecho "Delete bad_jobs.txt file" 1
 fi
-
-

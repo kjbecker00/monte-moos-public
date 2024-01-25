@@ -1,7 +1,7 @@
 #!/bin/bash
 # Kevin Becker Nov 17 2023
 ME="select_job.sh"
-probability_skip=25    # proability it skips the first available job
+probability_skip=25 # proability it skips the first available job
 QUEUE_FILE=""
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
@@ -29,11 +29,9 @@ for ARGI; do
     fi
 done
 
-
 if [[ ! -f "$QUEUE_FILE" ]]; then
-    vexit "Queue file does not exist: $QUEUE_FILE" 1
+    vexit "Queue file does not exist: $QUEUE_FILE" 3
 fi
-
 
 #-------------------------------------------------------
 #  Part 3: Determine which job to run
@@ -64,9 +62,8 @@ for ((i = 1; i <= length; i++)); do
     JOB_ARGS=""
     RUNS_DES=""
     RUNS_ACT=""
-    
-    for j in "${linearray[@]}"
-    do
+
+    for j in "${linearray[@]}"; do
         if [[ "$j" == "$JOB_FILE" ]]; then
             continue
         elif [[ "$j" == "--"* ]]; then

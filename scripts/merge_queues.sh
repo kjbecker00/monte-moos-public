@@ -33,7 +33,7 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         echo "    All other args are passed to consolodate_queue.sh "
-        exit 0;
+        exit 0
     elif [[ "${ARGI}" = "--verbose"* || "${ARGI}" = "-v"* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -53,8 +53,6 @@ for ARGI; do
     fi
 done
 
-
-
 #--------------------------------------------------------------
 #  Part 3: Pre-flight Checks
 #--------------------------------------------------------------
@@ -68,8 +66,8 @@ cp "$INPUT_FILE2" "${INPUT_FILE2}.temp" || vexit "Error copying $INPUT_FILE2 to 
 [ -n "$(tail -c1 ${INPUT_FILE2}.temp)" ] && printf '\n' >>${INPUT_FILE2}.temp
 
 # Cat the files together (file 2 appended to end of file 1)
-echo "${breakpoint}" >> "${INPUT_FILE}.temp"
-cat "$INPUT_FILE2.temp" >> "${INPUT_FILE}.temp"
+echo "${breakpoint}" >>"${INPUT_FILE}.temp"
+cat "$INPUT_FILE2.temp" >>"${INPUT_FILE}.temp"
 
 # echo "Press any key to continue, or Ctrl-C to cancel."
 # read -n 1 -s
@@ -85,16 +83,12 @@ cat "$INPUT_FILE2.temp" >> "${INPUT_FILE}.temp"
 ${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.out.tmp "${INPUT_FILE}.temp" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
 
-
-
 # Remove the temp file
-rm "${INPUT_FILE}.temp" 2> /dev/null
-rm "${INPUT_FILE2}.temp" 2> /dev/null
+rm "${INPUT_FILE}.temp" 2>/dev/null
+rm "${INPUT_FILE2}.temp" 2>/dev/null
 mv "${OUTPUT_FILENAME}.out.tmp" "$OUTPUT_FILENAME"
 
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then
     vexit "Error in consolodate_queue.sh, exited with code $EXIT_CODE " 1
 fi
-
-

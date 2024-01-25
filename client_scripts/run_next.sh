@@ -1,15 +1,14 @@
 #!/bin/bash
 # Kevin Becker Jun 9 2023
 
-
 HOSTLESS="no"
 TO_UPDATE="no"
 ALL_JOBS_OK="yes"
 ME="run_next.sh"
 
-probability_skip=25    # proability it skips the first available job
+probability_skip=25 # proability it skips the first available job
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
-
+VERBOSE=10
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
 #-------------------------------------------------------
@@ -69,7 +68,7 @@ if [[ "$HOSTLESS" == "yes" ]]; then
 else
     OUTPUT=$(/${MONTE_MOOS_BASE_DIR}/client_scripts/select_queue_file.sh)
 fi
-[[ $? -eq 0 ]] || { vexit "unable to pull a queue file. Exiting..." 8 ; }
+[[ $? -eq 0 ]] || { vexit "unable to pull a queue file. Exiting..." 8; }
 
 QUEUE_FILE=$(echo "$OUTPUT" | tail -n 1)
 echo "$OUTPUT" | awk '{if (a) print a; a=b; b=c; c=$0}'
@@ -84,22 +83,26 @@ output=$(/${MONTE_MOOS_BASE_DIR}/client_scripts/select_job.sh --queue_file="$FUL
 EXIT_CODE=$?
 # Check the queue by observing the exit code
 # 1: no jobs left
-[[ $EXIT_CODE -ne 1 ]] || { echo "No jobs left to run..." ; exit 1; }
+[[ $EXIT_CODE -ne 1 ]] || {
+    echo "No jobs left to run..."
+    exit 1
+}
 # 2: no jobs left, but still has bad jobs
-[[ $EXIT_CODE -ne 2 ]] || { echo "No jobs left to run, but has bad jobs... " ; exit 1;  }
+[[ $EXIT_CODE -ne 2 ]] || {
+    echo "No jobs left to run, but has bad jobs... "
+    exit 1
+}
 # not zero: bad
-[[ $EXIT_CODE -eq 0 ]] || { vexit "running /${MONTE_MOOS_BASE_DIR}/client_scripts/select_job.sh returned exit code: $EXIT_CODE" 9; }
+[[ $EXIT_CODE -eq 0 ]] || { vexit "running /${MONTE_MOOS_BASE_DIR}/client_scripts/select_job.sh --queue_file="$FULL_QUEUE_FILE" returned exit code: $EXIT_CODE" 9; }
 
 vecho "queue line: $output" 5
-JOB_FILE=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output"  -jf)
-JOB_ARGS=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output"  -ja)
-RUNS_DES=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output"  -rd)
-RUNS_ACT=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output"  -ra)
+JOB_FILE=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output" -jf)
+JOB_ARGS=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output" -ja)
+RUNS_DES=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output" -rd)
+RUNS_ACT=$(/${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh -l="$output" -ra)
 RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
 
 vecho "Initial run_act=$RUNS_ACT" 1
-
-
 
 #-------------------------------------------------------
 #  Part 4: Get the job dir
@@ -140,58 +143,49 @@ RUNS_LEFT=$((RUNS_LEFT - 1))
 RUNS_ACT=$((RUNS_ACT + 1))
 vecho "New run_act=$RUNS_ACT" 1
 
-
+#-------------------------------------------------------
+#  Part 4B: Update the job dir from the host
+#-------------------------------------------------------
 cd ${CARLO_DIR_LOCATION}
 if [ "$HOSTLESS" = "no" ]; then
+
+    # Update the queue file
     vecho "Getting job dirs..." 1
     vecho "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh \"${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_WGET_BASE_DIR}/clients/job_dirs/$JOB_DIR_FILE\"" 2
     /${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh "${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_WGET_BASE_DIR}/clients/job_dirs/$JOB_DIR_FILE"
     EXIT_CODE=$?
-    
-    # Pull from host worked
-    if [[ $EXIT_CODE -eq 0 ]]; then
-        # Success, move encrypted file to job_dirs, decrypt it
-        if [ ! -d "job_dirs" ]; then
-            mkdir job_dirs
-        fi
-        vecho "Moving $JOB_DIR_FILE to job_dirs/..." 1
-        mv "$JOB_DIR_FILE" job_dirs/
-        vecho "Decrypting job_dirs/$JOB_DIR_FILE ..." 1
-        if [[ -d job_dirs/$JOB_DIR_NAME ]]; then
-            vecho "Removing old job_dirs/$JOB_DIR_NAME ..." 1
-            rm -rf job_dirs/$JOB_DIR_NAME
-        fi
-        # if [[ ! -f "job_dirs/$JOB_DIR_FILE" ]]; then
-        #     vexit "job_dirs/$JOB_DIR_FILE does not exist" 1
-        # fi
-        /${MONTE_MOOS_BASE_DIR}/scripts/encrypt_file.sh "job_dirs/$JOB_DIR_FILE" --output="${CARLO_DIR_LOCATION}/job_dirs/" #>/dev/null
-        EXIT_CODE=$?
-        if [[ $EXIT_CODE -ne 0 ]]; then
-            vexit "encrypt_file.sh failed do decrypt file job_dirs/$JOB_DIR_FILE --output=${CARLO_DIR_LOCATION}/job_dirs/ with code $EXIT_CODE" 7
-        fi
-        if [[ -f job_dirs/$JOB_DIR_FILE ]]; then
-            rm -f job_dirs/$JOB_DIR_FILE
-        fi
-        if [[ ! -d "${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME" ]]; then
-            vexit "after decrypting $JOB_DIR_NAME, ${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME still does not exist" 1
-        fi
-
-    # # Pull from host failed; network error. Use a local copy if it exists
-    # elif [[ $EXIT_CODE -eq 4 ]]; then
-    #     secho "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh ${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_HOST_CLIENT_DIR}/job_dirs/$JOB_DIR_NAME failed with code $EXIT_CODE. Checking for local copy..."
-       
-    #     # - - - - - - - - - - - - - - - - - - - - -
-    #     # Network error
-    #     if [ -f "job_dirs/$JOB_FILE_NO_PREFIX" ]; then
-    #         vecho "Local copy found. Running..." 1
-    #     else
-    #         /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh "${JOB_FILE}"
-    #         vexit "local copy of $JOB_FILE does not exist. Adding to bad_jobs.txt..." 2
-    #     fi
-    # Other failure. Exit
-    else
+    if [[ $EXIT_CODE -ne 0 ]]; then
         vexit "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh ${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_HOST_CLIENT_DIR}/job_dirs/$JOB_DIR_NAME failed with code $EXIT_CODE" 1
     fi
+
+    # Success! Move encrypted file to job_dirs, decrypt it
+    if [ ! -d "job_dirs" ]; then
+        mkdir job_dirs
+    fi
+    vecho "Moving $JOB_DIR_FILE to job_dirs/..." 1
+    mv "$JOB_DIR_FILE" job_dirs/
+
+    # Decrypt
+    vecho "Decrypting job_dirs/$JOB_DIR_FILE ..." 1
+    /${MONTE_MOOS_BASE_DIR}/scripts/decrypt.sh "job_dirs/$JOB_DIR_FILE" -o -d
+    EXIT_CODE=$?
+    if [[ $EXIT_CODE -ne 0 ]]; then
+        vexit "decrypt.sh failed do decrypt file job_dirs/$JOB_DIR_FILE -o -d with code $EXIT_CODE" 7
+    fi
+
+    # Decompress
+    vecho "Decompressing job_dirs/$JOB_DIR_NAME.tar.gz ..." 1
+    /${MONTE_MOOS_BASE_DIR}/scripts/decompress.sh "job_dirs/$JOB_DIR_NAME.tar.gz" -o -d
+    EXIT_CODE=$?
+    if [[ $EXIT_CODE -ne 0 ]]; then
+        vexit "decrypt.sh failed do decrypt file job_dirs/$JOB_DIR_NAME.tar.gz -o -d with code $EXIT_CODE" 7
+    fi
+
+    # Check that the dir now exists
+    if [[ ! -d "${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME" ]]; then
+        vexit "after decrypting $JOB_DIR_NAME, ${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME still does not exist" 1
+    fi
+
 fi
 
 #-------------------------------------------------------
@@ -204,7 +198,6 @@ else
     vecho "monte_run_job.sh --job_file=\"$FULL_JOB_PATH\" --job_args=\"$JOB_ARGS\"" 1
     monte_run_job.sh --job_file="$FULL_JOB_PATH" --job_args="$JOB_ARGS"
 fi
-
 
 EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
@@ -229,6 +222,5 @@ else
 fi
 
 # cat $QUEUE_FILE
-
 
 exit 0
