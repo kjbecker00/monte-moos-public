@@ -54,14 +54,16 @@ for ARGI; do
 done
 
 #--------------------------------------------------------------
-#  Part 3: Add temperature (if PI)
+#  Part 3: Add other info
 #--------------------------------------------------------------
+# Temp and free memory (if PI)
 if [ -f /usr/bin/vcgencmd ]; then
     TEMP=$(sudo /usr/bin/vcgencmd measure_temp)
     free_memory=$(free -m | awk '/^Mem:/{print $4}')
     TO_PRINT="$TO_PRINT (temp = $TEMP free memory=$free_memory)"
 fi
-
+# Number of processes running
+TO_PRINT="$TO_PRINT (processes: $(ps -aux | wc -l))"
 
 #--------------------------------------------------------------
 #  Part 4: Print and write to status.txt
