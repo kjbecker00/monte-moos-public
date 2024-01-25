@@ -63,7 +63,7 @@ if [ -f /usr/bin/vcgencmd ]; then
     TO_PRINT="$TO_PRINT (temp = $TEMP free memory=$free_memory)"
 fi
 # Number of processes running
-TO_PRINT="$TO_PRINT (processes: $(ps -aux | wc -l))"
+TO_PRINT="$TO_PRINT (processes: $(ps aux | wc -l))"
 
 #--------------------------------------------------------------
 #  Part 4: Print and write to status.txt
