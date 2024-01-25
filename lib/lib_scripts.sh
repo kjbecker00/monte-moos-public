@@ -77,7 +77,7 @@ job_dirname() {
     input=$1
     this_job_path=$(job_path $input)
     this_job_dir="${this_job_path%%/*}" # extract everything before /
-    if [[ -z $this_job_dir || $(job_filename $input) -eq $this_job_dir ]]; then
+    if [[ -z $this_job_dir  || "$(job_filename $input)" == "$this_job_dir" ]]; then
         this_job_dir=misc_job
     fi
     echo $this_job_dir
