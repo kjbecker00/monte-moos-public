@@ -113,6 +113,13 @@ vecho "JOB_DIR=$JOB_DIR" 2
 #-------------------------------------------------------
 #  Part 3a: find the shore alog
 #-------------------------------------------------------
+if [[ -d $MONTE_MOOS_CLIENT_REPOS_DIR/$SHORE_REPO ]]; then
+    vecho "Found shore repo: $MONTE_MOOS_CLIENT_REPOS_DIR/$SHORE_REPO" 1
+else
+    vexit "Shore repo not found: $MONTE_MOOS_CLIENT_REPOS_DIR/$SHORE_REPO. Be sure to run the job first with monte_run_job.sh" 10
+fi
+
+
 SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
 if [ ! -f "$SHORE_ALOG" ]; then
     vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 4 -type f -iname *SHORE*.alog" 2

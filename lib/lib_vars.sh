@@ -21,7 +21,9 @@ txtul=$(tput bold)        # Bold
 # Get myname. If it is not set, then set it
 if [[ -f ${CARLO_DIR_LOCATION}/myname.txt ]]; then
     MYNAME=$(head -n 1 ${CARLO_DIR_LOCATION}/myname.txt)
-else
+fi
+
+if [[ -z $MYNAME ]]; then
     if [ -f "/home/student2680/pablo-common/bin/get_vname.sh" ]; then
         MYNAME="$(/home/student2680/pablo-common/bin/get_vname.sh)"
     else

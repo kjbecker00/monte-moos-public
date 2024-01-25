@@ -8,7 +8,7 @@ ME="run_next.sh"
 
 probability_skip=25 # proability it skips the first available job
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
-VERBOSE=10
+
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
 #-------------------------------------------------------
