@@ -43,6 +43,16 @@ for ARGI; do
     fi
 done
 
+
+#-------------------------------------------------------
+#  Part 1a: Check for monte_info file. Useful if you 
+#           have multiple carlo_dirs for different hosts
+#-------------------------------------------------------
+if [[ -f monte_info ]]; then
+    echo "Found a monte_info file. Using it to set variables."
+    source monte_info
+fi
+
 # Check the shell enviornment
 monte_check_job.sh
 if [ $? -ne 0 ]; then
