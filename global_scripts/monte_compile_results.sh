@@ -74,7 +74,7 @@ if [[ -z $PATH_TO_JOB_FILE ]]; then
     vexit "No job file given. Please specify a job file with --job_file=job_dirs/.../job_file" 2
 fi
 JOB_NAME=$(job_filename "$PATH_TO_JOB_FILE") # The name of the job_file itself
-job_dir=$(job_dirname "$job_dir")
+job_dir=$(job_dirname "$PATH_TO_JOB_FILE")
 
 # Set default input results directory
 if [[ -z $INPUT_JOB_RESULTS_DIR ]]; then
@@ -198,3 +198,4 @@ else
 fi
 
 exit 0
+

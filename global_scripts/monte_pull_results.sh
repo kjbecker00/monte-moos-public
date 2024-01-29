@@ -9,7 +9,6 @@
 ME="monte_pull_results.sh"
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 INPUT_PATH=""
-# DEFAULT_OUTPUT_PATH="$CARLO_DIR_LOCATION"
 OUTPUT_PATH=""
 
 #--------------------------------------------------------------

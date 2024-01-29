@@ -54,7 +54,7 @@ fi
 #- - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ -d "job_dirs" ] && [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     if [ "$IGNORE_WARNING" != "yes" ]; then
-        echo "WARNING: All results files. If you are pulling from the host,"
+        echo "WARNING: If you are pulling from the host,"
         echo "any new job files may be overwritten with the host's. Be sure "
         echo "to commit & push changes in this carlo_dir directory."
         echo "Press any key to continue, or Ctrl-C to cancel."

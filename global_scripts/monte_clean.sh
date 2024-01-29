@@ -218,7 +218,7 @@ if [[ "${METADATA}" = "yes" ]]; then
     vecho "Cleaning metadata (status.txt and myname.txt)" 1
     [ -f ${CARLO_DIR_LOCATION}/status.txt ] && rm -f ${CARLO_DIR_LOCATION}/status.txt
     [ -f ${CARLO_DIR_LOCATION}/myname.txt ] && rm -f ${CARLO_DIR_LOCATION}/myname.txt
-    find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null  
+    find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
 fi
 
 #-------------------------------------------------------

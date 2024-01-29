@@ -96,16 +96,6 @@ JOB_FILE_NAME=$(job_filename $JOB_FILE)
 JOB_PATH="$(job_path $FULL_JOB_PATH)"
 JOB_DIR="$(job_dirname $JOB_FILE)"
 
-# If there is no parent directory named "job_dirs", then classify it as a misc job
-if [[ "$JOB_DIR" -eq "$JOB_FILE_NAME" || "$JOB_PATH" -eq "$FULL_JOB_PATH" ]]; then
-    JOB_DIR="misc_jobs"
-fi
-vecho "FULL_JOB_PATH=$FULL_JOB_PATH" 1
-vecho "JOB_FILE=$JOB_FILE" 2
-vecho "JOB_PATH=$JOB_PATH" 2
-vecho "JOB_DIR=$JOB_DIR" 2
-
-
 
 #-------------------------------------------------------
 #  Part 3: Save to a directory on the local machine
@@ -143,25 +133,14 @@ vecho "Shore alog = $SHORE_ALOG" 1
 #  Part 3b: get the hash from the alog, or generate one
 #-------------------------------------------------------
 # Get the hash from the alog
-if [[ -f $SHORE_ALOG ]]; then
-    if [[ -f ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/ivp/bin/aloggrep ]]; then
-        hash=$(${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/ivp/bin/aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
-    fi
-    if [[ -f ${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/ivp/bin/aloggrep ]]; then
-        hash=$(${MONTE_MOOS_CLIENT_REPOS_DIR}/moos-ivp/trunk/ivp/bin/aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
-    fi
-    
-    if [ $? -ne 0 ]; then
-        hash=""
-        echo "${txtylw}Warning: aloggrep failed to retrieve a hash. Generating a hash${txtrst}"
-    fi
-fi
+
+add_bin "moos-ivp"
+hash=$(aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
+
 #-------------------------------------------------------
-# Makes a hash if not found. Useful if pMissionHash hasn't been added
+# Makes a hash if not found. Useful if pMissionHash hasn't been added to mission
 if [ -z $hash ]; then
-    current_time=$(date +%y%m%d-%H%M)
-    seconds=$(date +%S)
-    hash="${current_time}-${seconds}-$RANDOM"
+    hash=$(mhash_gen)
 fi
 vecho "Hash = $hash" 1
 LOCAL_RESULTS_DIR="${CARLO_DIR_LOCATION}/results"

@@ -26,54 +26,58 @@ for ARGI; do
         JOB_FILE="${ARGI#*=}"
     elif [[ "${ARGI}" == "--job_args="* ]]; then
         JOB_ARGS="${ARGI#*=}"
-    elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
+    elif [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
         VERBOSE=1
-    elif [ "${ARGI}" = "--client" -o "${ARGI}" = "-c" ]; then
+    elif [[ "${ARGI}" = "--client" || "${ARGI}" = "-c" ]]; then
         CLIENT="yes"
     else
         # Job file provided without the flag
         # Assumed running as test
-        if [ -z $JOB_FILE ]; then
+        if [ -z "$JOB_FILE" ]; then
             TEST="yes"
             if [[ $VERBOSE -eq 0 ]]; then
                 VERBOSE=1
             fi
             JOB_FILE=$ARGI
         else
-            echo "$ME.sh: Bad Arg: $ARGI " 
+            echo "$ME.sh: Bad Arg: $ARGI "
             exit 1
         fi
     fi
 done
-
 
 #-------------------------------------------------------
 #  Part 0.5: Check monte_info variables
 #-------------------------------------------------------
 
 # Check if monte-moos was added to path and carlo dir has been sourced
-[[ -d $MONTE_MOOS_BASE_DIR ]] || { echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) Does not exist. Should be set in ~/.bashrc or equivalent"; exit 30; }
-throwaway="$(which monte_check_job.sh)"
-[[ "$?" -eq 0 ]] || { echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) not added to path" ; exit 31; }
+[[ -d $MONTE_MOOS_BASE_DIR ]] || {
+    echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) Does not exist. Should be set in ~/.bashrc or equivalent"
+    exit 30
+}
+
+which monte_check_job.sh > /dev/null || {
+    echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) not added to path"
+    exit 31
+}
 
 #-------------------------------------------------------
-# Now that the path is set, we can import the proper 
+# Now that the path is set, we can import the proper
 # utils
 #-------------------------------------------------------
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
-
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 # Variables to be set for BOTH the host and the client
 [[ -d $CARLO_DIR_LOCATION ]] || { vexit "CARLO_DIR_LOCATION ($CARLO_DIR_LOCATION) does not exist. Should be set in ~/.bashrc or equivalent" 30; }
-[[ ! -z $MONTE_MOOS_HOST ]] || { vexit "MONTE_MOOS_HOST ($MONTE_MOOS_HOST) not set. Did you add \"source ${CARLO_DIR_LOCATION}/monte_info\" to your ~/.bashrc or equivalent?" 30; }
-[[ ! -z $MONTE_MOOS_HOST_RECIEVE_DIR ]] || { vexit "MONTE_MOOS_HOST_RECIEVE_DIR ($MONTE_MOOS_HOST_RECIEVE_DIR) not set" 30; }
-[[ ! -z $MONTE_MOOS_HOST_JOB_DIRS ]] || { vexit "MONTE_MOOS_HOST_JOB_DIRS ($MONTE_MOOS_HOST_JOB_DIRS) not set" 30; }
-[[ ! -z $MONTE_MOOS_HOST_QUEUE_FILES ]] || { vexit "MONTE_MOOS_HOST_QUEUE_FILES ($MONTE_MOOS_HOST_QUEUE_FILES) not set" 30; }
+[[ -n $MONTE_MOOS_HOST ]] || { vexit "MONTE_MOOS_HOST ($MONTE_MOOS_HOST) not set. Did you add \"source ${CARLO_DIR_LOCATION}/monte_info\" to your ~/.bashrc or equivalent?" 30; }
+[[ -n $MONTE_MOOS_HOST_RECIEVE_DIR ]] || { vexit "MONTE_MOOS_HOST_RECIEVE_DIR ($MONTE_MOOS_HOST_RECIEVE_DIR) not set" 30; }
+[[ -n $MONTE_MOOS_HOST_JOB_DIRS ]] || { vexit "MONTE_MOOS_HOST_JOB_DIRS ($MONTE_MOOS_HOST_JOB_DIRS) not set" 30; }
+[[ -n $MONTE_MOOS_HOST_QUEUE_FILES ]] || { vexit "MONTE_MOOS_HOST_QUEUE_FILES ($MONTE_MOOS_HOST_QUEUE_FILES) not set" 30; }
 
-if [[ $MYNAME == $MONTE_MOOS_HOST ]]; then
+if [[ $MYNAME == "$MONTE_MOOS_HOST" ]]; then
     vecho "Checking as host" 1
     # Variables to be set for the HOST only
-    [[ ! -z $MONTE_MOOS_HOST_WEB_ROOT_DIR ]] || { vexit "MONTE_MOOS_HOST_WEB_ROOT_DIR ($MONTE_MOOS_HOST_WEB_ROOT_DIR) not set" 30; }
+    [[ -n $MONTE_MOOS_HOST_WEB_ROOT_DIR ]] || { vexit "MONTE_MOOS_HOST_WEB_ROOT_DIR ($MONTE_MOOS_HOST_WEB_ROOT_DIR) not set" 30; }
     # Checks for the HOST only
     [[ -d $MONTE_MOOS_HOST_RECIEVE_DIR ]] || { vexit "MONTE_MOOS_HOST_RECIEVE_DIR ($MONTE_MOOS_HOST_RECIEVE_DIR) does not exist" 30; }
     [[ -d $MONTE_MOOS_HOST_JOB_DIRS ]] || { vexit "MONTE_MOOS_HOST_JOB_DIRS ($MONTE_MOOS_HOST_JOB_DIRS) does not exist" 30; }
@@ -82,14 +86,12 @@ else
     vecho "Checking as client" 1
     # Variables to be set for the CLIENT only (may vary from client to client)
     [[ -f $MONTE_MOOS_BASE_REPO_LINKS ]] || { vexit "MONTE_MOOS_BASE_REPO_LINKS ($MONTE_MOOS_BASE_REPO_LINKS) not set" 30; }
-    [[ -d "$(dirname $MONTE_MOOS_CLIENT_REPOS_DIR)" ]] || { vexit "MONTE_MOOS_CLIENT_REPOS_DIR ($MONTE_MOOS_CLIENT_REPOS_DIR) does not exist" 30; }
-    [[ ! -z $MONTE_MOOS_HOST_URL_WGET ]] || { vexit "MONTE_MOOS_HOST_URL_WGET ($MONTE_MOOS_HOST_URL_WGET) not set" 30; }
-    [[ ! -z $MONTE_MOOS_HOSTNAME_SSH ]] || { vexit "MONTE_MOOS_HOSTNAME_SSH ($MONTE_MOOS_HOSTNAME_SSH) not set" 30; }
-    [[ ! -z $MONTE_MOOS_HOST_SSH_KEY ]] || { vexit "MONTE_MOOS_HOST_SSH_KEY ($MONTE_MOOS_HOST_SSH_KEY) not set" 30; }
-    [[ ! -z $MONTE_MOOS_WGET_BASE_DIR ]] || { vexit "MONTE_MOOS_WGET_BASE_DIR ($MONTE_MOOS_WGET_BASE_DIR) not set" 30; }
+    [[ -d "$(dirname "$MONTE_MOOS_CLIENT_REPOS_DIR")" ]] || { vexit "MONTE_MOOS_CLIENT_REPOS_DIR ($MONTE_MOOS_CLIENT_REPOS_DIR) does not exist" 30; }
+    [[ -n $MONTE_MOOS_HOST_URL_WGET ]] || { vexit "MONTE_MOOS_HOST_URL_WGET ($MONTE_MOOS_HOST_URL_WGET) not set" 30; }
+    [[ -n $MONTE_MOOS_HOSTNAME_SSH ]] || { vexit "MONTE_MOOS_HOSTNAME_SSH ($MONTE_MOOS_HOSTNAME_SSH) not set" 30; }
+    [[ -n $MONTE_MOOS_HOST_SSH_KEY ]] || { vexit "MONTE_MOOS_HOST_SSH_KEY ($MONTE_MOOS_HOST_SSH_KEY) not set" 30; }
+    [[ -n $MONTE_MOOS_WGET_BASE_DIR ]] || { vexit "MONTE_MOOS_WGET_BASE_DIR ($MONTE_MOOS_WGET_BASE_DIR) not set" 30; }
 fi
-
-
 
 #-------------------------------------------------------
 #  Part 1: Check if job exists
@@ -141,7 +143,7 @@ vecho "Shoreside variables set" 1
 #-------------------------------------------------------
 #  Part 4: Check that there is a job timeout
 #-------------------------------------------------------
-[[ ! -z "$JOB_TIMEOUT" ]] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not set" 12; }
+[[ -n "$JOB_TIMEOUT" ]] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not set" 12; }
 [ "$JOB_TIMEOUT" -gt 1 ] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not greater than one" 12; }
 vecho "JOB_TIMEOUT set" 1
 
@@ -149,7 +151,7 @@ vecho "JOB_TIMEOUT set" 1
 #  Part 5: Checking ssh
 #-------------------------------------------------------
 if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
-    ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh --test
+    "${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh" --test
     EXIT_CODE=$?
     if [ $EXIT_CODE -ne 0 ]; then
         vexit " with ssh (exit code $EXIT_CODE). If you are not using the current computer as the client, feel free to continue" 14
