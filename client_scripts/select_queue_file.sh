@@ -95,7 +95,7 @@ fi
 #-------------------------------------------------------
 [[ ! -f "${INCOMING_FILE}" ]] && { touch "${INCOMING_FILE}"; }
 mv "${INCOMING_FILE}" ".old_${INCOMING_FILE}" 2>/dev/null
-/${MONTE_MOOS_BASE_DIR}/scripts/decrypt.sh ${INCOMING_FILE}.enc -d -o
+monte_decrypt.sh ${INCOMING_FILE}.enc -d -o
 [[ $? -eq 0 ]] || { vexit "unable to decrypt ${INCOMING_FILE}.enc" 5; }
 
 #-------------------------------------------------------

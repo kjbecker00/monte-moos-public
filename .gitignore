@@ -2,11 +2,9 @@
 .DS_Store
 force_quit
 
-
 # Results
 results/*
 compiled_results/*
-
 
 # Private files
 .vscode/*
@@ -21,5 +19,3 @@ scripts/attic/*
 attic/*
 __*
 */__*
-
-

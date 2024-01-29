@@ -10,7 +10,7 @@ ME="consolodate_queue.sh"
 OUTPUT_FILENAME="merged_queue.txt"
 rm -f $OUTPUT_FILENAME # Delete default output file if it exists
 
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_scripts.sh
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_util_functions.sh
 INPUT_FILE=""
 RUNS_DES_MERGE_TYPE="add"
 

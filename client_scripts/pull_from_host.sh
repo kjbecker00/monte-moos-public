@@ -6,7 +6,7 @@ ME="pull_from_host.sh"
 VERBOSE=0
 LINK_TO_FILE=""
 QUIET=0
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_scripts.sh
+source /${MONTE_MOOS_BASE_DIR}/lib/lib_util_functions.sh
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments

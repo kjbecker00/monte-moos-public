@@ -230,7 +230,7 @@ if [[ "${CACHE}" = "yes" ]]; then
     vecho "Cleaning cache (.build_dirs, bad_jobs.txt)" 1
     [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
     if [[ $MYNAME != $MONTE_MOOS_HOST ]]; then
-        /${MONTE_MOOS_BASE_DIR}/scripts/list_bad_job.sh -d
+        /${MONTE_MOOS_BASE_DIR}/client_scripts/list_bad_job.sh -d
     fi
 fi
 

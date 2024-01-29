@@ -12,7 +12,7 @@ LINES_TO_KEEP=500
 HOSTLESS="no"
 source "/${MONTE_MOOS_BASE_DIR}/lib/lib_vars.sh"
 
-# Making these seperate from lib_scripts.sh since lib_scripts.sh references this file
+# Making these seperate from lib_util_functions.sh since lib_scripts.sh references this file
 vecho() { if [[ "$VERBOSE" -ge "$2" ]]; then echo ${txtgry}"$ME: $1" ${txtrst}; fi; }
 vexit() {
     echo "${txtred}""$ME: Error $2. Exit Code $2" "${txtrst}"
