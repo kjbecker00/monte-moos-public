@@ -72,7 +72,9 @@ if [ -f /usr/bin/vcgencmd ]; then
     # free_memory=$(free -m | awk '/^Mem:/{print $4}')
     META_INFO="$META_INFO temp=$TEMP"
 fi
+cd "$MONTE_MOOS_BASE_DIR" || vexit "cd $MONTE_MOOS_BASE_DIR failed" 1
 MONTE_MOOS_RELSEASE="$(git rev-parse --short HEAD)"
+cd - >/dev/null || vexit "cd - failed" 1
 META_INFO="$META_INFO  mm-version=$MONTE_MOOS_RELSEASE"
 META_INFO="$(date)  $META_INFO"
 
