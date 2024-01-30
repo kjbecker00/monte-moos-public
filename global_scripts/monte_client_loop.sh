@@ -113,7 +113,7 @@ RE_UPDATE="--update"
 #  Part 2: Run, and (sometimes) update
 #-------------------------------------------------------
 while true; do
-    vecho "New iteration of loop..." 1
+    vecho "New iteration of loop..." 10
     monte_clean.sh
 
     # Run the next job and check exit codes
@@ -152,6 +152,7 @@ while true; do
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Determine if a reupdate is needed
     if [[ $PERPETUAL == "yes" ]]; then
+        vecho "Perpetual mode. Checking for updates..." 10
         # Reset the reupdate flag
         if [ "$RE_UPDATE" = "--update" ]; then
             RE_UPDATE=""
