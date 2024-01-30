@@ -5,7 +5,7 @@ ME="monte_client_loop.sh"
 PERPETUAL=""
 IGNORE_WARNING="no"
 HOSTLESS=""
-SLEEP_TIME=3
+SLEEP_TIME=60
 
 # shellcheck disable=SC1090
 source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
