@@ -156,17 +156,17 @@ while true; do
         # Reset the reupdate flag
         if [ "$RE_UPDATE" = "--update" ]; then
             RE_UPDATE=""
+            # Update monte-moos as well
+            secho "Updating monte-moos..." 
+            cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
+            git pull 2>&1 >/dev/null || { git reset --hard HEAD 2>&1 >/dev/null; git pull 2>&1 >/dev/null; }
+            cd - >/dev/null
         fi
 
         # Populate the reupdate flag
         if [ "$day_of_last_update" -ne $(date +%u) ]; then
             RE_UPDATE="--update"
             day_of_last_update=$(date +%u)
-            # Update monte-moos as well
-            secho "Updating monte-moos..." 
-            cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
-            git pull 2>&1 >/dev/null || { git reset --hard HEAD 2>&1 >/dev/null; git pull 2>&1 >/dev/null; }
-            cd - >/dev/null
         fi
     fi
 
