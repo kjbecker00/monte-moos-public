@@ -10,7 +10,7 @@ ME="list_bad_job.sh"
 JOB=""
 DELETE=""
 
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
@@ -53,10 +53,10 @@ done
 #  Part 3: Write to bad_jobs.txt
 #--------------------------------------------------------------
 if [[ "${DELETE}" != "yes" ]]; then
-    echo "$JOB" >>${CARLO_DIR_LOCATION}/bad_jobs.txt
-    ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${CARLO_DIR_LOCATION}/bad_jobs.txt ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt
+    echo "$JOB" >>"${CARLO_DIR_LOCATION}"/bad_jobs.txt
+    "${MONTE_MOOS_BASE_DIR}"/scripts/send2host.sh "${CARLO_DIR_LOCATION}/bad_jobs.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt"
 else
     [[ -f "${CARLO_DIR_LOCATION}/bad_jobs.txt" ]] && { rm -f "${CARLO_DIR_LOCATION}/bad_jobs.txt"; }
-    ${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh ${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt --delete
+    "${MONTE_MOOS_BASE_DIR}"/scripts/send2host.sh "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/bad_jobs/${MYNAME}.txt" --delete
     vecho "Delete bad_jobs.txt file" 1
 fi

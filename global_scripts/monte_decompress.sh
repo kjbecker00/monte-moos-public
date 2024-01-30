@@ -4,7 +4,7 @@
 
 ME="monte_decompress.sh"
 
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -41,7 +41,7 @@ if [[ ! -f $INPUT ]]; then
     vexit " No input file found. Use -h or --help for help with this script" 1
 fi
 
-cd $(dirname $INPUT)
+cd $(dirname $INPUT) || exit 5
 input_basename=$(basename $INPUT)
 INPUT_STRIPPED="${input_basename%.tar.gz}"
 

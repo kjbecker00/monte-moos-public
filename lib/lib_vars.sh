@@ -20,7 +20,7 @@ txtul=$(tput bold)        # Bold
 
 # Get myname. If it is not set, then set it
 if [[ -f ${CARLO_DIR_LOCATION}/myname.txt ]]; then
-    MYNAME=$(head -n 1 ${CARLO_DIR_LOCATION}/myname.txt)
+    MYNAME=$(head -n 1 "${CARLO_DIR_LOCATION}"/myname.txt)
 fi
 
 if [[ -z $MYNAME ]]; then
@@ -29,5 +29,5 @@ if [[ -z $MYNAME ]]; then
     else
         MYNAME="$(hostname)"
     fi
-    echo "$name" >"${CARLO_DIR_LOCATION}/myname.txt"
+    echo "$MYNAME" >"${CARLO_DIR_LOCATION}/myname.txt"
 fi

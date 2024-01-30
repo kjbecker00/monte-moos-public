@@ -2,7 +2,6 @@
 # Kevin Becker Jun 9 2023
 
 ME="monte_run_job.sh"
-VERBOSE=0
 TEST=""
 HOSTLESS="no"
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh

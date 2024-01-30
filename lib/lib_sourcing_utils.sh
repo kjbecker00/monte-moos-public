@@ -6,15 +6,18 @@
 #--------------------------------------------------------------
 
 #--------------------------------------------------------------
-# Finds the location of a repo, given a repo name
+# Finds the expanded path of a repo, given a repo name
 #--------------------------------------------------------------
 find_repo_location() {
     repo="$1"
+    # If the repo is in the home directory, expand it
     if [[ "$repo" == "~/"* ]]; then
         repo="${repo/#\~/$HOME}"
     else
+        # Look for repo in carlo_dir/moos_dirs/
         if [[ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo}" ]]; then
             repo="${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo}"
+        # If given a full, expanded path anyways, use that
         elif [[ -d $repo ]]; then
             :
         else
@@ -30,7 +33,7 @@ find_repo_location() {
 add_lib() {
     repo=$(find_repo_location "$1")
 
-    vecho "Adding ${repo}/lib, to IVP_BEHAVIOR_DIRS..." 1
+    vecho "Adding ${repo}'s lib, to IVP_BEHAVIOR_DIRS..." 1
     if [[ -d ${repo}/lib ]]; then
         IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS:${repo}/lib
     elif [[ -d ${repo}/trunk/lib ]]; then
@@ -47,7 +50,7 @@ add_lib() {
 add_bin() {
     repo=$(find_repo_location "$1")
 
-    vecho "Adding ${repo}/bin, scripts, to $PATH..." 1
+    vecho "Adding ${repo}'s bin and scripts, to $PATH..." 1
     if [[ -d ${repo}/bin ]]; then
         PATH=$PATH:${repo}/bin
         PATH=$PATH:${repo}/scripts

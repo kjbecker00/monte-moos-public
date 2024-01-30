@@ -8,7 +8,8 @@ IGNORE_WARNING="no"
 HOSTLESS="no"
 SLEEP_TIME=60
 
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+# shellcheck disable=SC1090
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_include.sh
 
 # Updates once per day
 day_of_last_update=$(date +%u) # current day
@@ -18,7 +19,7 @@ day_of_last_update=$(date +%u) # current day
 #-------------------------------------------------------
 for ARGI; do
     ALL_ARGS+=$ARGI" "
-    if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
+    if [[ "${ARGI}" = "--help" || "${ARGI}" = "-h" ]]; then
         echo "$ME.sh [OPTIONS]"
         echo "                                                          "
         echo " This is a script used to run jobs from the queue. It can "
@@ -50,6 +51,7 @@ done
 #-------------------------------------------------------
 if [[ -f monte_info ]]; then
     echo "Found a monte_info file. Using it to set variables."
+    # shellcheck disable=SC1091
     source monte_info
 fi
 
@@ -123,7 +125,7 @@ while true; do
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Run the next job, updating if necessary
-    /${MONTE_MOOS_BASE_DIR}/client_scripts/run_next.sh $FLAGS
+    /"${MONTE_MOOS_BASE_DIR}"/client_scripts/run_next.sh $FLAGS
     EXIT=$?
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -

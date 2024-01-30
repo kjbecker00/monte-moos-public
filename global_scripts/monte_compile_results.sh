@@ -8,9 +8,9 @@
 #--------------------------------------------------------------
 ME="monte_compile_results.sh"
 TYPE="cp"              # cp for copy, ln for link
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
-if [[ $MONTE_MOOS_HOST == $MYNAME ]]; then
+if [[ $MONTE_MOOS_HOST == "$MYNAME" ]]; then
     OUTPUT_BASE_DIR="${MONTE_MOOS_HOST_WEB_ROOT_DIR}/results"
 else
     OUTPUT_BASE_DIR="${CARLO_DIR_LOCATION}/compiled_results"

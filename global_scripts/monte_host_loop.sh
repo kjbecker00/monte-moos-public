@@ -8,10 +8,7 @@ LOOP_TIME=60
 PERPETUAL="no"
 QUEUE_COMPLETE="no"
 
-# Ensure status file exists
-[[ -f ${CARLO_DIR_LOCATION}/status.txt ]] || { touch ${CARLO_DIR_LOCATION}/status.txt ; }
-
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_include.sh
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -41,7 +38,6 @@ for ARGI; do
     fi
 done
 
-
 #-------------------------------------------------------
 #  Part 2: Error handling
 #-------------------------------------------------------
@@ -62,7 +58,7 @@ fi
 #-------------------------------------------------------
 #  Part 2b: Clean up any old monte processes
 #-------------------------------------------------------
-cd ${CARLO_DIR_LOCATION}
+cd "${CARLO_DIR_LOCATION}"
 monte_clean.sh --cache
 cd - >/dev/null
 

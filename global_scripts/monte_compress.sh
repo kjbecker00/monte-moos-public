@@ -4,7 +4,7 @@
 
 ME="monte_compress.sh"
 
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -34,15 +34,15 @@ done
 #  Part 2: Check arguments, cd to dirname fiel
 #-------------------------------------------------------
 
-INPUT="$(realpath $INPUT)"
+INPUT="$(realpath "$INPUT")"
 vecho "INPUT = ${INPUT}" 3
 if [[ ! -d $INPUT ]]; then
     vexit " No input dir found. Use -h or --help for help with this script" 1
 fi
 
 # cd to file dir
-base_input=$(basename $INPUT)
-cd $(dirname $INPUT)
+base_input=$(basename "$INPUT")
+cd "$(dirname "$INPUT")" || exit
 
 #-------------------------------------------------------
 #  Part 3: Overwrite existing file
@@ -50,7 +50,7 @@ cd $(dirname $INPUT)
 if [[ -f "${base_input}.tar.gz" ]]; then
     if [[ $OVERWRITE = "yes" ]]; then
         vecho "Removing existing file ${base_input}.tar.gz" 2
-        rm -f ${base_input}.tar.gz
+        rm -f "${base_input}".tar.gz
     else
         vexit "File ${base_input}.tar.gz already exists. Use -o or --overwrite to overwrite" 2
     fi
@@ -62,7 +62,7 @@ fi
 vecho "Compressing..." 1
 vecho "Input is a directory. Compressing..." 1
 vecho "tar -czf \"${base_input}.tar.gz\" $base_input " 2
-tar -czf "${base_input}.tar.gz" $base_input #"$base_input" -C $base_input #2> /dev/null
+tar -czf "${base_input}.tar.gz" "$base_input" #"$base_input" -C $base_input #2> /dev/null
 if [[ $? -ne 0 ]]; then
     vexit " compressing file" 2
 fi
@@ -71,7 +71,7 @@ fi
 #  Part 5: Delete origional
 #-------------------------------------------------------
 if [[ $DELETE = "yes" ]]; then
-    rm -rf $INPUT
+    rm -rf "$INPUT"
 fi
 
 exit 0

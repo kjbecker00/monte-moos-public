@@ -12,7 +12,7 @@ vecho() { if [[ "$VERBOSE" -ge "$2" || -z "$2" ]]; then echo $(tput setaf 245)"$
 #--------------------------------------------------------------
 # Status echo
 #--------------------------------------------------------------
-secho() { /${MONTE_MOOS_BASE_DIR}/lib/secho.sh "$1"; } # status echo
+secho() { /"${MONTE_MOOS_BASE_DIR}"/lib/secho.sh "$1"; } # status echo
 
 #--------------------------------------------------------------
 # Warning echo
@@ -75,12 +75,12 @@ job_filename() {
 #--------------------------------------------------------------
 job_dirname() { 
     input=$1
-    this_job_path=$(job_path $input)
+    this_job_path=$(job_path "$input")
     this_job_dir="${this_job_path%%/*}" # extract everything before /
     if [[ -z $this_job_dir  || "$(job_filename $input)" == "$this_job_dir" ]]; then
         this_job_dir=misc_job
     fi
-    echo $this_job_dir
+    echo "$this_job_dir"
 }
 
 #--------------------------------------------------------------

@@ -5,8 +5,8 @@
 ME="monte_extract_results.sh"
 TEST="no"
 OFFLOAD="yes"
-RSYNC_TIMEOUT=120
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+RSYNC_TIMEOUT=120 # TODO: ADD TIMEOUT HERE!
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_include.sh
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -49,7 +49,7 @@ for ARGI; do
     else
         # Job file provided without the flag
         # Assumed running as test
-        if [ -z $JOB_FILE ]; then
+        if [ -z "$JOB_FILE" ]; then
             TEST="yes"
             JOB_FILE=$ARGI
         else
@@ -60,7 +60,7 @@ done
 
 # Set test mode
 if [ $TEST = "yes" ]; then
-    if [ $VERBOSE -eq 0 ]; then
+    if [ "$VERBOSE" -eq 0 ]; then
         VERBOSE=1
     fi
     OFFLOAD="no"
@@ -75,9 +75,11 @@ fi
 #-------------------------------------------------------
 #  Part 2: Source job File
 #-------------------------------------------------------
-if [ ! -f $JOB_FILE ]; then
+if [ ! -f "$JOB_FILE" ]; then
     vexit "No job file found. Use -h or --help for help with this script" 1
 fi
+
+# shellcheck disable=SC2086
 . "$JOB_FILE" $JOB_ARGS
 if [[ $? -ne 0 ]]; then
     vexit "Sourcing job file yeilded non-zero exit code" 4
@@ -92,9 +94,9 @@ add_repo "$SHORE_REPO"
 # Part 2.5: Determine the job directory (to put the results in)
 #-------------------------------------------------------
 FULL_JOB_PATH=$(pwd)/$JOB_FILE
-JOB_FILE_NAME=$(job_filename $JOB_FILE)
-JOB_PATH="$(job_path $FULL_JOB_PATH)"
-JOB_DIR="$(job_dirname $JOB_FILE)"
+JOB_FILE_NAME=$(job_filename "$JOB_FILE")
+JOB_PATH="$(job_path "$FULL_JOB_PATH")"
+JOB_DIR="$(job_dirname "$JOB_FILE")"
 
 
 #-------------------------------------------------------
@@ -135,11 +137,11 @@ vecho "Shore alog = $SHORE_ALOG" 1
 # Get the hash from the alog
 
 add_bin "moos-ivp"
-hash=$(aloggrep ${SHORE_ALOG} MISSION_HASH --v --final --format=val --subpat=mhash)
+hash=$(aloggrep "${SHORE_ALOG}" MISSION_HASH --v --final --format=val --subpat=mhash)
 
 #-------------------------------------------------------
 # Makes a hash if not found. Useful if pMissionHash hasn't been added to mission
-if [ -z $hash ]; then
+if [ -z "$hash" ]; then
     hash=$(mhash_gen)
 fi
 vecho "Hash = $hash" 1
@@ -153,19 +155,19 @@ LOCAL_RESULTS_DIR="${CARLO_DIR_LOCATION}/results"
 LOCAL_JOB_RESULTS_DIR="${LOCAL_RESULTS_DIR}/${JOB_DIR}/${JOB_FILE_NAME}/${JOB_FILE_NAME}_${hash}"
 HOST_RESULTS_FULL_DIR="${MONTE_MOOS_HOST_RECIEVE_DIR}/results/${JOB_PATH}"
 # Just for display purposes
-LINK_TO_RESULTS="$MONTE_MOOS_HOSTNAME_FULL/${MONTE_MOOS_HOST_RESULTS_DIR}/${JOB_DIR}"
+# LINK_TO_RESULTS="$MONTE_MOOS_HOSTNAME_FULL/${MONTE_MOOS_HOST_RESULTS_DIR}/${JOB_DIR}"
 
 # If you're testing it, remove a prior iteration of the local results dir
-if [ -d $LOCAL_JOB_RESULTS_DIR ] && [ $TEST = "yes" ]; then
+if [ -d "$LOCAL_JOB_RESULTS_DIR" ] && [ $TEST = "yes" ]; then
     vecho "Testing, so removing old results dir" 1
-    rm -rf $LOCAL_JOB_RESULTS_DIR
+    rm -rf "$LOCAL_JOB_RESULTS_DIR"
 fi
 if [[ ! -d $LOCAL_JOB_RESULTS_DIR ]]; then
-    mkdir -p $LOCAL_JOB_RESULTS_DIR
+    mkdir -p "$LOCAL_JOB_RESULTS_DIR"
 fi
 
 # Writes to an argfile, which saves the job name job args
-echo "$JOB_FILE $JOB_ARGS" >> $LOCAL_JOB_RESULTS_DIR/.argfile
+echo "$JOB_FILE $JOB_ARGS" >> "$LOCAL_JOB_RESULTS_DIR"/.argfile
 
 #-------------------------------------------------------
 #  Part 4: Run post-processing script specific
@@ -176,8 +178,8 @@ echo "$JOB_FILE $JOB_ARGS" >> $LOCAL_JOB_RESULTS_DIR/.argfile
 # Step 1: Find the post_process_results.sh script to use
 results_script_directory="${JOB_FILE}"
 while [[ ! -f "${results_script_directory}/post_process_results.sh" && "${results_script_directory}" != "job_dirs" ]]; do
-    results_script_directory=$(dirname ${results_script_directory})
-    if [[ $results_script_directory == $(dirname ${results_script_directory}) ]]; then
+    results_script_directory=$(dirname "${results_script_directory}")
+    if [[ $results_script_directory == $(dirname "${results_script_directory}") ]]; then
         break
     fi
 done
@@ -186,16 +188,16 @@ if [ ! -f "${results_script_directory}/post_process_results.sh" ]; then
 fi
 
 # Step 2: ensure it can be executed
-chmod +x ${results_script_directory}/post_process_results.sh
+chmod +x "${results_script_directory}"/post_process_results.sh
 
 # Step 3: Execute the script
 vecho "$(tput bold)${txtylw}Using the script: $(tput smul)${results_script_directory}/post_process_results.sh Ensure this is the correct script" 1
 if [[ $JOB_ARGS == "" ]]; then
     vecho "Running with these flags: $(tput smul)${results_script_directory}/post_process_results.sh --job_file=$JOB_FILE --local_results_dir=$LOCAL_JOB_RESULTS_DIR" 1
-    ${results_script_directory}/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
+    "${results_script_directory}"/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
 else
     vecho "Running with these flags: $(tput smul)${results_script_directory}/post_process_results.sh --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\" --local_results_dir=$LOCAL_JOB_RESULTS_DIR" 1
-    ${results_script_directory}/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
+    "${results_script_directory}"/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
 fi
 
 
@@ -206,8 +208,6 @@ fi
 #********************************************************
 
 if [ $TEST = "yes" ]; then
-    # get everything before the first / in JOB_FILE
-    yourdir="${JOB_DIR%%/*}"
     echo ""
     echo "-------------------------------------- Next Steps --------------------------------------"
     echo "${txtrst}Now, go into the directory: $(tput smul)${txtblu}$LOCAL_JOB_RESULTS_DIR${txtrst}"
@@ -226,9 +226,9 @@ fi
 #  Part 5: Send results to host, if desired
 if [[ $OFFLOAD != "no" ]]; then
     vecho "Part 5: Offloading results $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR " 5
-    /${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR
+    /"${MONTE_MOOS_BASE_DIR}"/scripts/send2host.sh "$LOCAL_JOB_RESULTS_DIR" "$HOST_RESULTS_FULL_DIR"
     [ $? -eq 0 ] || { vexit "send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR failed with exit code $?" 3; }
-    rm -rf $LOCAL_JOB_RESULTS_DIR
+    rm -rf "$LOCAL_JOB_RESULTS_DIR"
 else
     vecho "Not offloading results" 1
 fi

@@ -3,10 +3,8 @@
 
 HOSTLESS="no"
 TO_UPDATE="no"
-ALL_JOBS_OK="yes"
 ME="run_next.sh"
 
-probability_skip=25 # proability it skips the first available job
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
 #-------------------------------------------------------
@@ -104,9 +102,8 @@ vecho "Initial run_act=$RUNS_ACT" 1
 #-------------------------------------------------------
 #  Part 4: Get the job dir
 #-------------------------------------------------------
+vecho "JOB_FILE: $JOB_FILE" 5
 
-# Ensures JOB_FILE begins with job_dirs/___
-# retrieves the job_dir (the subdirectory within carlo_dir/job_dirs that contains the job)
 JOB_DIR_NAME=$(job_dirname "$JOB_FILE")
 JOB_PATH=$(job_path "$JOB_FILE")
 # name of the zipped and encrypted job_dir
@@ -114,16 +111,7 @@ JOB_DIR_FILE="$JOB_DIR_NAME.tar.gz.enc"
 # FULL path, to the job file
 FULL_JOB_PATH=${CARLO_DIR_LOCATION}/job_dirs/$JOB_PATH
 
-vecho "JOB_FILE: $JOB_FILE" 5
-vecho "JOB_PATH: $JOB_PATH" 5
-vecho "FULL_JOB_PATH: $FULL_JOB_PATH" 5
-vecho "JOB_DIR_NAME: $JOB_DIR_NAME" 5
-# vecho "JOB_DIR_NAME: $JOB_DIR_NAME" 5
 
-# exit 1
-# if [ -f "$JOB_DIR_NAME" ]; then
-#     rm "$JOB_DIR_NAME"
-# fi
 # Notifies user, updates numbers for local copy of queue
 echo $(tput bold)"Running Job ${CARLO_DIR_LOCATION}/$JOB_FILE ($RUNS_LEFT runs left)" $txtrst
 RUNS_LEFT=$((RUNS_LEFT - 1))
@@ -133,7 +121,7 @@ vecho "New run_act=$RUNS_ACT" 1
 #-------------------------------------------------------
 #  Part 4B: Update the job dir from the host
 #-------------------------------------------------------
-cd ${CARLO_DIR_LOCATION}
+cd ${CARLO_DIR_LOCATION} || vexit "cd ${CARLO_DIR_LOCATION} failed" 1
 if [ "$HOSTLESS" = "no" ]; then
 
     # Update the queue file
@@ -207,7 +195,5 @@ else
     # Linux
     sed -i "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
 fi
-
-# cat $QUEUE_FILE
 
 exit 0

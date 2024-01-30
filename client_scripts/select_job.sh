@@ -1,9 +1,9 @@
 #!/bin/bash
 # Kevin Becker Nov 17 2023
 ME="select_job.sh"
-probability_skip=25 # proability it skips the first available job
+probability_skip=75 # proability it skips the first available job
 QUEUE_FILE=""
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -100,11 +100,8 @@ for ((i = 1; i <= length; i++)); do
     if [[ $RUNS_LEFT -gt 0 ]]; then
 
         # check that it is in a directory
-        JOB_FILE_NAME=$(job_filename $JOB_FILE)
         JOB_PATH=$(job_path ${JOB_FILE})
-        JOB_DIR=$(job_dirname ${JOB_FILE})
         KERBS=$(echo "$JOB_PATH" | cut -d '/' -f 1)
-        FILE="$JOB_NAME.tar.gz.enc"
 
         if [ -z "$KERBS" ]; then
             vecho "Job not in a directory. Skipping..." 1
@@ -116,8 +113,6 @@ for ((i = 1; i <= length; i++)); do
         GOOD_JOB_ARGS=$JOB_ARGS
         GOOD_RUNS_DES=$RUNS_DES
         GOOD_RUNS_ACT=$RUNS_ACT
-        GOOD_RUNS_LEFT=$RUNS_LEFT
-        probability_skip=75
         random_number=$((RANDOM % 100))
         # Randomly selects this job. Or tries the next one
         if ((random_number > probability_skip)); then

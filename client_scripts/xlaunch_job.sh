@@ -4,7 +4,6 @@
 #  Part 1: Handle command line arguments
 #-----------------------------------------------------
 QUIET="no"
-UQUERY_TRIES=2
 DELAY_REPEAT_POKE=1 # Default
 ME="xlaunch_job.sh"
 TIMER_ONLY="no"
@@ -137,13 +136,13 @@ if [[ ! -d $FULL_MISSION_DIR ]]; then
         FULL_MISSION_DIR=${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}
     fi
 fi
-cd $FULL_MISSION_DIR
-if [[ -f clean.sh && USE_MISSION_CLEAN_SCRIPT == "yes" ]]; then
+cd $FULL_MISSION_DIR || vexit "cd $FULL_MISSION_DIR failed" 1
+if [[ -f clean.sh && $USE_MISSION_CLEAN_SCRIPT == "yes" ]]; then
     ./clean.sh
 fi
 
 # cd - >&/dev/null
-cd ${CARLO_DIR_LOCATION} #>&/dev/null
+cd ${CARLO_DIR_LOCATION} || vexit "unable to cd into CARLO_DIR_LOCATION $CARLO_DIR_LOCATION" 20 #>&/dev/null
 
 #-----------------------------------------------------
 #  Part 7: Launch shoreside

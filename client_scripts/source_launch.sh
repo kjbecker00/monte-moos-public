@@ -20,7 +20,7 @@ TO_SOURCE="yes"             # if the script should add repo/bin to the path
 TO_ADD_LIB="yes"            # if the script should add repo/lib to IVP_BEHAVIOR_DIRS
 
 ME="source_launch.sh"
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 trap ctrl_c INT
 ctrl_c() {
     safe_exit 130

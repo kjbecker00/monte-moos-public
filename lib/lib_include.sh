@@ -5,12 +5,12 @@
 # for monte-moos
 #--------------------------------------------------------------
 
-# Initialize VERBOSE=0, tput colors
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_vars.sh
+# Initialize VERBOSE, tput colors
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_vars.sh
 
 # Convenience functions (vecho, secho, safe_exit, etc)
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_util_functions.sh
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_util_functions.sh
 
 # Functions for adding repos to PATH and IVP_BEHAVIOR_DIRS
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_sourcing_utils.sh
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_sourcing_utils.sh
 

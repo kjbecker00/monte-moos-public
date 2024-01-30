@@ -43,13 +43,13 @@ for ARGI; do
         echo "  --metadata, -m   status.txt, myname.txt               "
         echo "                   Rarely used."
         exit 0
-    elif [ "${ARGI}" = "--verbose" -o "${ARGI}" = "-v" ]; then
+    elif [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
         VERBOSE=1
-    elif [ "${ARGI}" = "--binaries" -o "${ARGI}" = "-b" ]; then
+    elif [[ "${ARGI}" = "--binaries" || "${ARGI}" = "-b" ]]; then
         BINARIES="yes"
-    elif [ "${ARGI}" = "--cache" -o "${ARGI}" = "-c" ]; then
+    elif [[ "${ARGI}" = "--cache" || "${ARGI}" = "-c" ]]; then
         CACHE="yes"
-    elif [ "${ARGI}" = "--metadata" -o "${ARGI}" = "-m" ]; then
+    elif [[ "${ARGI}" = "--metadata" || "${ARGI}" = "-m" ]]; then
         METADATA="yes"
     elif [ "${ARGI}" = "--results" ]; then
         # This is a dangerous option, so we make it prompt the user
@@ -107,71 +107,68 @@ if [ $METADATA = "yes" ] && [ $OVERRIDE_CHECKS != "yes" ]; then
     read -n 1 -s
 fi
 
-#-------------------------------------------------------
-# Part 4: ALWAYS Remove old moos-dirs (older than 30 days)
-#-------------------------------------------------------
-if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
-    vecho "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
-    mkdir -p ${MONTE_MOOS_CLIENT_REPOS_DIR}
-    find ${MONTE_MOOS_CLIENT_REPOS_DIR} -type d -mtime +30 -exec echo "     Removing: {}" \; -exec rm -r {} \;
-fi
 
 #-------------------------------------------------------
-# Part 5: Handle moos-ivp-extend directories
+# Part 4: Handle moos-ivp-extend directories
 #-------------------------------------------------------
-
 if [[ "${BINARIES}" = "yes" ]]; then
     vecho "Cleaning binaries..." 1
-    [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
+    [ -f "${CARLO_DIR_LOCATION}/.built_dirs" ] && rm -f "${CARLO_DIR_LOCATION}/.built_dirs"
 fi
 
-if [ -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
+if [ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}" ]; then
     starting_dir="$(pwd)"
-    cd ${MONTE_MOOS_CLIENT_REPOS_DIR} || vexit "Error with cd into ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
-
+    cd "${MONTE_MOOS_CLIENT_REPOS_DIR}" || vexit "Error with cd into ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
+    
+    
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Part 5a: Handle moos-ivp-extend directories
+    # Part 4a: Remove moos-dirs if specified
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    if find . -maxdepth 1 -type d -name 'moos-ivp-*' | read; then
-        if [[ "${MOOS_DIRS}" = "yes" ]]; then
-            vecho "Removing all moos-ivp-extend dirs in $pwd" 1
-            rm -rf moos-ivp-*
-        else
-            for dir in moos-ivp-*/; do
-                vecho "Cleaning $dir in $pwd..." 1
-                cd $dir || vexit "Error with cd into $dir" 1
+    if [[ "${MOOS_DIRS}" = "yes" ]]; then
+        vecho "Removing all moos-ivp-extend dirs in $(pwd)" 1
+        rm -rf moos-ivp-*
+    fi
+    #- - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Part 4b: Clean other moos-ivp-extend directories
+    #- - - - - - - - - - - - - - - - - - - - - - - - - -
+    if find . -maxdepth 1 -type d -name 'moos-ivp-*' | read -r; then
+        for dir in moos-ivp*/; do
+            vecho "Cleaning $dir in $pwd..." 1
+            cd $dir || vexit "Error with cd into $dir" 1
 
-                # Clean the binaries
-                if [[ "${BINARIES}" = "yes" ]]; then
-                    vecho "Cleaning binaries in $dir..." 2
-                    rm -rf build/*
-                    rm -rf lib/*
-                    rm -rf bin/p*
-                    find . -name '.build_log.txt' -exec rm -rf {} \; 2>/dev/null
-                fi
+            #- - - - - - - - - - - - - - - - - - - - - - - - - -
+            # Part 4c: Clean binaries (ONLY IF SPECIFIED)
+            #- - - - - - - - - - - - - - - - - - - - - - - - - -
+            # Clean the binaries
+            if [[ "${BINARIES}" = "yes" ]]; then
+                vecho "Cleaning binaries in $dir..." 2
+                rm -rf build/*
+                rm -rf lib/*
+                rm -rf bin/p*
+                find . -name '.build_log.txt' -exec rm -rf {} \; 2>/dev/null
+            fi
 
-                # ALWAYS remove temporary files, alogs, and other junk
-                rm -f .DS_Store
-                rm -f missions/*/.LastOpenedMOOSLogDirectory
-                find . -name '*~' -exec rm -rf {} \; 2>/dev/null
-                find . -name '#*' -exec rm -rf {} \; 2>/dev/null
-                find . -name '*.moos++' -exec rm -rf {} \; 2>/dev/null
-                find . -type f -name '*.dbg' -exec rm {} \; 2>/dev/null
-                find . -type f -name '*.moos++' -exec rm {} \; 2>/dev/null
-                find . -type f -name '*.DS_Store' -exec rm {} \; 2>/dev/null
-                find . -path '*/MOOSLog*' -exec rm -rf {} \; 2>/dev/null
-                find . -path '*/LOG_*' -exec rm -rf {} \; 2>/dev/null
-                find . -path '*/XLOG_*' -exec rm -rf {} \; 2>/dev/null
-                cd - >/dev/null || vexit "Error with cd" 1
+            # ALWAYS remove temporary files, alogs, and other junk
+            rm -f .DS_Store
+            rm -f missions/*/.LastOpenedMOOSLogDirectory
+            find . -name '*~' -exec rm -rf {} \; 2>/dev/null
+            find . -name '#*' -exec rm -rf {} \; 2>/dev/null
+            find . -name '*.moos++' -exec rm -rf {} \; 2>/dev/null
+            find . -type f -name '*.dbg' -exec rm {} \; 2>/dev/null
+            find . -type f -name '*.moos++' -exec rm {} \; 2>/dev/null
+            find . -type f -name '*.DS_Store' -exec rm {} \; 2>/dev/null
+            find . -path '*/MOOSLog*' -exec rm -rf {} \; 2>/dev/null
+            find . -path '*/LOG_*' -exec rm -rf {} \; 2>/dev/null
+            find . -path '*/XLOG_*' -exec rm -rf {} \; 2>/dev/null
+            cd - >/dev/null || vexit "Error with cd" 1
 
-            done
-        fi
+        done
     else
         vecho "No moos-ivp-extend directories found." 1
     fi
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Part 5b: ALWAYS clean moos-ivp/ivp/missions
+    # Part 4d: ALWAYS clean moos-ivp/ivp/missions
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Always clean all moos-ivp missions
     if [ -d moos-ivp ]; then
@@ -188,7 +185,7 @@ if [ -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
 fi
 
 #-------------------------------------------------------
-# Part 6: Clean all results folders
+# Part 5: Clean all results folders
 #-------------------------------------------------------
 if [[ "${RESULTS}" = "yes" ]]; then
     vecho "Cleaning results" 1
@@ -211,40 +208,50 @@ if [[ "${RESULTS}" = "yes" ]]; then
 fi
 
 #-------------------------------------------------------
-# Part 7: Clean all metadata (queues, statuses, etc.)
+# Part 6: Clean all metadata (queues, statuses, etc.)
 # Mostly unnecessary, since these shouldn't cause harm
 #-------------------------------------------------------
 if [[ "${METADATA}" = "yes" ]]; then
     vecho "Cleaning metadata (status.txt and myname.txt)" 1
-    [ -f ${CARLO_DIR_LOCATION}/status.txt ] && rm -f ${CARLO_DIR_LOCATION}/status.txt
-    [ -f ${CARLO_DIR_LOCATION}/myname.txt ] && rm -f ${CARLO_DIR_LOCATION}/myname.txt
-    find ${CARLO_DIR_LOCATION} -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
+    [ -f "${CARLO_DIR_LOCATION}/status.txt" ] && rm -f "${CARLO_DIR_LOCATION}/status.txt"
+    [ -f "${CARLO_DIR_LOCATION}/myname.txt" ] && rm -f "${CARLO_DIR_LOCATION}/myname.txt"
+    find "${CARLO_DIR_LOCATION}" -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
 fi
 
 #-------------------------------------------------------
-# Part 8: Clean all cache files:
+# Part 7: Clean all cache files:
 #           - bulit_dirs
 #           - bad_jobs
 #-------------------------------------------------------
 if [[ "${CACHE}" = "yes" ]]; then
     vecho "Cleaning cache (.build_dirs, bad_jobs.txt)" 1
-    [ -f ${CARLO_DIR_LOCATION}/.built_dirs ] && rm -f ${CARLO_DIR_LOCATION}/.built_dirs
-    if [[ $MYNAME != $MONTE_MOOS_HOST ]]; then
-        /${MONTE_MOOS_BASE_DIR}/client_scripts/list_bad_job.sh -d
+    [ -f "${CARLO_DIR_LOCATION}/.built_dirs" ] && rm -f "${CARLO_DIR_LOCATION}/.built_dirs"
+    if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
+        /"${MONTE_MOOS_BASE_DIR}"/client_scripts/list_bad_job.sh -d
     fi
 fi
 
 #-------------------------------------------------------
-# Part 9: ALWAYS do the following
+# Part 8: ALWAYS do the following
 #-------------------------------------------------------
 # Always clean all remaining .enc files
 vecho "Cleaning all remaining files" 3
-find ${CARLO_DIR_LOCATION} -name '*.enc' -exec rm -rf {} \; 2>/dev/null
-find ${CARLO_DIR_LOCATION} -name '*.enc.*' -exec rm -rf {} \; 2>/dev/null
+find "${CARLO_DIR_LOCATION}" -name '*.enc' -exec rm -rf {} \; 2>/dev/null
+find "${CARLO_DIR_LOCATION}" -name '*.enc.*' -exec rm -rf {} \; 2>/dev/null
+
 # Always remove temporary files
-[ -f ${CARLO_DIR_LOCATION}/.old_*_job_queue.txt ] && rm -f ${CARLO_DIR_LOCATION}/.old_*_job_queue.txt
-[ -f ${CARLO_DIR_LOCATION}/.temp_queue.txt ] && rm -f ${CARLO_DIR_LOCATION}/.temp_queue.txt
+rm -f "${CARLO_DIR_LOCATION}"/.old_*_job_queue.txt
+rm -f "${CARLO_DIR_LOCATION}"/.temp_queue.txt
+
 # Remove empty results folders
-[[ -d ${CARLO_DIR_LOCATION}/results ]] && { find ${CARLO_DIR_LOCATION}/results -type d -delete 2>/dev/null; }
+[[ -d ${CARLO_DIR_LOCATION}/results ]] && { find "${CARLO_DIR_LOCATION}"/results -type d -delete 2>/dev/null; }
+
+# Remove old moos-dirs
+if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
+    vecho "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
+    mkdir -p ${MONTE_MOOS_CLIENT_REPOS_DIR}
+    find ${MONTE_MOOS_CLIENT_REPOS_DIR} -type d -mtime +30 -exec echo "     Removing: {} since its older than 30 days..." \; -exec rm -r {} \;
+fi
+
 
 exit 0

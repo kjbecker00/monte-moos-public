@@ -14,19 +14,14 @@ is_in_job() {
     if [[ "$SHORE_REPO" == "$this_repo_name" ]]; then
         vecho "$this_repo_name in SHORE_REPO" 3
         return 0
-    elif [[ "${VEHICLE_REPOS[@]}" == "$this_repo_name"* ]]; then
-        vecho "$this_repo_name in VEHICLE_REPOS" 3
-        return 0
-    elif [[ "${EXTRA_REPOS[@]}" == "$this_repo_name"* ]]; then
-        vecho "$this_repo_name in EXTRA_REPOS" 3
-        return 0
-    elif [[ "${EXTRA_LIB_REPOS[@]}" == "$this_repo_name"* ]]; then
-        vecho "$this_repo_name in EXTRA_LIB_REPOS" 3
-        return 0
-    elif [[ "${EXTRA_BIN_REPOS[@]}" == "$this_repo_name"* ]]; then
-        vecho "$this_repo_name in EXTRA_BIN_REPOS" 3
-        return 0
     fi
+    for repo in "${VEHICLE_REPOS[@]}" "${EXTRA_REPOS[@]}" "${EXTRA_LIB_REPOS[@]}" "${EXTRA_BIN_REPOS[@]}"; do
+        if [[ "$repo" == "$this_repo_name" ]]; then
+            vecho "$this_repo_name in job" 3
+            return 0
+        fi
+    done
+
     vecho "      $this_repo_name is not part of this job" 1
     return 1
 }
@@ -35,15 +30,19 @@ is_in_job() {
 # Checks if a repo has been built
 #--------------------------------------------------------------
 has_not_built_repo() {
-    local repo=$1
+    local repo
+    local name
+    local num
+    local num2
+    repo=$1
 
     if [ -f "$built_dirs_cache" ]; then
-        num=$(grep -Fx -m 1 "$repo" $built_dirs_cache)
+        num=$(grep -Fx -m 1 "$repo" "$built_dirs_cache")
         if [ -z "$num" ]; then
             return 1
         fi
-        local name=$(extract_repo_name $repo)
-        num2=$(grep -Fx -m 1 "$name" $built_dirs_cache)
+        name=$(extract_repo_name "$repo")
+        num2=$(grep -Fx -m 1 "$name" "$built_dirs_cache")
         if [ -z "$num2" ]; then
             return 1
         fi
@@ -55,32 +54,49 @@ has_not_built_repo() {
 # given a line in a repo_links file, retrieves the repo name
 #--------------------------------------------------------------
 extract_repo_name() {
-    local repo_full=$1
-    local repo_name=""
-    if [[ $repo_full =~ \.git$ ]]; then
-        repo_name=$(basename "$repo_full" .git)
-    elif [[ $repo_full == *github.* || $repo_full == *gitlab.* ]]; then
-        repo_name=$(basename "$repo_full")
-    elif [[ "$repo_full" == "~/"* ]] || [[ "$repo_full" == "/"* ]]; then
-        # repo_name="${repo_full##*/}" Old version
-        repo_name="$(basename $repo_full)"
-    else
-        echo "$0 Error: Repo type not recognized: \"$repo_full\""
-        exit 1
+    local repo_full
+    repo_full=$(echo "$1" | xargs)
+    local repo_name
+    repo_name="$(echo "$repo_full" | awk '{print $2}')"
+    
+    if [[ $repo_name = "" ]]; then
+        if [[ $repo_full =~ \.git$ ]]; then
+            repo_name=$(basename "$repo_full" .git)
+        elif [[ $repo_full == *github.* || $repo_full == *gitlab.* ]]; then
+            repo_name=$(basename "$repo_full")
+        elif [[ "$repo_full" == "~/"* ]] || [[ "$repo_full" == "/"* ]]; then
+            # repo_name="${repo_full##*/}" Old version
+            repo_name="$(basename $repo_full)"
+        else
+            echo "$0 Error: Repo type not recognized: \"$repo_full\""
+        fi
     fi
-    echo $repo_name
+    echo "$repo_name"
+}
+
+#--------------------------------------------------------------
+# given a line in a repo_links file, retrieves the repo name
+#--------------------------------------------------------------
+extract_repo_link() {
+    #  trim the repo name
+    local trimmed
+    trimmed=$(echo "$1" | xargs)
+
+    # split by spaces
+    # return the first element
+    echo "$trimmed" | awk '{print $1}'
 }
 
 #--------------------------------------------------------------
 # Wrapper for git pull (note: alter return if no changes)
 #--------------------------------------------------------------
 gpull() {
-    local repo=$1
+    local repo_name=$1
     local repo_links_file=$2
     git pull &>/dev/null
     if [ $? -ne 0 ]; then
         echo ""
-        echo "    ${txtylw}Warning: git pull on $repo failed, check $repo_links_file ${txtrst}"
+        echo "    ${txtylw}Warning: git pull on $repo_name failed, check $repo_links_file ${txtrst}"
     fi
     echo $txtgrn " updated sucessfully" $txtrst
 }
@@ -89,12 +105,14 @@ gpull() {
 # Wrapper for svn up (note: alter return if no changes)
 #--------------------------------------------------------------
 svnup() {
-    local repo=$1
-    local repo_links_file=$2
+    local repo_name
+    repo_name=$1
+    local repo_links_file
+    repo_links_file=$2
     svn up &>/dev/null
     if [ $? -ne 0 ]; then
         echo ""
-        echo "    ${txtylw}Warning: svn up on $repo failed, check $repo_links_file ${txtrst}"
+        echo "    ${txtylw}Warning: svn up on $repo_name failed, check $repo_links_file ${txtrst}"
     fi
     echo $txtgrn " updated sucessfully" $txtrst
 }
@@ -112,17 +130,17 @@ skipline() {
         vecho "Identified as comment... $repo" 10
         return 0
     fi
-    repo_name=$(extract_repo_name $repo)
+    repo_name=$(extract_repo_name "$repo")
     vecho "repo=$repo repo_name=$repo_name" 1
     if [ $ALL != "yes" ]; then
-        if has_not_built_repo $repo_name ; then
+        if has_not_built_repo "$repo_name" ; then
             echo "      ${repo_name} ${txtgrn} Already built. skipping...${txtrst}"
             return 0
         else
             vecho "      ${repo_name} not built. May be building...${txtrst}" 1
         fi
         # Determines if the repo is used for the job
-        if is_in_job $repo_name; then
+        if is_in_job "$repo_name"; then
             echo "      Updating & building $repo_name..."
             return 1
         else
@@ -138,8 +156,8 @@ skipline() {
 #--------------------------------------------------------------
 build_script() {
     starting_dir="$PWD"
-    if [ ! -f $script ]; then
-        if [ -f trunk/$script ]; then
+    if [ ! -f "$script" ]; then
+        if [ -f trunk/"$script" ]; then
             cd trunk
         else
             vexit "      can't find build script as $PWD/$script or $PWD/$trunk/$script" 1
@@ -182,6 +200,6 @@ build_script() {
             BUILD_FAIL=1
         fi
     fi
-    cd $starting_dir
+    cd "$starting_dir"
     return $BUILD_FAIL
 }

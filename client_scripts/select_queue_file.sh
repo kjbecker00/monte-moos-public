@@ -2,7 +2,6 @@
 # Kevin Becker Nov 17 2023
 
 HOST_QUEUE_FILE="host_job_queue.txt"
-QUEUE_FILE=""
 HOSTLESS="no"
 ME="select_queue_file.sh"
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
@@ -45,7 +44,7 @@ done
 if [[ ! -d ${CARLO_DIR_LOCATION} ]]; then
     vexit "CARLO_DIR_LOCATION not set, please set it to the location of the carlo directory" 1
 fi
-cd ${CARLO_DIR_LOCATION}
+cd ${CARLO_DIR_LOCATION} || vexit "Unable to cd to ${CARLO_DIR_LOCATION}" 1
 
 #-------------------------------------------------------
 #  Part 3a: If hostless, only look here

@@ -4,7 +4,7 @@
 
 ME="monte_encrypt.sh"
 
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -37,7 +37,7 @@ done
 #  Part 2: Check arguments
 #-------------------------------------------------------
 
-INPUT="$(realpath $INPUT)"
+INPUT="$(realpath "$INPUT")"
 vecho "INPUT = ${INPUT}" 3
 
 # Check for input file
@@ -46,7 +46,7 @@ if [[ -z $INPUT ]]; then
 fi
 # Check for input file
 if [[ -z $PASSWORD ]]; then
-    PASSWORD=$(head -n 1 ${CARLO_DIR_LOCATION}/.password)
+    PASSWORD=$(head -n 1 "${CARLO_DIR_LOCATION}"/.password)
     # vexit " No password given" 2
 fi
 
