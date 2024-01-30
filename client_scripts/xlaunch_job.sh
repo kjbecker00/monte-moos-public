@@ -11,7 +11,7 @@ USE_MISSION_CLEAN_SCRIPT="yes"
 START_POKE="DEPLOY_ALL=true DEPLOY=true MOOS_MANUAL_OVERRIDE_ALL=false "
 START_POKE+="MOOS_MANUAL_OVERIDE_ALL=false MOOS_MANUAL_OVERRIDE=false "
 START_POKE+="MOOS_MANUAL_OVERIDE=false RETURN_ALL=false RETURN=false "
-
+NUM_REPEAT_POKES=1
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 trap ctrl_c INT
 ctrl_c() {
@@ -230,12 +230,10 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Poke the mission
-if [[ -z NUM_REPEAT_POKES ]]; then
-    NUM_REPEAT_POKES=1
-fi
+
 for ((i = 0; i < NUM_REPEAT_POKES; i++)); do
     if [ $VERBOSE -lt 2 ]; then
-    vecho "uPokeDB $SHORE_TARG $START_POKE >&/dev/null" 2
+    vecho "uPokeDB $SHORE_TARG $START_POKE >&/dev/null" 1
     uPokeDB $SHORE_TARG $START_POKE >&/dev/null
     else
         vecho "uPokeDB $SHORE_TARG $START_POKE" 2
