@@ -45,12 +45,15 @@ done
 
 # if it should update
 if [[ "$TO_UPDATE" == "yes" ]]; then
-    vecho "UPDATING..." 1
+    vecho "UPDATING all repos..." 1
     # remove old cache files
     rm -f .built_dirs
     if [ -f .built_dirs ]; then
         rm .built_dirs
     fi
+    cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
+    git pull
+    cd - > /dev/null
 fi
 
 echo $(tput bold)"-------------------------------------------------------" $txtrst
