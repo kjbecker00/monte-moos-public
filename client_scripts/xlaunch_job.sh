@@ -12,7 +12,10 @@ START_POKE="DEPLOY_ALL=true DEPLOY=true MOOS_MANUAL_OVERRIDE_ALL=false "
 START_POKE+="MOOS_MANUAL_OVERIDE_ALL=false MOOS_MANUAL_OVERRIDE=false "
 START_POKE+="MOOS_MANUAL_OVERIDE=false RETURN_ALL=false RETURN=false "
 NUM_REPEAT_POKES=1
+
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
+
+
 trap ctrl_c INT
 ctrl_c() {
     safe_exit 130
@@ -342,7 +345,7 @@ while [ 1 ]; do
     # fi
 
     # Check timer, exit if necessary
-    if [ $elapsed_time -gt $JOB_TIMEOUT ]; then
+    if [ $elapsed_time -gt "$JOB_TIMEOUT" ]; then
         echo ""
         echo "${txtylw}      Mission timed out after ${elapsed_time} seconds${txtrst}"
         break
