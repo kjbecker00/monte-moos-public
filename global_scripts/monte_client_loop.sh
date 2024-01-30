@@ -31,6 +31,7 @@ for ARGI; do
         echo " -p,        perpetual mode. Does not exit when there are  "
         echo "            no more jobs left in the queue. Useful for "
         echo "            running in a cluster.     "
+        echo "  --verbose=num, -v=num or --verbose, -v              "
         exit 0
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
         HOSTLESS=""--hostless""
@@ -38,6 +39,12 @@ for ARGI; do
         PERPETUAL="yes"
     elif [[ "${ARGI}" = "-y" ]]; then
         IGNORE_WARNING="yes"
+    elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
+        if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
+            VERBOSE=1
+        else
+            VERBOSE="${ARGI#*=}"
+        fi
     else
         vexit "Unrecognized option: $ARGI" 1
     fi
@@ -109,11 +116,12 @@ RE_UPDATE="--update"
 while true; do
     monte_clean.sh
 
-    #- - - - - - - - - - - - - - - - - - - - - - - - - -
+
     # Run the next job and check exit codes
     /"${MONTE_MOOS_BASE_DIR}"/client_scripts/run_next.sh $HOSTLESS $RE_UPDATE
     EXIT=$?
 
+    #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 1: Queue is empty
     if [ $EXIT -eq 1 ]; then
         if [ -z "$PERPETUAL" ]; then
@@ -145,9 +153,12 @@ while true; do
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Determine if a reupdate is needed
     if [[ $PERPETUAL == "yes" ]]; then
+        # Reset the reupdate flag
         if [ "$RE_UPDATE" = "--update" ]; then
             RE_UPDATE=""
         fi
+
+        # Populate the reupdate flag
         if [ "$day_of_last_update" -ne $(date +%u) ]; then
             RE_UPDATE="--update"
             day_of_last_update=$(date +%u)
