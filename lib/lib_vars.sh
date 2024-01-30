@@ -15,7 +15,7 @@ txtblu=$(tput setaf 4)    # Blue
 txtltblu=$(tput setaf 75) # Light Blue
 txtgry=$(tput setaf 8)    # Grey
 txtul=$(tput smul)        # Underline
-txtul=$(tput bold)        # Bold
+txtbld=$(tput bold)       # Bold
 
 
 # Get myname. If it is not set, then set it

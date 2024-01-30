@@ -114,7 +114,7 @@ if [ -z "$JOB_FILE" ]; then
 fi
 # adds job_gropus to the directory if neded (should be needed!)
 if [ ! -f "$JOB_FILE" ]; then
-    new_JOB_FILE="job_dirs/$JOB_FILE"
+    new_JOB_FILE=".temp_job_dirs/$JOB_FILE"
     if [ ! -f "$new_JOB_FILE" ]; then
         vexit "Job file must exist at $JOB_FILE" 2
     else

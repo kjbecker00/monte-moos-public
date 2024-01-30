@@ -87,7 +87,7 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
     check_quit
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    #  Part 3b: Update the job_dirs and repo links on the web
+    #  Part 3b: Update the .temp_job_dirs and repo links on the web
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     secho "Updating job dirs"
     ${MONTE_MOOS_BASE_DIR}/host_scripts/update_job_dirs.sh

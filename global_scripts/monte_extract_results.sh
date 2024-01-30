@@ -177,14 +177,14 @@ echo "$JOB_FILE $JOB_ARGS" >> "$LOCAL_JOB_RESULTS_DIR"/.argfile
 #  Runs job-specific post-processing script here:
 # Step 1: Find the post_process_results.sh script to use
 results_script_directory="${JOB_FILE}"
-while [[ ! -f "${results_script_directory}/post_process_results.sh" && "${results_script_directory}" != "job_dirs" ]]; do
+while [[ ! -f "${results_script_directory}/post_process_results.sh" && "${results_script_directory}" != ".temp_job_dirs" ]]; do
     results_script_directory=$(dirname "${results_script_directory}")
     if [[ $results_script_directory == $(dirname "${results_script_directory}") ]]; then
         break
     fi
 done
 if [ ! -f "${results_script_directory}/post_process_results.sh" ]; then
-    vexit "No post_process_results.sh found in job_dirs/${JOB_DIR} or any parent directory" 2
+    vexit "No post_process_results.sh found in .temp_job_dirs/${JOB_DIR} or any parent directory" 2
 fi
 
 # Step 2: ensure it can be executed

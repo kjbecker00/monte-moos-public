@@ -51,8 +51,10 @@ for ARGI; do
 done
 
 #-------------------------------------------------------
-#  Part 1a: Check for monte_info file. Useful if you
-#           have multiple carlo_dirs for different hosts
+#  Part 1: Set enviornment, checks
+#-------------------------------------------------------
+# a: Check for monte_info file. Useful if you have
+#    multiple carlo_dirs for different hosts
 #-------------------------------------------------------
 if [[ -f monte_info ]]; then
     echo "Found a monte_info file. Using it to set variables."
@@ -60,20 +62,18 @@ if [[ -f monte_info ]]; then
     source monte_info
 fi
 
-# Check the shell enviornment
 monte_check_job.sh
 if [ $? -ne 0 ]; then
     vexit "Enviornment has errors. Please fix them before running this script." 1
 fi
 
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
-#  Part 1b: Warn the user about loosing files
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
-if [ -d "job_dirs" ] && [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
+#-------------------------------------------------------
+#  Part 2: Warnings
+#-------------------------------------------------------
+if [ -d ".temp_job_dirs" ] && [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
     if [ "$IGNORE_WARNING" != "yes" ]; then
-        echo "WARNING: If you are pulling from the host,"
-        echo "any new job files may be overwritten with the host's. Be sure "
-        echo "to commit & push changes in this carlo_dir directory."
+        echo "WARNING: The .temp_job_dirs directory may be overwritten. "
+        echo "Be sure to commit & push changes in this carlo_dir directory."
         echo "Press any key to continue, or Ctrl-C to cancel."
         read -n 1 -s
     fi
@@ -83,34 +83,51 @@ if [ "$MYNAME" = "$MONTE_MOOS_HOST" ]; then
     vexit "This script should only be run on a client" 1
 fi
 
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
-#  Part 1d: Check for force_quit file
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
+#-------------------------------------------------------
+#  Part 3: Check for force_quit file
+#-------------------------------------------------------
 if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
     secho "${CARLO_DIR_LOCATION}/force_quit file found. Not starting up until this is manually deleted."
     exit 0
 fi
 
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
-# Part 1e: Ensure the temporary job dirs are in place
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+#-------------------------------------------------------
+#  Part 4: Force updates on monte-moos and moos-dirs
+#-------------------------------------------------------
+monte_clean.sh --cache
+RE_UPDATE="--update"
+if [[ $PERPETUAL = "yes" ]]; then
+    # Update monte-moos as well
+    vecho "Updating monte-moos..." 1
+    secho "Updating monte-moos..."
+    cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
+    git pull 2>&1 >/dev/null || {
+        git reset --hard HEAD 2>&1 >/dev/null
+        git pull 2>&1 >/dev/null
+    }
+    cd - >/dev/null
+fi
+
+#-------------------------------------------------------
+#  Part 5: Set temporary .temp_job_dirs
+#-------------------------------------------------------
 if [ "$HOSTLESS" = "--hostless" ]; then
-    # If the runtime job_dirs directory doesn't exist, copy the local_job_dirs
-    if [ ! -d "${CARLO_DIR_LOCATION}/job_dirs" ]; then
-        if [ -d "${CARLO_DIR_LOCATION}/local_job_dirs" ]; then
-            cp -rp "${CARLO_DIR_LOCATION}/local_job_dirs" "${CARLO_DIR_LOCATION}/job_dirs"
-        fi
+    # If the runtime .temp_job_dirs directory doesn't exist, copy the local_job_dirs
+    vecho "Hostless..." 10
+    if [ -d "${CARLO_DIR_LOCATION}/.temp_job_dirs" ]; then
+        vecho "Removing old .temp_job_dirs..." 3
+        rm -rf "${CARLO_DIR_LOCATION}/.temp_job_dirs"
+    fi
+    if [ -d "${CARLO_DIR_LOCATION}/local_job_dirs" ]; then
+        vecho "Copying local_job_dirs to .temp_job_dirs..." 3
+        cp -rp "${CARLO_DIR_LOCATION}/local_job_dirs" "${CARLO_DIR_LOCATION}/.temp_job_dirs"
     fi
 fi
 
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
-# Part 1f: Clean cache (bad_jobs.txt, .built_dirs)
-#- - - - - - - - - - - - - - - - - - - - - - - - - -
-monte_clean.sh --cache
-
-RE_UPDATE="--update"
 #-------------------------------------------------------
-#  Part 2: Run, and (sometimes) update
+#  Part 6: Run, and (sometimes) update!
 #-------------------------------------------------------
 while true; do
     vecho "New iteration of loop..." 10
@@ -151,7 +168,7 @@ while true; do
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Determine if a reupdate is needed
-    if [[ $PERPETUAL == "yes" ]]; then
+    if [[ $PERPETUAL = "yes" ]]; then
         vecho "Perpetual mode. Checking for updates..." 10
         # Reset the reupdate flag
         if [ "$RE_UPDATE" = "--update" ]; then

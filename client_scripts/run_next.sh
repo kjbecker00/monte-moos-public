@@ -110,10 +110,10 @@ JOB_PATH=$(job_path "$JOB_FILE")
 # name of the zipped and encrypted job_dir
 JOB_DIR_FILE="$JOB_DIR_NAME.tar.gz.enc"
 # FULL path, to the job file
-FULL_JOB_PATH=${CARLO_DIR_LOCATION}/job_dirs/$JOB_PATH
+FULL_JOB_PATH=${CARLO_DIR_LOCATION}/.temp_job_dirs/$JOB_PATH
 
 # Notifies user, updates numbers for local copy of queue
-echo $(tput bold)"Running Job ${CARLO_DIR_LOCATION}/$JOB_FILE ($RUNS_LEFT runs left)" $txtrst
+echo $(tput bold)"Running Job $JOB_FILE ($RUNS_LEFT runs left)" $txtrst
 RUNS_LEFT=$((RUNS_LEFT - 1))
 RUNS_ACT=$((RUNS_ACT + 1))
 vecho "New run_act=$RUNS_ACT" 1
@@ -121,7 +121,7 @@ vecho "New run_act=$RUNS_ACT" 1
 #-------------------------------------------------------
 #  Part 4B: Update the job file by pulling the job dir from the host
 #-------------------------------------------------------
-cd ${CARLO_DIR_LOCATION} || vexit "cd ${CARLO_DIR_LOCATION} failed" 1
+cd "${CARLO_DIR_LOCATION}" || vexit "cd ${CARLO_DIR_LOCATION} failed" 1
 if [ "$HOSTLESS" = "no" ]; then
 
     # Update the queue file
@@ -133,32 +133,33 @@ if [ "$HOSTLESS" = "no" ]; then
         vexit "/${MONTE_MOOS_BASE_DIR}/client_scripts/pull_from_host.sh ${MONTE_MOOS_HOST_URL_WGET}${MONTE_MOOS_HOST_CLIENT_DIR}/job_dirs/$JOB_DIR_NAME failed with code $EXIT_CODE" 1
     fi
 
-    # Success! Move encrypted file to job_dirs, decrypt it
-    if [ ! -d "job_dirs" ]; then
-        mkdir job_dirs
+    # Success! Move encrypted file to .temp_job_dirs, decrypt it
+    if [ ! -d ".temp_job_dirs" ]; then
+        mkdir .temp_job_dirs
     fi
-    vecho "Moving $JOB_DIR_FILE to job_dirs/..." 1
-    mv "$JOB_DIR_FILE" job_dirs/
+
+    vecho "Moving $JOB_DIR_FILE to .temp_job_dirs/..." 1
+    mv "$JOB_DIR_FILE" .temp_job_dirs/
 
     # Decrypt
-    vecho "Decrypting job_dirs/$JOB_DIR_FILE ..." 1
-    monte_decrypt.sh "job_dirs/$JOB_DIR_FILE" -o -d
+    vecho "Decrypting .temp_job_dirs/$JOB_DIR_FILE ..." 1
+    monte_decrypt.sh ".temp_job_dirs/$JOB_DIR_FILE" -o -d
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-        vexit "monte_decrypt.sh failed do decrypt file job_dirs/$JOB_DIR_FILE -o -d with code $EXIT_CODE" 7
+        vexit "monte_decrypt.sh failed do decrypt file .temp_job_dirs/$JOB_DIR_FILE -o -d with code $EXIT_CODE" 7
     fi
 
     # Decompress
-    vecho "Decompressing job_dirs/$JOB_DIR_NAME.tar.gz ..." 1
-    monte_decompress.sh "job_dirs/$JOB_DIR_NAME.tar.gz" -o -d
+    vecho "Decompressing .temp_job_dirs/$JOB_DIR_NAME.tar.gz ..." 1
+    monte_decompress.sh ".temp_job_dirs/$JOB_DIR_NAME.tar.gz" -o -d
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
-        vexit "monte_decrypt.sh failed do decrypt file job_dirs/$JOB_DIR_NAME.tar.gz -o -d with code $EXIT_CODE" 7
+        vexit "monte_decrypt.sh failed do decrypt file .temp_job_dirs/$JOB_DIR_NAME.tar.gz -o -d with code $EXIT_CODE" 7
     fi
 
     # Check that the dir now exists
-    if [[ ! -d "${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME" ]]; then
-        vexit "after decrypting $JOB_DIR_NAME, ${CARLO_DIR_LOCATION}/job_dirs/$JOB_DIR_NAME still does not exist" 1
+    if [[ ! -d "${CARLO_DIR_LOCATION}/.temp_job_dirs/$JOB_DIR_NAME" ]]; then
+        vexit "after decrypting $JOB_DIR_NAME, ${CARLO_DIR_LOCATION}/.temp_job_dirs/$JOB_DIR_NAME still does not exist" 1
     fi
 
 fi

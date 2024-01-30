@@ -13,7 +13,6 @@ CACHE="no"
 MOOS_DIRS="no"
 OVERRIDE_CHECKS="no"
 METADATA="no"
-JOB_DIRS="no"
 ALL="no"
 
 ME="monte_clean.sh"
@@ -36,7 +35,6 @@ for ARGI; do
         echo "  --binaries, -b   binaries in each moos-dir            "
         echo "  --cache, -c      Which dirs have been built, which jobs are bad.               "
         echo "  --results        removes all dirs named results               "
-        echo "  --job_dirs       removes job_dirs directory (NOT local_job_dirs)               "
         echo "  --moos_dirs      removes all moos-ivp-extend dirs         "
         echo "  --all            enable all options         "
         echo "  -y               bypass any safety checks             "
@@ -54,8 +52,6 @@ for ARGI; do
     elif [ "${ARGI}" = "--results" ]; then
         # This is a dangerous option, so we make it prompt the user
         RESULTS="yes"
-    elif [ "${ARGI}" = "--job_dirs" ]; then
-        JOB_DIRS="yes"
     elif [ "${ARGI}" = "--moos_dirs" ]; then
         MOOS_DIRS="yes"
     elif [ "${ARGI}" = "--all" ]; then
@@ -92,7 +88,6 @@ if [ $ALL = "yes" ]; then
         RESULTS="yes"
         METADATA="yes"
         BINARIES="yes"
-        JOB_DIRS="yes"
         MOOS_DIRS="yes"
     fi
 fi
@@ -229,6 +224,8 @@ if [[ "${CACHE}" = "yes" ]]; then
     if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
         /"${MONTE_MOOS_BASE_DIR}"/client_scripts/list_bad_job.sh -d
     fi
+    # Remove old temp job dirs
+    [[ -d ${CARLO_DIR_LOCATION}/.temp_job_dirs ]] && { rm -rf "${CARLO_DIR_LOCATION}"/.temp_job_dirs; }
 fi
 
 #-------------------------------------------------------
@@ -245,6 +242,7 @@ rm -f "${CARLO_DIR_LOCATION}"/.temp_queue.txt
 
 # Remove empty results folders
 [[ -d ${CARLO_DIR_LOCATION}/results ]] && { find "${CARLO_DIR_LOCATION}"/results -type d -delete 2>/dev/null; }
+
 
 # Remove old moos-dirs
 if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then

@@ -12,7 +12,7 @@ compiled_results/*
 
 # Private dirs
 moos-dirs/*
-job_dirs/*
+.temp_job_dirs/*
 
 # Scratchpads
 scripts/attic/*
