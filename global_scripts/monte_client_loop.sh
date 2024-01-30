@@ -113,6 +113,7 @@ RE_UPDATE="--update"
 #  Part 2: Run, and (sometimes) update
 #-------------------------------------------------------
 while true; do
+    vecho "New iteration of loop..." 1
     monte_clean.sh
 
     # Run the next job and check exit codes
