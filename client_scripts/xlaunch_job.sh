@@ -264,13 +264,15 @@ while true; do
     #-----------------------------------------------------
     # Check for halt conditions
     #-----------------------------------------------------
+
+    # Check if uQueryDB is valid
     if [[ $TIMER_ONLY = "yes" ]]; then
         vecho "Timer only mode. Not querying..." 1
-        : # no-op. Will get checked later
     else
         if [[ $valid_uquerydb = "yes" ]]; then
             vecho "uQueryDB $SHORE_TARG " 2
-            uQueryDB $SHORE_TARG &>/dev/null
+            check_uquerydb $SHORE_TARG
+            # uQueryDB $SHORE_TARG &>/dev/null
             QUERY=$?
             vecho "output of query: $QUERY" 2
 
