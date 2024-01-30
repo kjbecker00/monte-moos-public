@@ -48,15 +48,12 @@ echo $(tput bold)"-------------------------------------------------------" $txtr
 # If it should update the moos-dirs
 #-------------------------------------------------------
 if [[ "$TO_UPDATE" == "yes" ]]; then
-    vecho "UPDATING all repos..." 1
+    secho "Updating all repos..." 1
     # remove old cache files
     rm -f .built_dirs
     if [ -f .built_dirs ]; then
         rm .built_dirs
     fi
-    cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
-    git pull
-    cd - >/dev/null
 fi
 
 #-------------------------------------------------------

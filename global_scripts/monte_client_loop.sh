@@ -107,14 +107,6 @@ RE_UPDATE="--update"
 #  Part 2: Run, and (sometimes) update
 #-------------------------------------------------------
 while true; do
-
-
-    #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Clean and reupdate
-    if [ "$RE_UPDATE" = "--update" ]; then
-        RE_UPDATE=""
-        day_of_last_update=$(date +%u)
-    fi
     monte_clean.sh
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -151,9 +143,20 @@ while true; do
     echo ""
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Determine if the client should update (daily)
-    if [ "$day_of_last_update" -ne $(date +%u) ]; then
-        RE_UPDATE="--update"
+    # Determine if a reupdate is needed
+    if [[ $PERPETUAL == "yes" ]]; then
+        if [ "$RE_UPDATE" = "--update" ]; then
+            RE_UPDATE=""
+        fi
+        if [ "$day_of_last_update" -ne $(date +%u) ]; then
+            RE_UPDATE="--update"
+            day_of_last_update=$(date +%u)
+            # Update monte-moos as well
+            secho "Updating monte-moos..." 
+            cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
+            git pull 2>&1 >/dev/null || { git reset --hard HEAD 2>&1 >/dev/null; git pull 2>&1 >/dev/null; }
+            cd - >/dev/null
+        fi
     fi
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
