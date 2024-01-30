@@ -9,7 +9,6 @@ SLEEP_TIME=60
 
 # shellcheck disable=SC1090
 source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
-echo "source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 # Updates once per day
 day_of_last_update=$(date +%u)
@@ -35,7 +34,7 @@ for ARGI; do
         echo "  --verbose=num, -v=num or --verbose, -v              "
         exit 0
     elif [[ "${ARGI}" = "--hostless" || "${ARGI}" = "-nh" ]]; then
-        HOSTLESS=""--hostless""
+        HOSTLESS="--hostless"
     elif [[ "${ARGI}" = "-p" ]]; then
         PERPETUAL="yes"
     elif [[ "${ARGI}" = "-y" ]]; then
