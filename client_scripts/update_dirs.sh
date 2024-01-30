@@ -16,8 +16,10 @@ built_dirs_cache="${CARLO_DIR_LOCATION}/.built_dirs"
 FLOW_DOWN_ARGS=""
 ALL="no"
 PROMPT_TIMEOUT=20
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
-source /${MONTE_MOOS_BASE_DIR}/lib/lib_repo_updating_utils.sh
+# shellcheck disable=SC1090
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_include.sh
+# shellcheck disable=SC1090
+source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_repo_updating_utils.sh
 
 #-------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments

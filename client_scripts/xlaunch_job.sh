@@ -1,7 +1,7 @@
 #!/bin/bash
 # Kevin Becker, May 26 2023
 #-----------------------------------------------------
-#  Part 1: Handle command line arguments
+#  Part 0: Set defaults, handle command line arguments
 #-----------------------------------------------------
 QUIET="no"
 DELAY_REPEAT_POKE=1 # Default
@@ -15,13 +15,14 @@ NUM_REPEAT_POKES=1
 
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh
 
-
+# Reset path upon ctrl+c exit
 trap ctrl_c INT
 ctrl_c() {
     safe_exit 130
 }
 
-check_uquerydb(){
+# Checks uqueryDB for error
+check_uquerydb() {
     local QUERY_MODE="a"
     SHORE_TARG=$1
     if [[ "${QUERY_MODE}" = "a" ]]; then
@@ -33,6 +34,10 @@ check_uquerydb(){
     vecho "                                                                  uQueryDB (mode $QUERY_MODE) output: $OUTPUT" 3
     return $OUTPUT
 }
+
+#-----------------------------------------------------
+#  Part 1: Handle command line arguments
+#-----------------------------------------------------
 for ARGI; do
     ALL_ARGS+=$ARGI" "
     if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
@@ -80,17 +85,8 @@ if [[ $? -ne 0 ]]; then
     vexit "Sourcing job file yeilded non-zero exit code" 4
 fi
 
-#-------------------------------------------------------
-#  Part 3: Add MOOS-IVP to path, export DIRS
-#-------------------------------------------------------
-if type MOOSDB >/dev/null 2>&1; then
-    true
-else
-    add_repo "moos-ivp"
-fi
-
 #-----------------------------------------------------
-#  Part 4: Set the defaults
+#  Part 3: Set the defaults
 #-----------------------------------------------------
 if [ -z $VEHICLES ]; then
     VEHICLES=0
@@ -110,7 +106,7 @@ if [ -z $VEHICLE_SCRIPTS ]; then
 fi
 
 #-----------------------------------------------------
-#  Part 5: Check job parameter file
+#  Part 4: Check job parameter file
 #-----------------------------------------------------
 if (($VEHICLES > 0)); then
     if ((${#VEHICLE_MISSIONS[@]} != $VEHICLES)); then
@@ -124,6 +120,12 @@ if (($VEHICLES > 0)); then
     fi
 fi
 
+#-------------------------------------------------------
+#  Part 5: Add shared (aka extra) repos to the path
+#-------------------------------------------------------
+if ! which MOOSDB >/dev/null 2>&1; then
+    add_repo "moos-ivp"
+fi
 # Add all job repos to the path
 add_extra_repos_to_path
 
@@ -131,7 +133,7 @@ vecho "IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
 vecho "PATH=$PATH" 2
 
 #-----------------------------------------------------
-#  Part 6: Clean directory
+#  Part 6: Clean shore mission directory
 #-----------------------------------------------------
 FULL_MISSION_DIR=${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}
 if [[ ! -d $FULL_MISSION_DIR ]]; then
@@ -192,7 +194,7 @@ fi
 COUNT=0
 
 while [ "$COUNT" -lt 30 ]; do
-    vecho "    Waiting for shore targ to generate in $(pwd)/${SHORE_TARG} or "${FULL_MISSION_DIR}/${SHORE_TARG}"... "0
+    vecho "    Waiting for shore targ to generate in $(pwd)/${SHORE_TARG} or ${FULL_MISSION_DIR}/${SHORE_TARG}... " 0
     if [ -f $SHORE_TARG ]; then
         break
     fi
@@ -202,7 +204,7 @@ while [ "$COUNT" -lt 30 ]; do
         break
     fi
     sleep 1
-    COUNT=$(($COUNT + 1))
+    COUNT=$((COUNT + 1))
 done
 
 # If SHORE_TARG is still not found, exit
@@ -221,26 +223,22 @@ if [ -z "$DELAY_POKE" ]; then
 fi
 
 #-------------------------------------------------------
-#  Part 10: Start the mission with the right pokes
+#  Part 10: Poke the mission
 #-------------------------------------------------------
 echo "$ME Part 2: Poking/Starting mission in $DELAY_POKE seconds... "
-sleep $DELAY_POKE
-echo "$ME             poking... " 
-
-which uPokeDB >&/dev/null
-if [[ $? -ne 0 ]]; then
-    vexit "uPokeDB not found in PATH=$PATH" 7
-fi
+sleep "$DELAY_POKE"
+echo "$ME             poking... "
 
 # Poke the mission
-
 for ((i = 0; i < NUM_REPEAT_POKES; i++)); do
-    if [ $VERBOSE -lt 2 ]; then
-    vecho "uPokeDB $SHORE_TARG $START_POKE >&/dev/null" 1
-    uPokeDB $SHORE_TARG $START_POKE >&/dev/null
+    if [ "$VERBOSE" -lt 2 ]; then
+        vecho "uPokeDB $SHORE_TARG $START_POKE >&/dev/null" 1
+        # shellcheck disable=SC2086
+        uPokeDB "$SHORE_TARG" $START_POKE >&/dev/null
     else
         vecho "uPokeDB $SHORE_TARG $START_POKE" 2
-        uPokeDB $SHORE_TARG $START_POKE
+        # shellcheck disable=SC2086
+        uPokeDB "$SHORE_TARG" $START_POKE
     fi
     EXIT_CODE=$?
     if [ $EXIT_CODE != 0 ]; then
@@ -248,7 +246,6 @@ for ((i = 0; i < NUM_REPEAT_POKES; i++)); do
     fi
     sleep $DELAY_REPEAT_POKE
 done
-
 
 #-------------------------------------------------------
 #  Part 11: Keep checking if the mission until it is done
@@ -260,7 +257,7 @@ valid_uquerydb="yes"
 start_time=$(date +%s)
 first_iter="yes"
 
-while [ 1 ]; do
+while true; do
 
     rm -f .checkvars
 
@@ -304,15 +301,13 @@ while [ 1 ]; do
     elapsed_time=$(($current_time - $start_time))
     vecho "     elapsed time=$elapsed_time (timeout=$JOB_TIMEOUT)" 20
 
-
-    if [ $(( elapsed_time % 60 )) -eq 0 ]; then
+    if [ $((elapsed_time % 60)) -eq 0 ]; then
         secho "Still runnig $JOB_FILE ($elapsed_time/$JOB_TIMEOUT seconds elapsed)" >&/dev/null
     fi
 
     #-----------------------------------------------------
     # Update timer
     #-----------------------------------------------------
-    # if [ $valid_uquerydb = "no" ]; then
     bar_width=40
     progress=$(echo "$bar_width/$JOB_TIMEOUT*$elapsed_time" | bc -l)
     fill=$(printf "%.0f\n" $progress)
@@ -366,7 +361,6 @@ sleep 1
 # Kills ALL child processes
 pkill -P $$
 sleep 1
-PATH=$OLD_PATH # from lib_include.sh
-export PATH
 
+# Resets path, lib
 safe_exit 0

@@ -42,8 +42,11 @@ for ARGI; do
         vexit "Bad Arg: $ARGI " 3
     fi
 done
+echo $(tput bold)"-------------------------------------------------------" $txtrst
 
-# if it should update
+#-------------------------------------------------------
+# If it should update the moos-dirs
+#-------------------------------------------------------
 if [[ "$TO_UPDATE" == "yes" ]]; then
     vecho "UPDATING all repos..." 1
     # remove old cache files
@@ -53,10 +56,8 @@ if [[ "$TO_UPDATE" == "yes" ]]; then
     fi
     cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
     git pull
-    cd - > /dev/null
+    cd - >/dev/null
 fi
-
-echo $(tput bold)"-------------------------------------------------------" $txtrst
 
 #-------------------------------------------------------
 #  Part 2: Get the host's job queue files and decrypts them
@@ -114,7 +115,6 @@ JOB_DIR_FILE="$JOB_DIR_NAME.tar.gz.enc"
 # FULL path, to the job file
 FULL_JOB_PATH=${CARLO_DIR_LOCATION}/job_dirs/$JOB_PATH
 
-
 # Notifies user, updates numbers for local copy of queue
 echo $(tput bold)"Running Job ${CARLO_DIR_LOCATION}/$JOB_FILE ($RUNS_LEFT runs left)" $txtrst
 RUNS_LEFT=$((RUNS_LEFT - 1))
@@ -122,7 +122,7 @@ RUNS_ACT=$((RUNS_ACT + 1))
 vecho "New run_act=$RUNS_ACT" 1
 
 #-------------------------------------------------------
-#  Part 4B: Update the job dir from the host
+#  Part 4B: Update the job file by pulling the job dir from the host
 #-------------------------------------------------------
 cd ${CARLO_DIR_LOCATION} || vexit "cd ${CARLO_DIR_LOCATION} failed" 1
 if [ "$HOSTLESS" = "no" ]; then
@@ -145,7 +145,7 @@ if [ "$HOSTLESS" = "no" ]; then
 
     # Decrypt
     vecho "Decrypting job_dirs/$JOB_DIR_FILE ..." 1
-   monte_decrypt.sh "job_dirs/$JOB_DIR_FILE" -o -d
+    monte_decrypt.sh "job_dirs/$JOB_DIR_FILE" -o -d
     EXIT_CODE=$?
     if [[ $EXIT_CODE -ne 0 ]]; then
         vexit "monte_decrypt.sh failed do decrypt file job_dirs/$JOB_DIR_FILE -o -d with code $EXIT_CODE" 7
@@ -167,7 +167,7 @@ if [ "$HOSTLESS" = "no" ]; then
 fi
 
 #-------------------------------------------------------
-#  Part 5: Run it!
+#  Part 5: Run the job!
 #-------------------------------------------------------
 if [ "$HOSTLESS" = "yes" ]; then
     vecho "monte_run_job.sh --job_file=\"$FULL_JOB_PATH\" --job_args=\"$JOB_ARGS\" -nh" 1
@@ -184,10 +184,12 @@ if [[ $EXIT_CODE -ne 0 ]]; then
         /${MONTE_MOOS_BASE_DIR}/client_scripts/list_bad_job.sh "${JOB_PATH}"
         vexit "run_job.sh failed with exit code: $EXIT_CODE. " 2
     fi
-    vexit "run_job.sh failed with exit code: $EXIT_CODE" 130
+    vexit "Detected ctrl-c. Exiting..." 130
 fi
 
-# update the queue file (helpful if trying to run w/o a host)
+#-------------------------------------------------------
+#  Part 6: Update the queue file
+#-------------------------------------------------------
 vecho "Updating queue file $FULL_QUEUE_FILE" 1
 vecho " $JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT" 1
 if [[ "$OSTYPE" == "darwin"* ]]; then

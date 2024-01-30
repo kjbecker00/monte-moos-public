@@ -3,19 +3,18 @@
 
 # Example:
 # ./source_launch.sh mylaunch moos-ivp-extend "missions/lab_05/alpha_return" 10
-#          runs ./mylaunch.sh in missions/lab_05/alpha_return with timewarp 10
+#          runs: ./mylaunch.sh in missions/lab_05/alpha_return with timewarp 10
 
 #-------------------------------------------------------
 #  Part 1: Initalize the variables
 #-------------------------------------------------------
 # Get the directory name and mission dir bname from the first 2 arguments
 SCRIPTNAME="launch"
-R_SDIR=""
-BIN_SDIR=""
-LIB_SDIR=""
+REPO_NAME=""
+# BIN_SDIR=""
+# LIB_SDIR=""
 MISSION_SDIR=""
 FLOW_DOWN_ARGS=""           # Get the mission name from the third argument
-REPO_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}" 
 TO_SOURCE="yes"             # if the script should add repo/bin to the path
 TO_ADD_LIB="yes"            # if the script should add repo/lib to IVP_BEHAVIOR_DIRS
 
@@ -40,8 +39,6 @@ for ARGI; do
         echo " --help, -h Show this help message                        "
         echo " --script=launch.sh    get the name of the script         "
         echo " --repo=moos-ivp-extend     which repo to run             "
-        echo " --repodir=$MONTE_MOOS_CLIENT_REPOS_DIR/,    directory to find which repo to run   "
-        echo "                              (defaults to \$MONTE_MOOS_CLIENT_REPOS_DIR)"
         echo " --mission=missions/alpha,    which mission to run from REPO_NAME"
         echo " --bindir=moos-ivp-extend/bin,    which repo to source for binaries "
         echo "                      (Defaults to repo/bin)              "
@@ -55,15 +52,9 @@ for ARGI; do
     elif [[ "${ARGI}" == "--script="* ]]; then
         SCRIPTNAME="${ARGI#*=}"
     elif [[ "${ARGI}" == "--repo="* ]]; then
-        R_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" == "--repodir="* ]]; then
-        REPO_DIR="${ARGI#*=}"
+        REPO_NAME="${ARGI#*=}"
     elif [[ "${ARGI}" == "--mission="* ]]; then
         MISSION_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" == "--bindir="* ]]; then
-        BIN_SDIR="${ARGI#*=}"
-    elif [[ "${ARGI}" == "--libdir="* ]]; then
-        LIB_SDIR="${ARGI#*=}"
     elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -79,16 +70,8 @@ done
 #  Part 3: Check that args have been set
 #-------------------------------------------------------
 
-# Set defaults (if not already set)
-if [[ -z "${BIN_SDIR}" ]]; then
-    BIN_SDIR="bin"
-fi
-if [[ -z "${LIB_SDIR}" ]]; then
-    LIB_SDIR="lib"
-fi
-
 # Checks that the required parameters have been set
-if [[ -z "${R_SDIR}" ]]; then
+if [[ -z "${REPO_NAME}" ]]; then
     vexit "Repo name not given. Example: --repo=moos-ivp-extend" 2
 fi
 if [[ -z "${MISSION_SDIR}" ]]; then
@@ -100,41 +83,19 @@ fi
 #-------------------------------------------------------
 
 # Checks that the required directories exist
-if [[ ! -d "${REPO_DIR}/${R_SDIR}" ]]; then
-    vexit "Repo directory/subdirectory $REPO_DIR/${R_SDIR} does not exist! Repo may be empty if the repo_links didn't work" 4
+if [[ ! -d "${MONTE_MOOS_CLIENT_REPOS_DIR}/${REPO_NAME}" ]]; then
+    vexit "Repo directory/subdirectory $MONTE_MOOS_CLIENT_REPOS_DIR/${REPO_NAME} does not exist! Repo may be empty if the repo_links didn't work" 4
 fi
 
-# Set the full path from the given subdirectories
-BIN_DIR="${REPO_DIR}/${R_SDIR}/${BIN_SDIR}"
-LIB_DIR="${REPO_DIR}/${R_SDIR}/${LIB_SDIR}"
-MISSION_DIR="${REPO_DIR}/${R_SDIR}/${MISSION_SDIR}"
+# Find the mission directory
+MISSION_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}/${REPO_NAME}/${MISSION_SDIR}"
 
 if [[ ! -d "${MISSION_DIR}" ]]; then
-    MISSION_DIR2="${REPO_DIR}/${R_SDIR}/trunk/${MISSION_SDIR}"
+    MISSION_DIR2="${MONTE_MOOS_CLIENT_REPOS_DIR}/${REPO_NAME}/trunk/${MISSION_SDIR}"
     if [[ ! -d "${MISSION_DIR2}" ]]; then
         vexit "Mission subdirectory ${MISSION_DIR} does exist. ${MISSION_DIR2} was also not found" 5
     else
         MISSION_DIR="${MISSION_DIR2}"
-    fi
-fi
-if [[ $TO_SOURCE == "yes" ]]; then
-    if [[ ! -d "${BIN_DIR}" ]]; then
-        BIN_DIR2="${REPO_DIR}/${R_SDIR}/trunk/${BIN_SDIR}"
-        if [[ ! -d "${BIN_DIR2}" ]]; then
-            vexit "Binary subdirectory ${BIN_DIR} does exist. ${BIN_DIR2} was also not found" 6
-        else
-            BIN_DIR="${BIN_DIR2}"
-        fi
-    fi
-fi
-if [[ $TO_ADD_LIB == "yes" ]]; then
-    if [[ ! -d "${LIB_DIR}" ]]; then
-        LIB_DIR2="${REPO_DIR}/${R_SDIR}/trunk/${LIB_SDIR}"
-        if [[ ! -d "${LIB_DIR2}" ]]; then
-            vexit "Library subdirectory ${LIB_DIR} does exist. ${LIB_DIR2} was also not found" 7
-        else
-            LIB_DIR="${LIB_DIR2}"
-        fi
     fi
 fi
 if [[ ! -f "${MISSION_DIR}/${SCRIPTNAME}" ]]; then
@@ -144,17 +105,16 @@ if [[ ! -f "${MISSION_DIR}/${SCRIPTNAME}" ]]; then
     fi
 fi
 
+
+
 #-------------------------------------------------------
 #  Part 6:  Source path, add behavior dirs, run the script
 #-------------------------------------------------------
-
 if [[ $TO_SOURCE == "yes" ]]; then
-    vecho "Temporarially adding $BIN_DIR to PATH" 2
-    export PATH=$PATH:$BIN_DIR
+    add_bin "$REPO_NAME"
 fi
 if [[ $TO_ADD_LIB == "yes" ]]; then
-    vecho "Temporarially adding $LIB_DIR to IVP_BEHAVIOR_DIRS" 2
-    export IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS:$LIB_DIR
+    add_lib "$REPO_NAME"
 fi
 
 vecho "Launching with PATH=$PATH" 1
