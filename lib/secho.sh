@@ -9,6 +9,7 @@
 ME="secho.sh"
 TO_PRINT=""
 LINES_TO_KEEP=500
+PRINT_LONG="no"
 HOSTLESS="no"
 source "/${MONTE_MOOS_BASE_DIR}/lib/lib_vars.sh"
 
@@ -35,10 +36,14 @@ for ARGI; do
         echo "Options:                                              "
         echo "  --help, -h                                          "
         echo "    Display this help message                         "
+        echo "  --long, -l                                          "
+        echo "    Display this help message                         "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
         echo "  --hostless, -nh Without sending to host              "
         exit 0
+    elif [[ "${ARGI}" == "--long" || "${ARGI}" == "-l" ]]; then
+        PRINT_LONG="yes"
     elif [[ "${ARGI}" == "--verbose"* || "${ARGI}" == "-v"* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
             VERBOSE=1
@@ -59,22 +64,31 @@ done
 #--------------------------------------------------------------
 #  Part 3: Add other info
 #--------------------------------------------------------------
+
+META_INFO="processes=$(ps aux | wc -l | xargs)"
 # Temp and free memory (if PI)
 if [ -f /usr/bin/vcgencmd ]; then
     TEMP=$(sudo /usr/bin/vcgencmd measure_temp)
-    free_memory=$(free -m | awk '/^Mem:/{print $4}')
-    TO_PRINT="$TO_PRINT (temp = $TEMP free memory=$free_memory)"
+    # free_memory=$(free -m | awk '/^Mem:/{print $4}')
+    META_INFO="$META_INFO temp=$TEMP"
 fi
-# Number of processes running
-TO_PRINT="$TO_PRINT (processes: $(ps aux | wc -l))"
+MONTE_MOOS_RELSEASE="$(git rev-parse --short HEAD)"
+META_INFO="$META_INFO  mm-version=$MONTE_MOOS_RELSEASE"
+META_INFO="$(date)  $META_INFO"
+
+if [[ $PRINT_LONG == "yes" ]]; then
+    TO_ECHO="$TO_PRINT ($META_INFO)"
+else
+    TO_ECHO="$TO_PRINT"
+fi
 
 #--------------------------------------------------------------
 #  Part 4: Print and write to status.txt
 #--------------------------------------------------------------
 
-echo "$TO_PRINT"
+echo "$TO_ECHO"
 
-TO_ADD="$TO_PRINT ($(date))"
+TO_ADD="$TO_PRINT ($META_INFO)"
 if [ -f "${CARLO_DIR_LOCATION}/status.txt" ]; then
     KEPT_LINES=$(head -n $LINES_TO_KEEP "${CARLO_DIR_LOCATION}/status.txt")
     new_subline="${TO_ADD%%(*}" # remove everything after the first (

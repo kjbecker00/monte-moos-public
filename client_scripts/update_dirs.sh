@@ -70,97 +70,54 @@ if [ ! -f $built_dirs_cache ]; then
     touch $built_dirs_cache
 fi
 
-
 #-------------------------------------------------------
 #  Part 4: Useful functions
 #-------------------------------------------------------
 #  Updates all necesary repos in an repo_links.txt file
 handle_repo_links_file() {
-    local repo_links_file=$1
+    local repo_links_file
+    repo_links_file=$1
+
+    local repo_line
+    local starting_pwd
+    local file_len
+    local repo_name
+    local repo_link
     #-------------------------------------------------------
     #  Git clone/git pull/build.sh all dirs in the file
     #-------------------------------------------------------
     vecho "repo_links file: $repo_links_file" 1
     # Add newline if not present
-    [ -n "$(tail -c1 $repo_links_file)" ] && printf '\n' >> "$repo_links_file"
+    [ -n "$(tail -c1 $repo_links_file)" ] && printf '\n' >>"$repo_links_file"
 
     # For resetting the pwd after each iter
-    local starting_pwd=$(pwd)
+    starting_pwd=$(pwd)
 
     # Would prefer to do a while read loop, but
     # The build scripts sometimes throw it off for some reason
     # This works though.
-    local file_len=$(wc -l < $repo_links_file)
+    file_len=$(wc -l <$repo_links_file)
     for ((counter = 1; counter <= file_len; counter++)); do
-        cd $starting_pwd
-        local repo_line=$(awk -v num=$counter 'NR==num' $repo_links_file )
+        cd "$starting_pwd" || vexit "Error cd'ing into old pwd?" 100
 
-        vecho "repo_line=$repo_line" 1
-
-        if skipline $repo_line ; then
+        repo_line=$(awk -v num=$counter 'NR==num' $repo_links_file)
+        if skipline $repo_line; then
             vecho "Skipping line... $repo_line" 10
             continue
         fi
-        local repo_name=$(extract_repo_name $repo_line)
-        local repo_link=$(extract_repo_link $repo_line)
-        vecho "repo_name=$repo_name from repo_line=$repo_line" 1
-        echo "     $repo_name"
+        repo_name=$(extract_repo_name $repo_line)
+        repo_link=$(extract_repo_link $repo_line)
 
         #-------------------------------------------------------
-        #  Part 4b: Handle mutliple types of repos: git
-        if [[ $repo_line == *github.* || $repo_line == *gitlab.* ]]; then
-            vecho "  $repo_name is a git repo" 2
-
-            if [ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name" ]; then
-                echo -n "        Updating..."
-                cd ${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name
-                gpull $repo_name $repo_links_file
-                cd ../..
-            else
-                echo "        Cloning $repo_name..."
-                cd ${MONTE_MOOS_CLIENT_REPOS_DIR}
-                git clone "$repo_link" "$repo_name" &>/dev/null
-                if [ $? -ne 0 ]; then
-                    vexit "git clone on $repo_name failed, check $repo_links_file" 2
-                fi
-                cd ../
-            fi
-
-
-        #-------------------------------------------------------
-        #  Part 4b: Handle mutliple types of repos: local repos
-        elif [[ "$repo_line" == "~/"* ]] || [[ "$repo_line" == "/"* ]]; then
-
-            # add link if it does not exist
-            if [ ! -L "${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo_name}" ]; then
-                if [[ "$repo_line" == "~/"* ]]; then
-                    repo_line="${repo_line/#\~/$HOME}"
-                fi
-                if [[ -d "$repo_name" ]]; then
-                    echo "        Linking repo..."
-                    ln -s "$repo_name" "${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo_name}"
-                else
-                    vexit "${txtylw}linking to $repo_name failed. Repo does not exist. Check $repo_links_file ${txtrst}" 2
-                fi
-            fi
-
-            echo -n "        Updating..."
-            cd ${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name || (
-                echo $txtred "$0 Error unable to cd ${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name (currently in $PWD) exiting..."
-                exit 1
-            )
-            if [ -f ".git" ]; then
-                gpull $repo_name $repo_links_file
-            elif [[ -f ".svn" || -d ".svn" ]]; then
-                svnup $repo_name $repo_links_file
-            fi
-            cd ../..
+        # Update or clone the repo
+        if [ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name" ]; then
+            update_repo $repo_name $repo_link
         else
-            vexit "$repo_line is not a valid repo" 2
+            clone_repo $repo_name $repo_link
         fi
 
         #-------------------------------------------------------
-        #  Part 4c: build the repo
+        #  Build the repo
         cd ${MONTE_MOOS_CLIENT_REPOS_DIR}/"$repo_name" || (vexit "unable to cd ${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name " 2)
         echo -n "        Building..."
 
@@ -172,6 +129,7 @@ handle_repo_links_file() {
         if [[ -f ".svn" || -d ".svn" ]]; then
             ALL_FLOW_DOWN_ARGS="${FLOW_DOWN_ARGS} -m"
         else
+            # shellcheck disable=SC2034 # ALL_FLOW_DOWN_ARGS is used in build_script
             ALL_FLOW_DOWN_ARGS="${FLOW_DOWN_ARGS}"
         fi
 
@@ -181,7 +139,8 @@ handle_repo_links_file() {
             BUILD_FAIL=0
         fi
 
-	if [ $BUILD_FAIL -ne 0 ]; then
+        if [ $BUILD_FAIL -ne 0 ]; then
+            # svn repos not building isn't fatal, but git repos are fatal
             if [[ -f ".svn" || -d ".svn" ]]; then
                 wecho "build failed on $repo_name. Check $repo_name/.build_log.txt"
             else
@@ -192,7 +151,7 @@ handle_repo_links_file() {
         echo $txtgrn " built sucessfully" $txtrst
         cd ../.. >/dev/null || exit 1
         echo "$repo_name" >>$built_dirs_cache
-    done < "$repo_links_file"
+    done <"$repo_links_file"
 }
 
 #-------------------------------------------------------
@@ -258,28 +217,13 @@ done
 #  Part 7: Check that every required repo has been updated
 #-------------------------------------------------------
 # Check that all repos have been built
+vecho "" 1
+vecho "" 1
 vecho "Checking if $SHORE_REPO has been built..." 1
-if has_not_built_repo "${SHORE_REPO}"; then
-    vexit "has not built ${SHORE_REPO}" 1
-fi
-for repo in "${VEHICLE_REPOS[@]}"; do
-    if has_not_built_repo $repo_name; then
-        vexit "has not built $repo_name" 1
-    fi
-done
-for repo in "${EXTRA_REPOS[@]}"; do
-    if has_not_built_repo $repo_name; then
-        vexit "has not built $repo_name" 1
-    fi
-done
-for repo in "{$EXTRA_LIB_REPOS[@]}"; do
-    if has_not_built_repo $repo_name; then
-        vexit "has not built $repo_name" 1
-    fi
-done
-for repo in "{$EXTRA_BIN_REPOS[@]}"; do
-    if has_not_built_repo $repo_name; then
-        vexit "has not built $repo_name" 1
+
+for repo_name in "${VEHICLE_REPOS[@]}" "${EXTRA_REPOS[@]}" "${EXTRA_LIB_REPOS[@]}" "${EXTRA_BIN_REPOS[@]}"; do
+    if has_not_built_repo "$repo_name"; then
+        vexit "has not built ${repo_name}" 1
     fi
 done
 if has_not_built_repo moos-ivp; then
