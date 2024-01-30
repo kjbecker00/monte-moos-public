@@ -50,9 +50,8 @@ for ARGI; do
     fi
 done
 
-
 #-------------------------------------------------------
-#  Part 1a: Check for monte_info file. Useful if you 
+#  Part 1a: Check for monte_info file. Useful if you
 #           have multiple carlo_dirs for different hosts
 #-------------------------------------------------------
 if [[ -f monte_info ]]; then
@@ -116,7 +115,6 @@ RE_UPDATE="--update"
 while true; do
     monte_clean.sh
 
-
     # Run the next job and check exit codes
     /"${MONTE_MOOS_BASE_DIR}"/client_scripts/run_next.sh $HOSTLESS $RE_UPDATE
     EXIT=$?
@@ -157,14 +155,19 @@ while true; do
         if [ "$RE_UPDATE" = "--update" ]; then
             RE_UPDATE=""
             # Update monte-moos as well
-            secho "Updating monte-moos..." 
+            vecho "Updating monte-moos..." 1
+            secho "Updating monte-moos..."
             cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
-            git pull 2>&1 >/dev/null || { git reset --hard HEAD 2>&1 >/dev/null; git pull 2>&1 >/dev/null; }
+            git pull 2>&1 >/dev/null || {
+                git reset --hard HEAD 2>&1 >/dev/null
+                git pull 2>&1 >/dev/null
+            }
             cd - >/dev/null
         fi
 
         # Populate the reupdate flag
         if [ "$day_of_last_update" -ne $(date +%u) ]; then
+            vecho "Setting re-update flag..." 1
             RE_UPDATE="--update"
             day_of_last_update=$(date +%u)
         fi
