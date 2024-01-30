@@ -5,14 +5,15 @@ ME="monte_client_loop.sh"
 PERPETUAL=""
 IGNORE_WARNING="no"
 HOSTLESS=""
-SLEEP_TIME=60
+SLEEP_TIME=3
 
 # shellcheck disable=SC1090
-source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_include.sh
+source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
+echo "source /${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 # Updates once per day
-day_of_last_update=$(date +%u) # current day
-
+day_of_last_update=$(date +%u)
+day_of_last_update=$((day_of_last_update-1)) # forces an update on the first iteration
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
 #-------------------------------------------------------
@@ -91,24 +92,10 @@ if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
     exit 0
 fi
 
-
-
 #-------------------------------------------------------
 #  Part 4: Force updates on monte-moos and moos-dirs
 #-------------------------------------------------------
 monte_clean.sh --cache
-RE_UPDATE="--update"
-if [[ $PERPETUAL = "yes" ]]; then
-    # Update monte-moos as well
-    vecho "Updating monte-moos..." 1
-    secho "Updating monte-moos..."
-    cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
-    git pull 2>&1 >/dev/null || {
-        git reset --hard HEAD 2>&1 >/dev/null
-        git pull 2>&1 >/dev/null
-    }
-    cd - >/dev/null
-fi
 
 #-------------------------------------------------------
 #  Part 5: Set temporary .temp_job_dirs
@@ -133,9 +120,34 @@ while true; do
     vecho "New iteration of loop..." 10
     monte_clean.sh
 
+    #- - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Determine if a reupdate is needed
+    if [[ $PERPETUAL = "yes" ]]; then
+        vecho "Perpetual mode. Checking for updates..." 10
+
+        # Populate the reupdate flag
+        if [ "$day_of_last_update" -ne "$(date +%u)" ]; then
+            vecho "Setting re-update flag..." 1
+            day_of_last_update="$(date +%u)"
+            UPDATE_THIS_ITER="--update"
+
+            # Update monte-moos as well
+            vecho "${txtgry}Updating monte-moos ${txtrst}" 1
+            secho "${txtgry}Updating monte-moos ${txtrst}"
+            cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
+            git pull 2>&1 >/dev/null || {
+                git reset --hard HEAD 2>&1 >/dev/null
+                git pull 2>&1 >/dev/null
+            }
+            cd - >/dev/null
+        fi
+
+    fi
+
     # Run the next job and check exit codes
-    /"${MONTE_MOOS_BASE_DIR}"/client_scripts/run_next.sh $HOSTLESS $RE_UPDATE
+    /"${MONTE_MOOS_BASE_DIR}"/client_scripts/run_next.sh $HOSTLESS $UPDATE_THIS_ITER
     EXIT=$?
+    UPDATE_THIS_ITER=""
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 1: Queue is empty
@@ -162,35 +174,9 @@ while true; do
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code !=0: run next failed for unknown reason
     elif [ $EXIT -ne 0 ]; then
-        vexit "/${MONTE_MOOS_BASE_DIR}/client_scripts/run_next.sh $HOSTLESS $RE_UPDATE failed with code $EXIT" 2
+        vexit "/${MONTE_MOOS_BASE_DIR}/client_scripts/run_next.sh $HOSTLESS $UPDATE_THIS_ITER failed with code $EXIT" 2
     fi
     echo ""
-
-    #- - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Determine if a reupdate is needed
-    if [[ $PERPETUAL = "yes" ]]; then
-        vecho "Perpetual mode. Checking for updates..." 10
-        # Reset the reupdate flag
-        if [ "$RE_UPDATE" = "--update" ]; then
-            RE_UPDATE=""
-            # Update monte-moos as well
-            vecho "Updating monte-moos..." 1
-            secho "Updating monte-moos..."
-            cd /"${MONTE_MOOS_BASE_DIR}" || vexit "cd /${MONTE_MOOS_BASE_DIR} failed" 1
-            git pull 2>&1 >/dev/null || {
-                git reset --hard HEAD 2>&1 >/dev/null
-                git pull 2>&1 >/dev/null
-            }
-            cd - >/dev/null
-        fi
-
-        # Populate the reupdate flag
-        if [ "$day_of_last_update" -ne $(date +%u) ]; then
-            vecho "Setting re-update flag..." 1
-            RE_UPDATE="--update"
-            day_of_last_update=$(date +%u)
-        fi
-    fi
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Another way to exit
