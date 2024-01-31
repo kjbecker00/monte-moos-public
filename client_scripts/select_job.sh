@@ -81,8 +81,8 @@ for ((i = 1; i <= length; i++)); do
 
     RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
 
-    if is_bad_job "$JOB_FILE"; then
-        vecho "Skipping bad job $JOB_FILE ..." 1
+    if is_bad_job_args "$JOB_FILE" "$JOB_ARGS"; then
+        vecho "Skipping bad job $JOB_FILE $JOB_ARGS ..." 1
         continue
     fi
 
