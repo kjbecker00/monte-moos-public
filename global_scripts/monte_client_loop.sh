@@ -101,14 +101,12 @@ monte_clean.sh --cache
 if [ "$HOSTLESS" = "--hostless" ]; then
     # If the runtime .temp_job_dirs directory doesn't exist, copy the local_job_dirs
     vecho "Hostless..." 10
-    if [ -d "${CARLO_DIR_LOCATION}/.temp_job_dirs" ]; then
-        vecho "Removing old .temp_job_dirs..." 3
-        rm -rf "${CARLO_DIR_LOCATION}/.temp_job_dirs"
-    fi
     if [ -d "${CARLO_DIR_LOCATION}/local_job_dirs" ]; then
         vecho "Copying local_job_dirs to .temp_job_dirs..." 3
         cp -rp "${CARLO_DIR_LOCATION}/local_job_dirs" "${CARLO_DIR_LOCATION}/.temp_job_dirs"
     fi
+else
+    rm -rf "${CARLO_DIR_LOCATION}/"*_job_queue.txt
 fi
 
 #-------------------------------------------------------
