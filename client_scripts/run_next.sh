@@ -179,7 +179,7 @@ EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
     # checks if the job was stopped by ctrl-c
     if [[ $EXIT_CODE -ne 130 ]]; then
-        /${MONTE_MOOS_BASE_DIR}/client_scripts/list_bad_job.sh "${JOB_PATH}"
+        /${MONTE_MOOS_BASE_DIR}/client_scripts/list_bad_job.sh "${JOB_PATH} ${JOB_ARGS}"
         vexit "run_job.sh failed with exit code: $EXIT_CODE. " 2
     fi
     vexit "Detected ctrl-c. Exiting..." 130

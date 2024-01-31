@@ -73,7 +73,10 @@ job_filename() {
 #       /home/job_dirs/foo/bar -> foo
 #       jobname -> misc_job
 #--------------------------------------------------------------
-job_dirname() { 
+job_dirname() {
+    local input 
+    local this_job_path
+    local this_job_dir
     input=$1
     this_job_path=$(job_path "$input")
     this_job_dir="${this_job_path%%/*}" # extract everything before /
@@ -90,8 +93,52 @@ job_dirname() {
 #     /home/job_dirs/foo/bar -> foo/bar
 #--------------------------------------------------------------
 job_path() { 
+    local input
     input=$1
     input="${input//\/\//\/}" # Replace // with /
     input="${input//\/\//\/}" # Replace // with / (again)
     echo "${input#*job_dirs/}" # extract everything after job_dirs/
 }
+
+#--------------------------------------------------------------
+# Given a job and its args determine if its in bad_jobs.txt
+#--------------------------------------------------------------
+is_bad_job() { 
+    local JOB_FILE
+    local BAD_JOBS_FILE
+    JOB_FILE=$1
+    BAD_JOBS_FILE="$2"
+    if [[ -z $BAD_JOBS_FILE ]]; then
+        BAD_JOBS_FILE="${CARLO_DIR_LOCATION}/bad_jobs.txt"
+    fi
+    if [[ ! -f $BAD_JOBS_FILE ]]; then
+        return 1
+    fi
+    if grep -Fq "$JOB_FILE" "${BAD_JOBS_FILE}"; then
+        return 0 # job is in bad_jobs.txt
+    fi
+    return 1
+}
+
+#--------------------------------------------------------------
+# Determine if a job with these args is in bad_jobs.txt
+#--------------------------------------------------------------
+is_bad_job_args() { 
+    local JOB_FILE
+    local JOB_ARGS
+    local BAD_JOBS_FILE
+    JOB_FILE=$1
+    JOB_ARGS=$2
+    BAD_JOBS_FILE="$3"
+    if [[ -z $BAD_JOBS_FILE ]]; then
+        BAD_JOBS_FILE="${CARLO_DIR_LOCATION}/bad_jobs.txt"
+    fi
+    if [[ ! -f $BAD_JOBS_FILE ]]; then
+        return 1
+    fi
+    if grep -Fxq "$JOB_FILE $JOB_ARGS" "${BAD_JOBS_FILE}"; then
+        return 0 # job with these args is in bad_jobs.txt
+    fi
+    return 1 # job is not in bad_jobs.txt
+}
+

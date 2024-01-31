@@ -81,19 +81,9 @@ for ((i = 1; i <= length; i++)); do
 
     RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
 
-    # filters out known bad jobs
-    if [ -f "bad_jobs.txt" ]; then
-        # Checks if the JOB_FILE is in bad_jobs.txt
-        if grep -Fxq "$JOB_FILE" "bad_jobs.txt"; then
-            ALL_JOBS_OK="no"
-            vecho "Skipping bad job $JOB_FILE ..." 1
-            JOB_FILE=""
-            continue
-        else
-            vecho "Job file is good: $JOB_FILE ..." 1
-        fi
-    else
-        vecho "No bad_jobs.txt file" 1
+    if is_bad_job "$JOB_FILE"; then
+        vecho "Skipping bad job $JOB_FILE ..." 1
+        continue
     fi
 
     # checks if it has runs left
