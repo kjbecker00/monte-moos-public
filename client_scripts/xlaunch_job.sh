@@ -303,8 +303,8 @@ while true; do
     elapsed_time=$(($current_time - $start_time))
     vecho "     elapsed time=$elapsed_time (timeout=$JOB_TIMEOUT)" 20
 
-    if [ $((elapsed_time % 60)) -eq 0 ]; then
-        secho "Still runnig $JOB_FILE ($elapsed_time/$JOB_TIMEOUT seconds elapsed)" >&/dev/null
+    if [ $((elapsed_time % 30)) -eq 0 ]; then
+        secho "Still running $JOB_FILE | $elapsed_time/$JOB_TIMEOUT seconds elapsed " >&/dev/null
     fi
 
     #-----------------------------------------------------

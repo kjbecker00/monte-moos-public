@@ -10,6 +10,15 @@ ME="monte_pull_results.sh"
 source /"${MONTE_MOOS_BASE_DIR}"/lib/lib_include.sh
 INPUT_PATH=""
 
+trap ctrl_c INT
+ctrl_c() {
+    safe_exit 130
+}
+safe_exit() {
+    rm -f robots.txt
+    exit "$1"
+}
+
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
 #--------------------------------------------------------------
@@ -65,10 +74,10 @@ cut_dirs=$((cut_dirs-1))
 vecho "cut-dirs=$cut_dirs" 2
 vecho "wget -r -nH -np --progress=bar --cut-dirs=$cut_dirs -R \"index*\" -X /results \"${MONTE_MOOS_HOST_URL_WGET}${full_input_path}/\"" 2
 if [[ $VERBOSE -ge 2 ]]; then
-    wget -r -nH -np --progress=bar --cut-dirs=$cut_dirs -R "index*" -X /results "${MONTE_MOOS_HOST_URL_WGET}${full_input_path}/"
+    wget -r      -nH -np --progress=bar --cut-dirs=$cut_dirs -R "index*" -X /results "${MONTE_MOOS_HOST_URL_WGET}${full_input_path}/"
 else
     echo "Running wget..."
-    wget -q -r -nH -np --progress=bar --cut-dirs=$cut_dirs -R "index*" -X /results "${MONTE_MOOS_HOST_URL_WGET}${full_input_path}/"
+    wget -r -nv -nH -np --progress=bar --cut-dirs=$cut_dirs -R "index*" -X /results "${MONTE_MOOS_HOST_URL_WGET}${full_input_path}/"
 fi
 EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then

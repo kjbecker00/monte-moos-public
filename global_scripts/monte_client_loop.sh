@@ -165,11 +165,11 @@ while true; do
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 2: Job was bad
     elif [ $EXIT -eq 2 ]; then
-        echo "Skipping bad job..."
+        secho "Skipping bad job..."
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 8: Unable to pull queue file. Trying again
     elif [ $EXIT -eq 8 ]; then
-        echo "Unable to pull queue file. Trying again in $SLEEP_TIME seconds..."
+        secho "Unable to pull queue file. Trying again in $SLEEP_TIME seconds..."
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Exit code 130: ctrl-c
     elif [ $EXIT -eq 130 ]; then

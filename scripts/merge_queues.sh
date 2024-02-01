@@ -56,18 +56,19 @@ done
 #--------------------------------------------------------------
 #  Part 3: Pre-flight Checks
 #--------------------------------------------------------------
-
+TEMP_INPUT_FILE=$(temp_filename ${INPUT_FILE})
+TEMP_INPUT_FILE2=$(temp_filename ${INPUT_FILE2})
 # Copy the file so we don't edit any of the originals
-cp "$INPUT_FILE" "${INPUT_FILE}.temp" || vexit "Error copying $INPUT_FILE to ${INPUT_FILE}.temp" 1
-cp "$INPUT_FILE2" "${INPUT_FILE2}.temp" || vexit "Error copying $INPUT_FILE2 to ${INPUT_FILE2}.temp" 1
+cp "$INPUT_FILE" "$TEMP_INPUT_FILE" || vexit "Error copying $INPUT_FILE to $TEMP_INPUT_FILE" 1
+cp "$INPUT_FILE2" "$TEMP_INPUT_FILE2" || vexit "Error copying $INPUT_FILE2 to $TEMP_INPUT_FILE2" 1
 
 # Add newline if not present
-[ -n "$(tail -c1 ${INPUT_FILE}.temp)" ] && printf '\n' >>${INPUT_FILE}.temp
-[ -n "$(tail -c1 ${INPUT_FILE2}.temp)" ] && printf '\n' >>${INPUT_FILE2}.temp
+[ -n "$(tail -c1 $TEMP_INPUT_FILE)" ] && printf '\n' >>$TEMP_INPUT_FILE
+[ -n "$(tail -c1 $TEMP_INPUT_FILE2)" ] && printf '\n' >>$TEMP_INPUT_FILE2
 
 # Cat the files together (file 2 appended to end of file 1)
-echo "${breakpoint}" >>"${INPUT_FILE}.temp"
-cat "$INPUT_FILE2.temp" >>"${INPUT_FILE}.temp"
+echo "${breakpoint}" >>"$TEMP_INPUT_FILE"
+cat "$TEMP_INPUT_FILE2" >>"$TEMP_INPUT_FILE"
 
 # echo "Press any key to continue, or Ctrl-C to cancel."
 # read -n 1 -s
@@ -79,14 +80,15 @@ cat "$INPUT_FILE2.temp" >>"${INPUT_FILE}.temp"
 # Output uses different suffix to prevent overwriting if INPUT_FILE or INPUT_FILE2
 # are the same as output_filename
 # vecho "output= ${OUTPUT_FILENAME}.out.tmp" 1
-# vecho "input= ${INPUT_FILE}.temp" 1
-${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=${OUTPUT_FILENAME}.out.tmp "${INPUT_FILE}.temp" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
+# vecho "input= $TEMP_INPUT_FILE" 1
+TEMP_OUTPUT=$(temp_filename ${OUTPUT_FILENAME})
+${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=$TEMP_OUTPUT "$TEMP_INPUT_FILE" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
 
 # Remove the temp file
-rm "${INPUT_FILE}.temp" 2>/dev/null
-rm "${INPUT_FILE2}.temp" 2>/dev/null
-mv "${OUTPUT_FILENAME}.out.tmp" "$OUTPUT_FILENAME"
+rm "$TEMP_INPUT_FILE" 2>/dev/null
+rm "$TEMP_INPUT_FILE2" 2>/dev/null
+mv "$TEMP_OUTPUT" "$OUTPUT_FILENAME"
 
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then

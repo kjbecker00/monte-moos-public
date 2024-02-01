@@ -79,7 +79,7 @@ META_INFO="$META_INFO  mm-version=$MONTE_MOOS_RELSEASE"
 META_INFO="$(date)  $META_INFO"
 
 if [[ $PRINT_LONG == "yes" ]]; then
-    TO_ECHO="$TO_PRINT ($META_INFO)"
+    TO_ECHO="$TO_PRINT | $META_INFO"
 else
     TO_ECHO="$TO_PRINT"
 fi
@@ -90,20 +90,20 @@ fi
 
 echo "$TO_ECHO"
 
-TO_ADD="$TO_PRINT ($META_INFO)"
+TO_ADD="$TO_PRINT | $META_INFO"
 if [ -f "${CARLO_DIR_LOCATION}/status.txt" ]; then
     KEPT_LINES=$(head -n $LINES_TO_KEEP "${CARLO_DIR_LOCATION}/status.txt")
-    new_subline="${TO_ADD%%(*}" # remove everything after the first (
+    new_subline="${TO_ADD%%|*}" # remove everything after the first |
 
     # Remove the most recent line if it is almost the same as the new line. Just update the time
     recent_line=$(head -n 1 "${CARLO_DIR_LOCATION}/status.txt")
-    recent_subline="${recent_line%%(*}" # remove everything after the first (
+    recent_subline="${recent_line%%|*}" # remove everything after the first |
 
     recent_line2=$(head -n 2 "${CARLO_DIR_LOCATION}/status.txt" | tail -n 1)
-    recent_subline2="${recent_line2%%(*}" # remove everything after the first (
+    recent_subline2="${recent_line2%%|*}" # remove everything after the first |
 
     recent_line3=$(head -n 3 "${CARLO_DIR_LOCATION}/status.txt" | tail -n 1)
-    recent_subline3="${recent_line3%%(*}" # remove everything after the first (
+    recent_subline3="${recent_line3%%|*}" # remove everything after the first |
     
     vecho "New subline: $new_subline" 5
     vecho "Recent subline: $recent_subline" 5
@@ -120,15 +120,15 @@ if [ -f "${CARLO_DIR_LOCATION}/status.txt" ]; then
         KEPT_LINES=$(tail -n +2 "${CARLO_DIR_LOCATION}/status.txt")
     else
         vecho "Not the same as last line. Keeping last line..." 2
-        echo "$TO_ADD" >>status.tmp
+        echo "$TO_ADD" >>.temp_status
     fi
 else
     KEPT_LINES=""
 fi
 
-echo "$TO_ADD" >status.tmp
-echo "$KEPT_LINES" >>status.tmp
-mv status.tmp "${CARLO_DIR_LOCATION}"/status.txt
+echo "$TO_ADD" >.temp_status
+echo "$KEPT_LINES" >>.temp_status
+mv .temp_status "${CARLO_DIR_LOCATION}"/status.txt
 
 #--------------------------------------------------------------
 #  Part 5: Copy to host

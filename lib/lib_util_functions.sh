@@ -61,7 +61,7 @@ done; }
 #--------------------------------------------------------------
 # From a queue line, extract the filename of the job
 #--------------------------------------------------------------
-job_filename() { 
+job_filename() {
     echo "$(basename $1)"
 }
 
@@ -74,13 +74,13 @@ job_filename() {
 #       jobname -> misc_job
 #--------------------------------------------------------------
 job_dirname() {
-    local input 
+    local input
     local this_job_path
     local this_job_dir
     input=$1
     this_job_path=$(job_path "$input")
     this_job_dir="${this_job_path%%/*}" # extract everything before /
-    if [[ -z $this_job_dir  || "$(job_filename $input)" == "$this_job_dir" ]]; then
+    if [[ -z $this_job_dir || "$(job_filename $input)" == "$this_job_dir" ]]; then
         this_job_dir=misc_job
     fi
     echo "$this_job_dir"
@@ -92,18 +92,33 @@ job_dirname() {
 #     foo//bar -> foo/bar
 #     /home/job_dirs/foo/bar -> foo/bar
 #--------------------------------------------------------------
-job_path() { 
+job_path() {
+    local input
+    input=$1
+    input="${input//\/\//\/}"  # Replace // with /
+    input="${input//\/\//\/}"  # Replace // with / (again)
+    echo "${input#*job_dirs/}" # extract everything after job_dirs/
+}
+
+#--------------------------------------------------------------
+# Given a file, add .temp_ to the filename
+#     foo/bar  -> foo/.temp_bar
+#     foo//bar -> foo/.temp_bar
+#     /home/job_dirs/foo/bar -> /home/job_dirs/foo/.temp_bar
+# This function produces a deterministic (repeatable) output
+#--------------------------------------------------------------
+temp_filename() {
     local input
     input=$1
     input="${input//\/\//\/}" # Replace // with /
     input="${input//\/\//\/}" # Replace // with / (again)
-    echo "${input#*job_dirs/}" # extract everything after job_dirs/
+    echo "$(dirname $input)/.tmp_$(basename $input)"
 }
 
 #--------------------------------------------------------------
 # Given a job and its args determine if its in bad_jobs.txt
 #--------------------------------------------------------------
-is_bad_job() { 
+is_bad_job() {
     local JOB_FILE
     local BAD_JOBS_FILE
     JOB_FILE=$1
@@ -123,16 +138,22 @@ is_bad_job() {
 #--------------------------------------------------------------
 # Determine if a job with these args is in bad_jobs.txt
 #--------------------------------------------------------------
-is_bad_job_args() { 
+is_bad_job_args() {
     local JOB_FILE
     local JOB_ARGS
     local BAD_JOBS_FILE
-    JOB_FILE=$1
-    JOB_ARGS=$2
+    JOB_FILE="$1 $2"
     BAD_JOBS_FILE="$3"
+
     if [[ -z $BAD_JOBS_FILE ]]; then
-        BAD_JOBS_FILE="${CARLO_DIR_LOCATION}/bad_jobs.txt"
+        if [[ -f $2 ]]; then
+            BAD_JOBS_FILE="$2"
+            JOB_FILE="$1"
+        else
+            BAD_JOBS_FILE="${CARLO_DIR_LOCATION}/bad_jobs.txt"
+        fi
     fi
+
     if [[ ! -f $BAD_JOBS_FILE ]]; then
         return 1
     fi
@@ -141,4 +162,3 @@ is_bad_job_args() {
     fi
     return 1 # job is not in bad_jobs.txt
 }
-

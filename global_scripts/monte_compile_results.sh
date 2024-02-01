@@ -75,13 +75,14 @@ if [[ -z $PATH_TO_JOB_FILE ]]; then
 fi
 JOB_NAME=$(job_filename "$PATH_TO_JOB_FILE") # The name of the job_file itself
 job_dir=$(job_dirname "$PATH_TO_JOB_FILE")
+JOB_SHORT_PATH=$(job_path "$PATH_TO_JOB_FILE")
 
 # Set default input results directory
 if [[ -z $INPUT_JOB_RESULTS_DIR ]]; then
-    if [[ -d "${CARLO_DIR_LOCATION}/results/$job_dir/$JOB_NAME" ]]; then
-        INPUT_JOB_RESULTS_DIR="${CARLO_DIR_LOCATION}/results/$job_dir/$JOB_NAME"
+    if [[ -d "${CARLO_DIR_LOCATION}/results/$JOB_SHORT_PATH/$JOB_NAME" ]]; then
+        INPUT_JOB_RESULTS_DIR="${CARLO_DIR_LOCATION}/results/$JOB_SHORT_PATH"
     else
-        vexit "No input results directory given or found at: ${CARLO_DIR_LOCATION}/results/$job_dir/$JOB_NAME or ${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME. Please specify a directory with --input_results=" 2
+        vexit "No input results directory given or found at: ${CARLO_DIR_LOCATION}/results/$JOB_SHORT_PATH or ${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME. Please specify a directory with --input_results=" 2
     fi
 fi
 
@@ -91,7 +92,7 @@ if [[ ! -d $INPUT_JOB_RESULTS_DIR ]]; then
 fi
 
 if [[ -z $compiled ]]; then
-    compiled="$OUTPUT_BASE_DIR"/"$job_dir/$JOB_NAME"
+    compiled="$OUTPUT_BASE_DIR"/"$JOB_SHORT_PATH"
 fi
 
 #--------------------------------------------------------------

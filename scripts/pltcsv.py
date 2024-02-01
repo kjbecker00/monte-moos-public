@@ -73,8 +73,7 @@ def plot_csv(input_file, figname, file_type, x_header, y_headers, plot_title):
 
 def display_help():
     """Prints help for use on command line"""
-    print(
-        "Usage: pltcsv.py --fname=figure [OPTIONS] [file].csv                    ")
+    print("Usage: pltcsv.py --fname=figure [OPTIONS] [file].csv                    ")
     print("     This python script will input a csv and plot the values            ")
     print("     --fname=<figure.png>    The name of the output figure. Defaults to ")
     print("                             figure.                                    ")
@@ -140,7 +139,10 @@ def main():
                  x_cols[0], y_plots[0], plot_title)
     else:
         for i, x_col in enumerate(x_cols):
-            fname = figname+"_"+x_col
+            if len(y_plots[i]) == 1:
+               fname = figname+"_"+x_col+"_"+y_plots[i][0]+f"_{i}"
+            else:
+               fname = figname+"_"+x_col+"_"+f"{i}"
             plot_csv(input_file, fname, file_type,
                      x_col, y_plots[i], plot_title)
 

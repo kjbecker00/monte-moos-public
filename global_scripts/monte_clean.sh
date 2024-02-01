@@ -239,6 +239,7 @@ find "${CARLO_DIR_LOCATION}" -name '*.enc.*' -exec rm -rf {} \; 2>/dev/null
 # Always remove temporary files
 rm -f "${CARLO_DIR_LOCATION}"/.old_*_job_queue.txt
 rm -f "${CARLO_DIR_LOCATION}"/.temp_queue.txt
+rm -f "${CARLO_DIR_LOCATION}"/.tmp_*
 
 # Remove empty results folders
 [[ -d ${CARLO_DIR_LOCATION}/results ]] && { find "${CARLO_DIR_LOCATION}"/results -type d -delete 2>/dev/null; }
