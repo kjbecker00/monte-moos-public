@@ -135,33 +135,6 @@ is_bad_job() {
     return 1
 }
 
-#--------------------------------------------------------------
-# Determine if a job with these args is in bad_jobs.txt
-#--------------------------------------------------------------
-is_bad_job_args() {
-    local JOB_FILE
-    local JOB_ARGS
-    local BAD_JOBS_FILE
-    JOB_FILE="$1 $2"
-    BAD_JOBS_FILE="$3"
-
-    if [[ -z $BAD_JOBS_FILE ]]; then
-        if [[ -f $2 ]]; then
-            BAD_JOBS_FILE="$2"
-            JOB_FILE="$1"
-        else
-            BAD_JOBS_FILE="${CARLO_DIR_LOCATION}/bad_jobs.txt"
-        fi
-    fi
-
-    if [[ ! -f $BAD_JOBS_FILE ]]; then
-        return 1
-    fi
-    if grep -Fxq "$JOB_FILE $JOB_ARGS" "${BAD_JOBS_FILE}"; then
-        return 0 # job with these args is in bad_jobs.txt
-    fi
-    return 1 # job is not in bad_jobs.txt
-}
 
 
 #--------------------------------------------------------------

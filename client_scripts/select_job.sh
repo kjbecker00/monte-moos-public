@@ -81,7 +81,7 @@ for ((i = 1; i <= length; i++)); do
 
     RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
 
-    if is_bad_job_args "$JOB_FILE" "$JOB_ARGS"; then
+    if is_bad_job "$JOB_FILE" "$JOB_ARGS"; then
         vecho "Skipping bad job $JOB_FILE $JOB_ARGS ..." 1
         continue
     fi
@@ -89,15 +89,7 @@ for ((i = 1; i <= length; i++)); do
     # checks if it has runs left
     if [[ $RUNS_LEFT -gt 0 ]]; then
 
-        # check that it is in a directory
-        JOB_PATH=$(job_path ${JOB_FILE})
-        KERBS=$(echo "$JOB_PATH" | cut -d '/' -f 1)
 
-        if [ -z "$KERBS" ]; then
-            vecho "Job not in a directory. Skipping..." 1
-            JOB_FILE=""
-            continue
-        fi
 
         GOOD_JOB_FILE=$JOB_FILE
         GOOD_JOB_ARGS=$JOB_ARGS
