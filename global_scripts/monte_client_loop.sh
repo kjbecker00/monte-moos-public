@@ -115,9 +115,10 @@ fi
 while true; do
     vecho "New iteration of loop..." 10
     monte_clean.sh
+    this_hour=$(get_hour)
 
     # Variable sleep time (1 minute during the day, 5 minutes overnight)
-    if [[ $(get_hour) -gt 8 && $(get_hour) -lt 18 ]]; then
+    if [[ $this_hour -gt 8 && $this_hour -lt 18 ]]; then
         SLEEP_TIME=60 # 1 minute during the day
     else
         SLEEP_TIME=300 # 5 minutes overnight
@@ -129,9 +130,9 @@ while true; do
         vecho "Perpetual mode. Checking for updates..." 10
 
         # Populate the reupdate flag
-        if [ "$last_update_time" -ne "$(get_hour)" ]; then
+        if [ "$last_update_time" -ne "$this_hour" ]; then
             vecho "Setting re-update flag..." 1
-            last_update_time="$(get_hour)"
+            last_update_time="$this_hour"
             UPDATE_THIS_ITER="--update"
 
             # Update monte-moos as well
@@ -143,6 +144,11 @@ while true; do
                 git pull 2>&1 >/dev/null
             }
             cd - >/dev/null
+        fi
+
+        # Delete bad_jobs.txt file every x hours
+        if [ "$((last_update_time/2))" -ne "$((this_hour/2))" ]; then
+            "${MONTE_MOOS_BASE_DIR}"/client_scripts/list_bad_job.sh -d
         fi
 
     fi
