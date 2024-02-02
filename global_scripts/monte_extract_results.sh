@@ -98,7 +98,6 @@ JOB_FILE_NAME=$(job_filename "$JOB_FILE")
 JOB_PATH="$(job_path "$FULL_JOB_PATH")"
 JOB_DIR="$(job_dirname "$JOB_FILE")"
 
-
 #-------------------------------------------------------
 #  Part 3: Save to a directory on the local machine
 #-------------------------------------------------------
@@ -110,21 +109,20 @@ else
     vexit "Shore repo not found: $MONTE_MOOS_CLIENT_REPOS_DIR/$SHORE_REPO. Be sure to run the job first with monte_run_job.sh" 10
 fi
 
-
 SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
 if [ ! -f "$SHORE_ALOG" ]; then
     vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 4 -type f -iname *SHORE*.alog" 2
     SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*.alog" 2>/dev/null | head -1)
     if [ ! -f "$SHORE_ALOG" ]; then
         vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 4 -type f -iname *.alog" 2
-        SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}"  -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
+        SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
         if [ ! -f "$SHORE_ALOG" ]; then
             vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION} -maxdepth 4 -type f -iname \"*SHORE*.alog\"" 2
             if [ $TEST = "yes" ]; then
                 vecho "${txtred} Error: No alog found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" 0
                 vecho "${txtred} Error: Be sure you have run job first with the following script:" 0
                 vecho "${txtred} Error: $(tput smul)monte_run_job.sh ${JOB_FILE}" 0
-                vecho "Continuing anyway, but this may fail later on" 
+                vecho "Continuing anyway, but this may fail later on"
             fi
         fi
     fi
@@ -147,7 +145,6 @@ fi
 vecho "Hash = $hash" 1
 LOCAL_RESULTS_DIR="${CARLO_DIR_LOCATION}/results"
 
-
 #-------------------------------------------------------
 # Set the results directory on the host
 #-------------------------------------------------------
@@ -167,7 +164,7 @@ if [[ ! -d $LOCAL_JOB_RESULTS_DIR ]]; then
 fi
 
 # Writes to an argfile, which saves the job name job args
-echo "$JOB_FILE $JOB_ARGS" >> "$LOCAL_JOB_RESULTS_DIR"/.argfile
+echo "$JOB_FILE $JOB_ARGS" >>"$LOCAL_JOB_RESULTS_DIR"/.argfile
 
 #-------------------------------------------------------
 #  Part 4: Run post-processing script specific
@@ -199,7 +196,6 @@ else
     vecho "Running with these flags: $(tput smul)${results_script_directory}/post_process_results.sh --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\" --local_results_dir=$LOCAL_JOB_RESULTS_DIR" 1
     "${results_script_directory}"/post_process_results.sh --job_file="$JOB_FILE" --job_args="$JOB_ARGS" --local_results_dir="$LOCAL_JOB_RESULTS_DIR" # >& /dev/null
 fi
-
 
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then

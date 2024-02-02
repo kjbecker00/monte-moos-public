@@ -10,7 +10,7 @@ HOSTLESS=""
 source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
 
 # Updates once per hour
-last_update_time=$(date +%H)
+last_update_time=$(get_hour)
 last_update_time=$((last_update_time-1)) # forces an update on the first iteration
 #-------------------------------------------------------
 #  Part 1: Check for and handle command-line arguments
@@ -117,7 +117,7 @@ while true; do
     monte_clean.sh
 
     # Variable sleep time (1 minute during the day, 5 minutes overnight)
-    if [[ $(date +%H) -gt 8 && $(date +%H) -lt 18 ]]; then
+    if [[ $(get_hour) -gt 8 && $(get_hour) -lt 18 ]]; then
         SLEEP_TIME=60 # 1 minute during the day
     else
         SLEEP_TIME=300 # 5 minutes overnight
@@ -129,9 +129,9 @@ while true; do
         vecho "Perpetual mode. Checking for updates..." 10
 
         # Populate the reupdate flag
-        if [ "$last_update_time" -ne "$(date +%H)" ]; then
+        if [ "$last_update_time" -ne "$(get_hour)" ]; then
             vecho "Setting re-update flag..." 1
-            last_update_time="$(date +%H)"
+            last_update_time="$(get_hour)"
             UPDATE_THIS_ITER="--update"
 
             # Update monte-moos as well

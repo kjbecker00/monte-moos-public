@@ -162,3 +162,19 @@ is_bad_job_args() {
     fi
     return 1 # job is not in bad_jobs.txt
 }
+
+
+#--------------------------------------------------------------
+# Gets the current hour with out a leading 0
+#--------------------------------------------------------------
+get_hour() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # Mac OSX
+        ehco "$(date +%k)"
+    else
+        # GNU/Linux
+        echo "$(date +%-H)"
+    fi
+    
+}
+
