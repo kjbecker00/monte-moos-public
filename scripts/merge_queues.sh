@@ -81,14 +81,15 @@ cat "$TEMP_INPUT_FILE2" >>"$TEMP_INPUT_FILE"
 # are the same as output_filename
 # vecho "output= ${OUTPUT_FILENAME}.out.tmp" 1
 # vecho "input= $TEMP_INPUT_FILE" 1
-TEMP_OUTPUT=$(temp_filename ${OUTPUT_FILENAME})
+TEMP_OUTPUT=$(temp_filename ${OUTPUT_FILENAME}).out
 ${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=$TEMP_OUTPUT "$TEMP_INPUT_FILE" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
 
 # Remove the temp file
 rm "$TEMP_INPUT_FILE" 2>/dev/null
 rm "$TEMP_INPUT_FILE2" 2>/dev/null
-mv "$TEMP_OUTPUT" "$OUTPUT_FILENAME"
+mkdir -p $(dirname "$OUTPUT_FILENAME")
+mv "$TEMP_OUTPUT" "$OUTPUT_FILENAME" || vexit "Error moving $TEMP_OUTPUT to $OUTPUT_FILENAME" 1
 
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then

@@ -145,11 +145,7 @@ while true; do
             }
             cd - >/dev/null
         fi
-
-        # Delete bad_jobs.txt file every x hours
-        if [ "$((last_update_time/2))" -ne "$((this_hour/2))" ]; then
-            "${MONTE_MOOS_BASE_DIR}"/client_scripts/list_bad_job.sh -d
-        fi
+        
 
     fi
 
