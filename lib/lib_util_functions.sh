@@ -39,6 +39,7 @@ safe_exit() {
         echo ""
         echo "${txtred}$ME Exiting safely. Resetting PATH and IVP_BEHAVIOR_DIRS... ${txtrst}"
     fi
+    ktm >&/dev/null &
     exit $1
 }
 
@@ -57,6 +58,13 @@ check_sleep() { for i in $(seq 1 1 $1); do
     check_quit
     sleep 1
 done; }
+
+#--------------------------------------------------------------
+# Safely source a job file
+#--------------------------------------------------------------
+safe_source() {
+    source "$1"
+}
 
 #--------------------------------------------------------------
 # From a queue line, extract the filename of the job
@@ -101,10 +109,11 @@ job_path() {
 }
 
 #--------------------------------------------------------------
-# Given a file, add .temp_ to the filename
-#     foo/bar  -> foo/.temp_bar
-#     foo//bar -> foo/.temp_bar
-#     /home/job_dirs/foo/bar -> /home/job_dirs/foo/.temp_bar
+# Given a file, add .tmp_ to the filename
+#     foo/bar  -> foo/.tmp_bar
+#     foo//bar -> foo/.tmp_bar
+#     foo/.tmp_bar -> foo/.tmp_tmp_bar
+#     /home/job_dirs/foo/bar -> /home/job_dirs/foo/.tmp_bar
 # This function produces a deterministic (repeatable) output
 #--------------------------------------------------------------
 temp_filename() {
@@ -112,6 +121,7 @@ temp_filename() {
     input=$1
     input="${input//\/\//\/}" # Replace // with /
     input="${input//\/\//\/}" # Replace // with / (again)
+    input="${input/.tmp_/tmp_}" # Replace .tmp_ with tmp_
     echo "$(dirname $input)/.tmp_$(basename $input)"
 }
 
@@ -135,19 +145,30 @@ is_bad_job() {
     return 1
 }
 
-
-
 #--------------------------------------------------------------
 # Gets the current hour with out a leading 0
 #--------------------------------------------------------------
 get_hour() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
-        ehco "$(date +%k)"
+        echo "$(date +%k)"
     else
         # GNU/Linux
         echo "$(date +%-H)"
     fi
-    
 }
 
+#--------------------------------------------------------------
+# Determines if you should skip over a line
+#--------------------------------------------------------------
+is_comment() {
+    if [[ $1 == "" ]]; then
+        vecho "Identified as blank line... $1" 50
+        return 0
+    fi
+    if [[ $1 == \#* ]]; then
+        vecho "Identified as comment... $1" 50
+        return 0
+    fi
+    return 1
+}

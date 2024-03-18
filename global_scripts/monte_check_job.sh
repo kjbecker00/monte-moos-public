@@ -56,7 +56,7 @@ done
     exit 30
 }
 
-which monte_check_job.sh > /dev/null || {
+which monte_check_job.sh >/dev/null || {
     echo "MONTE_MOOS_BASE_DIR ($MONTE_MOOS_BASE_DIR) not added to path"
     exit 31
 }

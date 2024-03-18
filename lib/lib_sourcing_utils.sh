@@ -103,6 +103,34 @@ add_extra_repos_to_path() {
 }
 
 #--------------------------------------------------------------
+# Echos everything in the current path
+#--------------------------------------------------------------
+mypath() {
+    AMT=75
+    for INDEX in $(seq 1 $AMT); do
+        PART=$(echo $PATH | cut -d : -f $INDEX)
+        if [ "${PART}" = "" ]; then
+            continue
+        fi
+        echo "     $PART"
+    done
+}
+
+#--------------------------------------------------------------
+# Echos everything in the current IVP_BEHAVIOR_DIRS
+#--------------------------------------------------------------
+mydirs() {
+    AMT=75
+    for INDEX in $(seq 1 $AMT); do
+        PART=$(echo $IVP_BEHAVIOR_DIRS | cut -d : -f $INDEX)
+        if [ "${PART}" = "" ]; then
+            continue
+        fi
+        echo "     $PART"
+    done
+}
+
+#--------------------------------------------------------------
 # Removes something from a path-like string. Returns the new
 # value of that path-like string
 #--------------------------------------------------------------

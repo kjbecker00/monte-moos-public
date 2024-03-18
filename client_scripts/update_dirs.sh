@@ -88,6 +88,7 @@ handle_repo_links_file() {
     #-------------------------------------------------------
     #  Git clone/git pull/build.sh all dirs in the file
     #-------------------------------------------------------
+    vecho "#################################" 1
     vecho "repo_links file: $repo_links_file" 1
     # Add newline if not present
     [ -n "$(tail -c1 $repo_links_file)" ] && printf '\n' >>"$repo_links_file"

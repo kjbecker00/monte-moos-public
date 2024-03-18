@@ -67,6 +67,14 @@ cd - >/dev/null
 #-------------------------------------------------------
 while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
 
+
+    # Merge each queue file into the host_job_queue.txt file
+    ${MONTE_MOOS_BASE_DIR}/host_scripts/merge_all_queues.sh 
+    EXIT_CODE=$?
+    if [ ! $EXIT_CODE -eq 0 ]; then
+        vexit "Error. merge_all_queues exit code: $EXIT_CODE" 5
+    fi
+
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #  Part 3a: Push latest queue to web
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -85,6 +93,17 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
         QUEUE_COMPLETE="yes"
     fi
     check_quit
+
+
+    #--------------------------------------------------------------
+    #  Part 3b: Distribute the queue
+    #--------------------------------------------------------------
+    "${MONTE_MOOS_BASE_DIR}"/host_scripts/distribute_queue.sh
+    EXIT_CODE=$?
+    if [ ! $EXIT_CODE -eq 0 ]; then
+        vexit "Error. distribute_queue exit code: $EXIT_CODE" 6
+    fi
+
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     #  Part 3b: Update the .temp_job_dirs and repo links on the web

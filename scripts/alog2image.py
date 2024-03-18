@@ -87,7 +87,8 @@ def prepare_alog(input_file):
         output_file_real = remove_extension(input_file) + "_data.csv"
         # Remove the output file if it already exists to prevent aloggrep from asking to overwrite
         # subprocess.run(f"rm {output_file}", shell=True)
-        script = f"aloggrep {input_file} NODE_REPORT_LOCAL {output_file} -sd --format=time:val --csw --subpat=x:y "
+        script = "aloggrep "+input_file+" NODE_REPORT_LOCAL " \
+            output_file + " -sd --format=time:val --csw --subpat=x:y "
         subprocess.run(script, shell=True, check=True)
         subprocess.run(
             f"mv {output_file} {output_file_real}", shell=True, check=True)
@@ -130,7 +131,8 @@ def alog_vname(alog_file):
     :return: The vehicle name from an alog file
     :doc-author: Trelent
     """
-    script = f"aloggrep {alog_file} NODE_REPORT_LOCAL --v --final --format=val --subpat=name"
+    script = "aloggrep "+alog_file + \
+        " NODE_REPORT_LOCAL --v --final --format=val --subpat=name"
     vname = subprocess.run(
         script, shell=True, capture_output=True, check=True).stdout.decode('utf-8')
     assert type(vname) == str, "Error: subprocess.run returns non-string type"
@@ -148,7 +150,8 @@ def alog_mhash(alog_file):
     Returns:
         string: mission hash
     """    """Returns the mission hash"""
-    script = f"aloggrep {alog_file} MISSION_HASH --v --final --format=val --subpat=mhash"
+    script = "aloggrep "+alog_file + \
+        " MISSION_HASH --v --final --format=val --subpat=mhash"
     hash = subprocess.run(script, shell=True,
                           capture_output=True, check=True).stdout.decode('utf-8').strip()
     assert not (hash.__contains__(" exiting")
@@ -339,7 +342,8 @@ def main():
             alog_files.append(arg)
             vprint("\tGiven alog file: "+arg)
             continue
-        assert False, f"alog2image.py error: {arg} is not a valid argument. Use -h or --help for usage."
+        assert False, "alog2image.py error: " + arg + \
+            " is not a valid argument. Use -h or --help for usage."
 
     if len(alog_files) == 0:
         alog_files = handle_no_alogs(to_find_alogs)

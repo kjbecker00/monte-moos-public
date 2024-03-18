@@ -71,7 +71,6 @@ if [ $? -ne 0 ]; then
     vexit "Enviornment has errors. Please fix them before running this script." 1
 fi
 
-
 #-------------------------------------------------------
 #  Part 1b: Set up test mode
 #-------------------------------------------------------
@@ -84,10 +83,9 @@ if [ "$TEST" = "yes" ]; then
     if [[ -f clean.sh ]]; then
         vecho "Cleaning old alog files with ./clean.sh" 0
         ./clean.sh # cleans old alogs
-        fi
+    fi
     OFFLOAD="no"
 fi
-
 
 #-------------------------------------------------------
 #  Part 1c: Clear extraneous paths and dirs
@@ -104,7 +102,6 @@ export PATH
 export IVP_BEHAVIOR_DIRS
 vecho "$ME: PATH after removing all instances of */moos-ivp-*/bin/* and */moos-ivp-*/scripts/*:   $PATH" 1
 vecho "$ME: IVP_BEHAVIOR_DIRS: $IVP_BEHAVIOR_DIRS" 1
-
 
 #-------------------------------------------------------
 #  Part 2: Check that command-line arguments are valid
@@ -134,7 +131,7 @@ if [ "$HOSTLESS" = "yes" ] || [ "$TEST" = "yes" ]; then
     echo "$ME running: monte_check_job.sh  --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\""
     monte_check_job.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS"
 else
-    echo "$ME running: monte_check_job.sh  --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\" --client" 
+    echo "$ME running: monte_check_job.sh  --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\" --client"
     monte_check_job.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS" --client
 fi
 EXIT_CODE=$?
@@ -146,23 +143,21 @@ fi
 #  Part 3b: Update the moos directories
 echo "[2] Updating dirs from job file... "
 secho "Updating_dirs from $JOB_FILE"
-cd ${CARLO_DIR_LOCATION}
-echo "$ME: /${MONTE_MOOS_BASE_DIR}/client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\" -j2" 
-cd - > /dev/null
-/${MONTE_MOOS_BASE_DIR}/client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS" -j2
+# cd "${CARLO_DIR_LOCATION}"
+echo "$ME: /${MONTE_MOOS_BASE_DIR}/client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\" -j2"
+# cd - >/dev/null
+/${MONTE_MOOS_BASE_DIR}/client_scripts/update_dirs.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS" -j2
 if [ $? -ne 0 ]; then
     vexit "updating dirs mentioned in job using: /${MONTE_MOOS_BASE_DIR}/client_scripts/update_dirs.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\" -j2" 3
 fi
 echo $txtgrn"      Done updating dirs" $txtrst
 
-
-
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #  Part 3c: Run the job file
-echo "$ME: /${MONTE_MOOS_BASE_DIR}/client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\"  -v=$VERBOSE" 
+echo "$ME: /${MONTE_MOOS_BASE_DIR}/client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args=\"$JOB_ARGS\"  -v=$VERBOSE"
 echo "[3] Running job from file..."
 secho "Running job $JOB_FILE $JOB_ARGS"
-/${MONTE_MOOS_BASE_DIR}/client_scripts/xlaunch_job.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS" -v=$VERBOSE
+/${MONTE_MOOS_BASE_DIR}/client_scripts/xlaunch_job.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS" -v=$VERBOSE
 EXIT_CODE=$?
 if [[ $EXIT_CODE -eq 2 ]]; then
     echo "Mission timed out. Extracting results anyway..."
@@ -189,10 +184,10 @@ fi
 secho "$ME: Extracting results from $JOB_FILE"
 if [ "$HOSTLESS" = "yes" ]; then
     vecho "monte_extract_results.sh -no --job_file=$JOB_FILE" 1
-    monte_extract_results.sh -no --job_file=$JOB_FILE  --job_args="$JOB_ARGS"
+    monte_extract_results.sh -no --job_file=$JOB_FILE --job_args="$JOB_ARGS"
 else
     vecho "monte_extract_results.sh --job_file=$JOB_FILE --job_args=\"$JOB_ARGS\"" 1
-    monte_extract_results.sh --job_file=$JOB_FILE  --job_args="$JOB_ARGS"
+    monte_extract_results.sh --job_file=$JOB_FILE --job_args="$JOB_ARGS"
 fi
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then

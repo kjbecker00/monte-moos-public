@@ -14,6 +14,8 @@ INPUT_FILE=""
 INPUT_FILE2=""
 FLOW_DOWN_ARGS=""
 breakpoint="-------BREAKPOINT-------"
+OUTPUT_FILENAME="merged_queue.txt"
+
 #--------------------------------------------------------------
 #  Part 2: Check for and handle command-line arguments
 #--------------------------------------------------------------
@@ -56,42 +58,44 @@ done
 #--------------------------------------------------------------
 #  Part 3: Pre-flight Checks
 #--------------------------------------------------------------
+if [[ ! -f $INPUT_FILE ]]; then
+    vexit "File 1 does not exist: $INPUT_FILE" 1
+fi
+if [[ ! -f $INPUT_FILE2 ]]; then
+    vexit "File 2 does not exist: $INPUT_FILE2" 1
+fi
+
+vecho "mergeing file 1: $INPUT_FILE and $INPUT_FILE2" 1
+#--------------------------------------------------------------
+#  Part 4: Cat files together
+#--------------------------------------------------------------
 TEMP_INPUT_FILE=$(temp_filename ${INPUT_FILE})
-TEMP_INPUT_FILE2=$(temp_filename ${INPUT_FILE2})
-# Copy the file so we don't edit any of the originals
-cp "$INPUT_FILE" "$TEMP_INPUT_FILE" || vexit "Error copying $INPUT_FILE to $TEMP_INPUT_FILE" 1
-cp "$INPUT_FILE2" "$TEMP_INPUT_FILE2" || vexit "Error copying $INPUT_FILE2 to $TEMP_INPUT_FILE2" 1
-
-# Add newline if not present
-[ -n "$(tail -c1 $TEMP_INPUT_FILE)" ] && printf '\n' >>$TEMP_INPUT_FILE
-[ -n "$(tail -c1 $TEMP_INPUT_FILE2)" ] && printf '\n' >>$TEMP_INPUT_FILE2
-
-# Cat the files together (file 2 appended to end of file 1)
+# Copy file 1 to the temp file
+cat $INPUT_FILE >> $TEMP_INPUT_FILE
+# Add breakpoint
 echo "${breakpoint}" >>"$TEMP_INPUT_FILE"
-cat "$TEMP_INPUT_FILE2" >>"$TEMP_INPUT_FILE"
+# Copy file 2 to the temp file
+cat $INPUT_FILE2 >> $TEMP_INPUT_FILE
 
-# echo "Press any key to continue, or Ctrl-C to cancel."
-# read -n 1 -s
 
 #--------------------------------------------------------------
-#  Part 4: Mergeing
+#  Part 4: Consolodate the queue
 #--------------------------------------------------------------
-# To merge we cat the files and then run consolodate_queue.sh
-# Output uses different suffix to prevent overwriting if INPUT_FILE or INPUT_FILE2
-# are the same as output_filename
-# vecho "output= ${OUTPUT_FILENAME}.out.tmp" 1
-# vecho "input= $TEMP_INPUT_FILE" 1
+# Removes duplicates, adds desired_runs, takes max act_runs
 TEMP_OUTPUT=$(temp_filename ${OUTPUT_FILENAME}).out
+rm -f "$TEMP_OUTPUT"
+vecho "Consolodating queue $TEMP_INPUT_FILE..." 1
+
 ${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=$TEMP_OUTPUT "$TEMP_INPUT_FILE" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
-
-# Remove the temp file
-rm "$TEMP_INPUT_FILE" 2>/dev/null
-rm "$TEMP_INPUT_FILE2" 2>/dev/null
-mkdir -p $(dirname "$OUTPUT_FILENAME")
-mv "$TEMP_OUTPUT" "$OUTPUT_FILENAME" || vexit "Error moving $TEMP_OUTPUT to $OUTPUT_FILENAME" 1
-
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then
     vexit "Error in consolodate_queue.sh, exited with code $EXIT_CODE " 1
 fi
+
+# Remove the temp file
+rm "$TEMP_INPUT_FILE" 2>/dev/null
+mkdir -p $(dirname "$OUTPUT_FILENAME")
+mv "$TEMP_OUTPUT" "$OUTPUT_FILENAME" || vexit "Error moving $TEMP_OUTPUT to $OUTPUT_FILENAME" 1
+
+vecho "output to $OUTPUT_FILENAME" 1

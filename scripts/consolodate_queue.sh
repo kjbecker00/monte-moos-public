@@ -7,13 +7,13 @@
 # Part 1: Convenience functions, set variables
 #--------------------------------------------------------------
 ME="consolodate_queue.sh"
-OUTPUT_FILENAME="merged_queue.txt"
+OUTPUT_FILENAME="consolodated_queue.txt"
 rm -f $OUTPUT_FILENAME # Delete default output file if it exists
 
 source /${MONTE_MOOS_BASE_DIR}/lib/lib_util_functions.sh
 INPUT_FILE=""
 RUNS_DES_MERGE_TYPE="add"
-
+WHICH_JOBS="all"
 BREAKPOINT_STRING="-------BREAKPOINT-------"
 
 #--------------------------------------------------------------
@@ -81,6 +81,11 @@ for ARGI; do
     elif [[ "${ARGI}" = "--last_desired" || "${ARGI}" = "-ld" ]]; then
         RUNS_DES_MERGE_TYPE="last"
 
+
+    # Only take jobs from before the breakpoint
+    elif [[ "${ARGI}" = "--first_jobs" || "${ARGI}" = "-fj" ]]; then
+        WHICH_JOBS="first"
+
     # Actual runs args
     elif [[ "${ARGI}" = "--max_actual" || "${ARGI}" = "-ma" ]]; then
         RUNS_ACT_MERGE_TYPE="max"
@@ -101,14 +106,23 @@ for ARGI; do
     fi
 done
 
+
+vecho "" 3
+vecho "" 3
+vecho "RUNS_ACT_MERGE_TYPE=$RUNS_ACT_MERGE_TYPE" 3
+vecho "RUNS_DES_MERGE_TYPE=$RUNS_DES_MERGE_TYPE" 3
+
+
+# Delete the output file if exists
 # Before deleting, check that the two files are different
 if [[ "$INPUT_FILE" = "$OUTPUT_FILENAME" ]]; then
     vexit "input file cannot equal output file" 2
 fi
-
-# Delete the output file first
-rm -f "$OUTPUT_FILENAME"
-touch $OUTPUT_FILENAME
+if [[ -f "$OUTPUT_FILENAME" ]]; then
+    vexit "Output file: $OUTPUT_FILENAME exists" 3
+fi
+mkdir -p "$(dirname $OUTPUT_FILENAME)"
+touch "$OUTPUT_FILENAME"
 
 #--------------------------------------------------------------
 #  Part 3: Loop through file 1, getting all job names with & args
@@ -122,43 +136,25 @@ job_runs_act=()
 
 line_num=0
 while read line; do
-    # Skip comments, empty lines
-    [[ "$line" =~ ^# ]] && continue
-    [[ -z "$line" ]] && continue
     line_num=$((line_num + 1))
+    is_comment "$line" && continue
 
     vecho "Line $line_num= $line" 5
 
     # Always skip over the breakpoint string
     if [[ "$line" == "$BREAKPOINT_STRING" ]]; then
-        if [[ $ignore_breakpoint != "yes" ]]; then
-            break
-        else
+            if [[ $WHICH_JOBS == "first" ]]; then
+                exit 0
+            fi
             continue
-        fi
+        # fi
     fi
 
-    [[ $ignore_breakpoint != "yes" && "$line" == "$BREAKPOINT_STRING" ]] && {
-        vecho "Reached breakpoint. Stopping..." 5
-        break
-    }
-
     # Skip a line if it contains an error
-    job_name=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -jf)
-    [[ $? -eq 0 ]] || { continue; }
-    job_args=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -ja)
-    [[ $? -eq 0 ]] || { continue; }
-    job_rd=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -rd)
-    [[ $? -eq 0 ]] || { continue; }
-    job_ra=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -ra)
-    [[ $? -eq 0 ]] || { continue; }
-
-    vecho "job_name = $job_name" 5
-    vecho "job_args = $job_args" 5
-    vecho "job_rd = $job_rd" 5
-    vecho "job_ra = $job_ra" 5
-    vecho "" 5
-    vecho "" 5
+    job_name=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -jf) ; [[ $? -eq 0 ]] || { continue; }
+    job_args=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -ja) ; [[ $? -eq 0 ]] || { continue; }
+    job_rd=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -rd) ; [[ $? -eq 0 ]] || { continue; }
+    job_ra=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$line" -ra) ; [[ $? -eq 0 ]] || { continue; }
 
     # Check if this line has already been added to the output file using grep
     grep -q "$job_name $job_args" $OUTPUT_FILENAME
@@ -171,75 +167,71 @@ while read line; do
     total_rd=0
     total_ra=0
 
-    next_lines_reached_breakpoint="no"
+    # next_lines_reached_breakpoint="no"
     # Loop through this file, looking for jobs with the same name and args
+
     while read next_lines; do
+        is_comment "$next_lines" && continue
 
-        # Skip comments, empty lines
-        [[ "$next_lines" =~ ^# ]] && continue
-        [[ -z "$next_lines" ]] && continue
-
-        # Skip breakpoint
+        # # Skip breakpoint
         if [[ "$next_lines" = "$BREAKPOINT_STRING" ]]; then
-            [[ $ignore_breakpoint != "yes" ]] && { next_lines_reached_breakpoint="yes"; }
-            vecho "Reached breakpoint" 5
+            # [[ $ignore_breakpoint != "yes" ]] && { next_lines_reached_breakpoint="yes"; }
+            vecho "        Reached breakpoint" 5
             continue
         fi
 
         vecho "" 15
-        vecho "   next_lines = $next_lines" 5
+        vecho "        next_lines = $next_lines" 15
 
         next_lines_job_name=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$next_lines" -jf)
         next_lines_job_args=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$next_lines" -ja)
-        # If it finds another copy of the file...
+        
+        # If it finds another copy of the line...
         if [[ "$next_lines_job_name" == "$job_name" && "$next_lines_job_args" == "$job_args" ]]; then
             next_lines_job_rd=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$next_lines" -rd)
             next_lines_job_ra=$(${MONTE_MOOS_BASE_DIR}/scripts/read_queue.sh --line="$next_lines" -ra)
-            vecho "     Found a match!" 5
+            vecho "        Found a match with line $next_lines. Currently has rd=$total_rd ra=$total_ra" 5
 
-            if [[ $next_lines_reached_breakpoint == "no" ]]; then
-
-                # Update number of desired runs
-                if [[ "$RUNS_DES_MERGE_TYPE" == "add" ]]; then
-                    vecho "     Adding $next_lines_job_rd to $total_rd" 5
-                    total_rd=$(($total_rd + $next_lines_job_rd))
-                elif [[ "$RUNS_DES_MERGE_TYPE" == "max" ]]; then
-                    if [[ "$next_lines_job_rd" -gt "$total_rd" ]]; then
-                        vecho "     Replacing total_rd with $next_lines_job_rd" 5
-                        total_rd=$next_lines_job_rd
-                    fi
-                elif [[ "$RUNS_DES_MERGE_TYPE" == "first" ]]; then
-                    if [[ "$total_rd" -eq "0" ]]; then
-                        vecho "     Setting total_rd to $next_lines_job_rd" 5
-                        total_rd=$next_lines_job_rd
-                    fi
-                elif [[ "$RUNS_DES_MERGE_TYPE" == "last" ]]; then
-                    vecho "     Setting total_rd to $next_lines_job_rd" 5
+            # Update number of desired runs
+            if [[ "$RUNS_DES_MERGE_TYPE" == "add" ]]; then
+                vecho "          Adding $next_lines_job_rd to $total_rd" 5
+                total_rd=$(($total_rd + $next_lines_job_rd))
+            elif [[ "$RUNS_DES_MERGE_TYPE" == "max" ]]; then
+                if [[ "$next_lines_job_rd" -gt "$total_rd" ]]; then
+                    vecho "          Replacing total_rd with $next_lines_job_rd" 5
                     total_rd=$next_lines_job_rd
                 fi
+            elif [[ "$RUNS_DES_MERGE_TYPE" == "first" ]]; then
+                if [[ "$total_rd" -eq "0" ]]; then
+                    vecho "          Setting total_rd to $next_lines_job_rd" 5
+                    total_rd=$next_lines_job_rd
+                fi
+            elif [[ "$RUNS_DES_MERGE_TYPE" == "last" ]]; then
+                vecho "          Setting total_rd to $next_lines_job_rd" 5
+                total_rd=$next_lines_job_rd
             fi
 
             # Update number of actual runs
             if [[ "$RUNS_ACT_MERGE_TYPE" == "add" ]]; then
-                vecho "     Adding $next_lines_job_ra to $total_ra" 5
+                vecho "          Adding $next_lines_job_ra to $total_ra" 5
                 total_ra=$(($total_ra + $next_lines_job_ra))
             elif [[ "$RUNS_ACT_MERGE_TYPE" == "max" ]]; then
                 if [[ "$next_lines_job_ra" -gt "$total_ra" ]]; then
-                    vecho "     Replacing total_ra with $next_lines_job_ra" 5
+                    vecho "          Replacing total_ra with $next_lines_job_ra" 5
                     total_ra=$next_lines_job_ra
                 fi
             elif [[ "$RUNS_ACT_MERGE_TYPE" == "first" ]]; then
                 if [[ "$total_ra" -eq "0" ]]; then
-                    vecho "     Setting total_ra to $next_lines_job_ra" 5
+                    vecho "          Setting total_ra to $next_lines_job_ra" 5
                     total_ra=$next_lines_job_ra
                 fi
             elif [[ "$RUNS_ACT_MERGE_TYPE" == "last" ]]; then
-                vecho "     Setting total_ra to $next_lines_job_ra" 5
+                vecho "          Setting total_ra to $next_lines_job_ra" 5
                 total_ra=$next_lines_job_ra
             fi
 
         else
-            vecho "   NOT a match!" 5
+            vecho "   NOT a match!" 15
         fi
     done <$INPUT_FILE
 
@@ -249,20 +241,11 @@ while read line; do
     # the host will add it back to the client's queue
     if [[ $total_rd -gt $total_ra ]]; then
         output_line="$job_name $job_args $total_rd $total_ra"
-        vecho "output_line = $output_line" 5
-        echo "$output_line" >>$OUTPUT_FILENAME
+        vecho "output_line = $output_line" 2
+        echo "$output_line" >>"$OUTPUT_FILENAME"
     else
-        vecho "not adding $job_name $job_args since runs_desired=runs_act" 5
+        vecho "not adding $job_name $job_args since runs_desired $total_rd=$total_ra runs_act" 2
     fi
 
 done <$INPUT_FILE
 
-#--------------------------------------------------------------
-#  Part 5: Print out the merged queue
-#--------------------------------------------------------------
-
-touch $OUTPUT_FILENAME
-
-for key in "${!job_runs_des[@]}"; do
-    echo "$key ${job_runs_des[$key]} ${job_runs_act[$key]}"
-done

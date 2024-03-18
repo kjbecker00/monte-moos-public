@@ -14,9 +14,9 @@ REPO_NAME=""
 # BIN_SDIR=""
 # LIB_SDIR=""
 MISSION_SDIR=""
-FLOW_DOWN_ARGS=""           # Get the mission name from the third argument
-TO_SOURCE="yes"             # if the script should add repo/bin to the path
-TO_ADD_LIB="yes"            # if the script should add repo/lib to IVP_BEHAVIOR_DIRS
+FLOW_DOWN_ARGS="" # Get the mission name from the third argument
+TO_SOURCE="yes"   # if the script should add repo/bin to the path
+TO_ADD_LIB="yes"  # if the script should add repo/lib to IVP_BEHAVIOR_DIRS
 
 ME="source_launch.sh"
 source "/${MONTE_MOOS_BASE_DIR}/lib/lib_include.sh"
@@ -105,8 +105,6 @@ if [[ ! -f "${MISSION_DIR}/${SCRIPTNAME}" ]]; then
     fi
 fi
 
-
-
 #-------------------------------------------------------
 #  Part 6:  Source path, add behavior dirs, run the script
 #-------------------------------------------------------
@@ -117,8 +115,11 @@ if [[ $TO_ADD_LIB == "yes" ]]; then
     add_lib "$REPO_NAME"
 fi
 
-vecho "Launching with PATH=$PATH" 1
-vecho "Launching with IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS" 1
+echo "Launching with PATH $(tput setaf 245)"
+mypath
+echo "$(tput sgr0)Launching with IVP_BEHAVIOR_DIRS$(tput setaf 245)"
+mydirs
+echo "$(tput sgr0)"
 
 # Run the launch.sh script with pre-determined flags
 cd "$MISSION_DIR" || safe_exit 9
