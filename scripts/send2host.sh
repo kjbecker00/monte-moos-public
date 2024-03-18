@@ -48,7 +48,6 @@ for ARGI; do
     fi
 done
 
-
 # check for required args
 if [[ $TEST != "yes" ]]; then
     if [[ -z $LOCAL_PATH ]]; then
@@ -76,6 +75,10 @@ fi
 #  Part 3: Start ssh agent
 #-------------------------------------------------------
 eval $(ssh-agent -s) &>/dev/null
+EXIT_CODE=$?
+if [ "$EXIT_CODE" -ne "0" ]; then
+    vexit "ssh agent unable to start ssh-agent. eval \$(ssh-agent -s) exited with code $EXIT_CODE" 3
+fi
 ps -p $SSH_AGENT_PID &>/dev/null
 SSH_AGENT_RUNNING=$?
 if [ ${SSH_AGENT_RUNNING} -ne 0 ]; then
@@ -88,7 +91,7 @@ fi
 ssh-add -t 7200 $MONTE_MOOS_HOST_SSH_KEY 2>/dev/null
 EXIT_CODE=$?
 if [ "$EXIT_CODE" -ne "0" ]; then
-    vexit "ssh agent unable to add ssh key" 3
+    vexit "ssh agent unable to add ssh key. ssh-add exited with code $EXIT_CODE" 3
 fi
 
 #-------------------------------------------------------
@@ -113,7 +116,7 @@ if [[ $DELETE != "yes" ]]; then
         DIR_TO_MAKE="$(dirname $HOST_PATH)"
     fi
     vecho "making dir $DIR_TO_MAKE on host" 2
-    ssh -n ${SSH_HOST} "mkdir -p $DIR_TO_MAKE" 
+    ssh -n ${SSH_HOST} "mkdir -p $DIR_TO_MAKE"
     EXIT_CODE=$?
     if [ ! $EXIT_CODE -eq "0" ]; then
         if [ $EXIT_CODE -eq 255 ]; then

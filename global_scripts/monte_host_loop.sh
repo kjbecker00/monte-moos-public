@@ -69,10 +69,10 @@ while [ "$QUEUE_COMPLETE" != "yes" ] || [ "$PERPETUAL" = "yes" ]; do
 
 
     # Merge each queue file into the host_job_queue.txt file
-    ${MONTE_MOOS_BASE_DIR}/host_scripts/merge_all_queues.sh 
+    "${MONTE_MOOS_BASE_DIR}"/host_scripts/merge_all_queues.sh 
     EXIT_CODE=$?
     if [ ! $EXIT_CODE -eq 0 ]; then
-        vexit "Error. merge_all_queues exit code: $EXIT_CODE" 5
+        vexit "Error. monte-moos/host_scripts/merge_all_queues.sh exit code: $EXIT_CODE" 5
     fi
 
     #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

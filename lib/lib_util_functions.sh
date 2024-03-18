@@ -39,7 +39,6 @@ safe_exit() {
         echo ""
         echo "${txtred}$ME Exiting safely. Resetting PATH and IVP_BEHAVIOR_DIRS... ${txtrst}"
     fi
-    ktm >&/dev/null &
     exit $1
 }
 
@@ -58,13 +57,6 @@ check_sleep() { for i in $(seq 1 1 $1); do
     check_quit
     sleep 1
 done; }
-
-#--------------------------------------------------------------
-# Safely source a job file
-#--------------------------------------------------------------
-safe_source() {
-    source "$1"
-}
 
 #--------------------------------------------------------------
 # From a queue line, extract the filename of the job

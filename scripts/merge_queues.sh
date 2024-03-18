@@ -84,7 +84,7 @@ cat $INPUT_FILE2 >> $TEMP_INPUT_FILE
 # Removes duplicates, adds desired_runs, takes max act_runs
 TEMP_OUTPUT=$(temp_filename ${OUTPUT_FILENAME}).out
 rm -f "$TEMP_OUTPUT"
-vecho "Consolodating queue $TEMP_INPUT_FILE..." 1
+vecho "Consolodating queue $TEMP_INPUT_FILE to $TEMP_OUTPUT..." 1
 
 ${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=$TEMP_OUTPUT "$TEMP_INPUT_FILE" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
