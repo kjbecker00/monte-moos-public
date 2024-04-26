@@ -152,9 +152,6 @@ else
     if [[ $HOST_PATH == "/" ]]; then
         vexit "HOST_PATH is /. This is a bug" 3
     fi
-    if [[ $HOST_PATH != "/home/monte/carlo_dir/"* && $HOST_PATH != "/home/yodacora/monte-moos/"* ]]; then
-        vexit "HOST_PATH is $HOST_PATH. This is a bug" 3
-    fi
 
     # Delete file/dir on host
     ssh -n ${SSH_HOST} "rm -rf $HOST_PATH" &>/dev/null

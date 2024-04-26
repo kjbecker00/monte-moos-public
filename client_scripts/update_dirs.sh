@@ -104,7 +104,7 @@ handle_repo_links_file() {
         cd "$starting_pwd" || vexit "Error cd'ing into old pwd?" 100
 
         repo_line=$(awk -v num=$counter 'NR==num' $repo_links_file)
-        if skipline $repo_line; then
+        if to_skip_repo_line $repo_line; then
             vecho "Skipping line... $repo_line" 10
             continue
         fi
@@ -132,11 +132,11 @@ handle_repo_links_file() {
         if [[ -f ".svn" || -d ".svn" ]]; then
             ALL_FLOW_DOWN_ARGS="${FLOW_DOWN_ARGS} -m"
         else
-            # shellcheck disable=SC2034 # ALL_FLOW_DOWN_ARGS is used in build_script
+            # shellcheck disable=SC2034 # ALL_FLOW_DOWN_ARGS is used in run_build_script
             ALL_FLOW_DOWN_ARGS="${FLOW_DOWN_ARGS}"
         fi
 
-        build_script
+        run_build_script
         BUILD_FAIL=$?
         if [[ -z $BUILD_FAIL ]]; then
             BUILD_FAIL=0
@@ -223,10 +223,10 @@ done
 vecho "" 1
 vecho "" 1
 vecho "Checking if $SHORE_REPO has been built..." 1
-
+VEHICLE_REPOS+=("${SHORE_REPO}")
 for repo_name in "${VEHICLE_REPOS[@]}" "${EXTRA_REPOS[@]}" "${EXTRA_LIB_REPOS[@]}" "${EXTRA_BIN_REPOS[@]}"; do
     if has_not_built_repo "$repo_name"; then
-        vexit "has not built ${repo_name}" 1
+        vexit "has not built ${repo_name}. Ensure there is a repo_link for this repository in your repo_links.txt" 1
     fi
 done
 if has_not_built_repo moos-ivp; then

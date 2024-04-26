@@ -81,16 +81,12 @@ for ((i = 1; i <= length; i++)); do
 
     RUNS_LEFT=$((RUNS_DES - RUNS_ACT))
 
-    if is_bad_job "$JOB_FILE" "$JOB_ARGS"; then
+    if is_bad_job "$JOB_FILE $JOB_ARGS"; then
         vecho "Skipping bad job $JOB_FILE $JOB_ARGS ..." 1
         continue
-    fi
-
     # checks if it has runs left
-    if [[ $RUNS_LEFT -gt 0 ]]; then
-
-
-
+    elif [[ $RUNS_LEFT -gt 0 ]]; then
+        vecho "job $JOB_FILE $JOB_ARGS is not bad" 1
         GOOD_JOB_FILE=$JOB_FILE
         GOOD_JOB_ARGS=$JOB_ARGS
         GOOD_RUNS_DES=$RUNS_DES
@@ -98,6 +94,7 @@ for ((i = 1; i <= length; i++)); do
         random_number=$((RANDOM % 100))
         # Randomly selects this job. Or tries the next one
         if ((random_number > probability_skip)); then
+            vecho "Taking this job..." 1
             break # takes the job
         else
             vecho "Randomly skipping job..." 1
@@ -114,8 +111,10 @@ JOB_ARGS=$GOOD_JOB_ARGS
 RUNS_ACT=$GOOD_RUNS_ACT
 RUNS_DES=$GOOD_RUNS_DES
 
+vecho "Job $JOB_FILE $JOB_ARGS selected" 3
+
 # Ensures a job has been chosen
-if [[ -z $JOB_FILE ]]; then
+if [[ -z $JOB_FILE || $JOB_FILE == "" ]]; then
     vecho "No jobs left to run. Exiting..." 1
     if [ "$ALL_JOBS_OK" == "no" ]; then
         vexit "Finished all ok jobs, but some were bad. Fix jobs in bad_jobs.txt and rerun" 2

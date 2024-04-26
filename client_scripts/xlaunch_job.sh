@@ -40,7 +40,7 @@ check_uquerydb() {
 #-----------------------------------------------------
 for ARGI; do
     ALL_ARGS+=$ARGI" "
-    if [ "${ARGI}" = "--help" -o "${ARGI}" = "-h" ]; then
+    if [[ "${ARGI}" = "--help" || "${ARGI}" = "-h" ]]; then
         echo "$ME [OPTIONS] "
         echo "                                                          "
         echo "Launches shoreside, vehicles (if set), and pokes the mission. "
@@ -57,7 +57,7 @@ for ARGI; do
         JOB_FILE="${ARGI#*=}"
     elif [[ "${ARGI}" == "--job_args="* ]]; then
         JOB_ARGS="${ARGI#*=}"
-    elif [ "${ARGI}" = "--quiet" -o "${ARGI}" = "-q" ]; then
+    elif [[ "${ARGI}" = "--quiet" || "${ARGI}" = "-q" ]]; then
         QUIET="yes"
     elif [[ "${ARGI}" == "--verbose="* || "${ARGI}" == "-v="* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
@@ -69,7 +69,6 @@ for ARGI; do
         FLOW_DOWN_ARGS+="${ARGI} "
     fi
 done
-
 #-----------------------------------------------------
 #  Part 2: Read parameter files
 #-----------------------------------------------------

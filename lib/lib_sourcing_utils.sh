@@ -1,7 +1,7 @@
 #!/bin/bash
 # Kevin Becker, Jan 23, 2024
 #--------------------------------------------------------------
-# These scripts are utils for adding/removing bash variables 
+# These scripts are utils for adding/removing bash variables
 # to the path/IVP_BEHAVIOR_DIRS
 #--------------------------------------------------------------
 
@@ -19,7 +19,7 @@ find_repo_location() {
             repo="${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo}"
         # If given a full, expanded path anyways, use that
         elif [[ -d $repo ]]; then
-            :
+            : # File exists!
         else
             vexit "unable to find ${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo} or $repo" 1
         fi
@@ -155,5 +155,8 @@ remove_from_pathlike_string() {
         fi
     done
     output_var="${output_var%:}"
+
+    output_var="${output_var//::/:}" # Replace :: with :
+    output_var="${output_var//::/:}" # Replace :: with : (again)
     echo "$output_var"
 }

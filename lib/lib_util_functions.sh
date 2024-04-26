@@ -43,7 +43,7 @@ safe_exit() {
 }
 
 #--------------------------------------------------------------
-# Check for force quit file, quit if exists
+# Check for force_quit file, quit if exists
 #--------------------------------------------------------------
 check_quit() { if [ -f "${CARLO_DIR_LOCATION}/force_quit" ]; then
     secho "${CARLO_DIR_LOCATION}/force_quit file found. Exiting"
@@ -111,8 +111,8 @@ job_path() {
 temp_filename() {
     local input
     input=$1
-    input="${input//\/\//\/}" # Replace // with /
-    input="${input//\/\//\/}" # Replace // with / (again)
+    input="${input//\/\//\/}"   # Replace // with /
+    input="${input//\/\//\/}"   # Replace // with / (again)
     input="${input/.tmp_/tmp_}" # Replace .tmp_ with tmp_
     echo "$(dirname $input)/.tmp_$(basename $input)"
 }

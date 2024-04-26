@@ -75,7 +75,7 @@ vecho "Using queue file: ${FULL_QUEUE_FILE}" 1
 #-------------------------------------------------------
 #  Part 3: Determine which job to run
 #-------------------------------------------------------
-output=$(/${MONTE_MOOS_BASE_DIR}/client_scripts/select_job.sh --queue_file="$FULL_QUEUE_FILE")
+output=$(${MONTE_MOOS_BASE_DIR}/client_scripts/select_job.sh --queue_file="$FULL_QUEUE_FILE")
 EXIT_CODE=$?
 # Check the queue by observing the exit code
 # 1: no jobs left

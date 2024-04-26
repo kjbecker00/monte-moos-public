@@ -55,7 +55,7 @@ def merge_csv_files(main_dir, output_file, job_name):
 def display_help():
     """Function displaying all help info when run on command line."""
     print(
-        "Usage: merge_results.py --job=<job name> --output=<filename> -wd=[WORKING DIRECTORY]")
+        "Usage: monte_merge_results.py --job=<job name> --output=<filename> -wd=[WORKING DIRECTORY]")
     print("     This python script will merge csv and plot the values                      ")
     print("     --output=<figure.png>   The name of the output file. Defaults to           ")
     print("                             results.csv                                        ")

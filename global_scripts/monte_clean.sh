@@ -39,7 +39,6 @@ for ARGI; do
         echo "  --all            enable all options         "
         echo "  -y               bypass any safety checks             "
         echo "  --metadata, -m   status.txt, myname.txt               "
-        echo "                   Rarely used."
         exit 0
     elif [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
         VERBOSE=1
@@ -74,7 +73,7 @@ if [ $? -ne 0 ]; then
     vexit "Enviornment has errors. Please fix them before running this script." 1
 fi
 
-# Require confirmation for dangerous options
+# Require confirmation for dangerous options (1)
 if [ $ALL = "yes" ]; then
     if [ $OVERRIDE_CHECKS != "yes" ]; then
         echo "Are you sure you want to clean all?"
@@ -91,17 +90,18 @@ if [ $ALL = "yes" ]; then
         MOOS_DIRS="yes"
     fi
 fi
+# Require confirmation for dangerous options (2)
 if [ $RESULTS = "yes" ] && [ $OVERRIDE_CHECKS != "yes" ]; then
     echo "Are you sure you want to remove all subdirs in results?"
     echo "Press any key to continue, or Ctrl-C to cancel."
     read -n 1 -s
 fi
+# Require confirmation for dangerous options (3)
 if [ $METADATA = "yes" ] && [ $OVERRIDE_CHECKS != "yes" ]; then
     echo "Are you sure you want to remove all metadata?"
     echo "Press any key to continue, or Ctrl-C to cancel."
     read -n 1 -s
 fi
-
 
 #-------------------------------------------------------
 # Part 4: Handle moos-ivp-extend directories
@@ -114,8 +114,7 @@ fi
 if [ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}" ]; then
     starting_dir="$(pwd)"
     cd "${MONTE_MOOS_CLIENT_REPOS_DIR}" || vexit "Error with cd into ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
-    
-    
+
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Part 4a: Remove moos-dirs if specified
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -207,9 +206,8 @@ fi
 # Mostly unnecessary, since these shouldn't cause harm
 #-------------------------------------------------------
 if [[ "${METADATA}" = "yes" ]]; then
-    vecho "Cleaning metadata (status.txt and myname.txt)" 1
+    vecho "Cleaning metadata (status.txt and *_job_queue.txt)" 1
     [ -f "${CARLO_DIR_LOCATION}/status.txt" ] && rm -f "${CARLO_DIR_LOCATION}/status.txt"
-    [ -f "${CARLO_DIR_LOCATION}/myname.txt" ] && rm -f "${CARLO_DIR_LOCATION}/myname.txt"
     find "${CARLO_DIR_LOCATION}" -type f -name '*_job_queue.txt' -exec rm {} \; 2>/dev/null
 fi
 
@@ -244,13 +242,12 @@ rm -f "${CARLO_DIR_LOCATION}"/.tmp_*
 # Remove empty results folders
 [[ -d ${CARLO_DIR_LOCATION}/results ]] && { find "${CARLO_DIR_LOCATION}"/results -type d -delete 2>/dev/null; }
 
-
 # Remove old moos-dirs
 if [[ $MYNAME != "$MONTE_MOOS_HOST" ]]; then
     vecho "Removing moos_dirs older than 30 days... ${MONTE_MOOS_CLIENT_REPOS_DIR}" 1
     mkdir -p ${MONTE_MOOS_CLIENT_REPOS_DIR}
+    # The following line works since monte-moos cleans and rebuilds each repo frequently enough, even if there have been no changes in git/svn
     find ${MONTE_MOOS_CLIENT_REPOS_DIR} -type d -mtime +30 -exec echo "     Removing: {} since its older than 30 days..." \; -exec rm -r {} \;
 fi
-
 
 exit 0

@@ -37,14 +37,18 @@ has_not_built_repo() {
     local repo_name
     local num
     repo_name=$1
-
+    built_dirs_cache="${CARLO_DIR_LOCATION}/.built_dirs"
     if [ -f "$built_dirs_cache" ]; then
         num=$(grep -Fx -m 1 "$repo_name" "$built_dirs_cache")
         # vecho "grep -Fx -m 1 \"$repo_name\" \"$built_dirs_cache\"" 10
         # vecho "num=$num" 10
         if [ -z "$num" ]; then
+            # Repo not found. need to build
             return 0
         fi
+    fi
+    if [[ ! -d "$MONTE_MOOS_CLIENT_REPOS_DIR/$repo_name"/bin ]]; then
+        return 0 # repo bin directory does not exist. Need to build
     fi
     return 1
 }
@@ -117,9 +121,10 @@ svnup() {
 }
 
 #--------------------------------------------------------------
-# Determines if you should skip over a line
+# Determines if you should skip over a line in a
+# repo_links.txt file
 #--------------------------------------------------------------
-skipline() {
+to_skip_repo_line() {
     local repo=$1
     if [[ $repo == "" ]]; then
         vecho "Identified as blank line... $repo" 10
@@ -153,7 +158,7 @@ skipline() {
 #--------------------------------------------------------------
 # Wrapper for build script
 #--------------------------------------------------------------
-build_script() {
+run_build_script() {
     starting_dir="$PWD"
     if [ ! -f "$script" ]; then
         if [ -f trunk/"$script" ]; then
@@ -229,7 +234,7 @@ clone_repo() { # $repo_name $repo_link
     local repo_name
     repo_name=$1
     local repo_link
-    repo_link=$2
+    repo_link=$2}
     local my_pwd
     my_pwd=$(pwd)
 

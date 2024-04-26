@@ -26,6 +26,10 @@ for ARGI; do
         echo "This script takes in two queues and merges them together."
         echo "The two files are cat'd together and then consolodate_queue.sh"
         echo "is run to remove duplicates. "
+        echo "  NOTE: the order of queue_file_1 and queue_file_2 matter."
+        echo "  Job and job_arg combinations not in queue_file_1 will be"
+        echo "  ignored! It is reccommended to put the newer, more up-to-date"
+        echo "  file in first as queue_file_1. "
         echo "                                                          "
         echo "Options:                                              "
         echo "  --help, -h                                          "
@@ -71,12 +75,11 @@ vecho "mergeing file 1: $INPUT_FILE and $INPUT_FILE2" 1
 #--------------------------------------------------------------
 TEMP_INPUT_FILE=$(temp_filename ${INPUT_FILE})
 # Copy file 1 to the temp file
-cat $INPUT_FILE >> $TEMP_INPUT_FILE
+cat $INPUT_FILE >>$TEMP_INPUT_FILE
 # Add breakpoint
 echo "${breakpoint}" >>"$TEMP_INPUT_FILE"
 # Copy file 2 to the temp file
-cat $INPUT_FILE2 >> $TEMP_INPUT_FILE
-
+cat $INPUT_FILE2 >>$TEMP_INPUT_FILE
 
 #--------------------------------------------------------------
 #  Part 4: Consolodate the queue
