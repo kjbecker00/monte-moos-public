@@ -109,6 +109,9 @@ else
     vexit "Shore repo not found: $MONTE_MOOS_CLIENT_REPOS_DIR/$SHORE_REPO. Be sure to run the job first with monte_run_job.sh" 10
 fi
 
+if [[ -d $MONTE_MOOS_CLIENT_REPOS_DIR/$SHORE_REPO/trunk/${SHORE_MISSION} ]]; then
+    SHORE_MISSION="trunk/${SHORE_MISSION}"
+fi
 SHORE_ALOG=$(find "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}" -maxdepth 4 -type f -iname "*SHORE*.alog" 2>/dev/null | head -1)
 if [ ! -f "$SHORE_ALOG" ]; then
     vecho "shore alog not found in ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION} -maxdepth 4 -type f -iname *SHORE*.alog" 2
@@ -222,7 +225,7 @@ fi
 #  Part 5: Send results to host, if desired
 if [[ $OFFLOAD != "no" ]]; then
     vecho "Part 5: Offloading results $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR " 5
-    /"${MONTE_MOOS_BASE_DIR}"/scripts/send2host.sh "$LOCAL_JOB_RESULTS_DIR" "$HOST_RESULTS_FULL_DIR"
+    /"${MONTE_MOOS_BASE_DIR}"/client_scripts/send2host.sh "$LOCAL_JOB_RESULTS_DIR" "$HOST_RESULTS_FULL_DIR"
     [ $? -eq 0 ] || { vexit "send2host.sh $LOCAL_JOB_RESULTS_DIR $HOST_RESULTS_FULL_DIR failed with exit code $?" 3; }
     rm -rf "$LOCAL_JOB_RESULTS_DIR"
 else

@@ -120,7 +120,7 @@ if [ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}" ]; then
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     if [[ "${MOOS_DIRS}" = "yes" ]]; then
         vecho "Removing all moos-ivp-extend dirs in $(pwd)" 1
-        rm -rf moos-ivp-*
+        rm -rf *
     fi
     #- - - - - - - - - - - - - - - - - - - - - - - - - -
     # Part 4b: Clean other moos-ivp-extend directories

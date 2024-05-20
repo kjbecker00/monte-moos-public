@@ -16,6 +16,9 @@ for ARGI; do
         echo " Checks a job file for (some basic) errors. "
         echo " Note: If the job file itself returns a non-zero exit code,"
         echo "    this script will return that same exit code."
+	echo " This does not check for more intracite errors, such as a "
+	echo " mission moos-ivp-extend directory, or a missing mission. "
+	echo " It is also worth noting that extra variables are ignored."
         echo "                                                          "
         echo "Options:                                                  "
         echo " --help, -h Show this help message                        "
@@ -94,12 +97,23 @@ else
 fi
 
 #-------------------------------------------------------
+#  Part 0.5: Checking ssh
+#-------------------------------------------------------
+if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
+    "${MONTE_MOOS_BASE_DIR}/client_scripts/send2host.sh" --test
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -ne 0 ]; then
+        vexit " with ssh (exit code $EXIT_CODE). If you are not using the current computer as the client, feel free to continue" 14
+    fi
+fi
+
+#-------------------------------------------------------
 #  Part 1: Check if job exists
 #-------------------------------------------------------
 if [ -f "$JOB_FILE" ]; then
     vecho "Job file exists" 1
 else
-    vecho "$txtgry $ME Passed shell enviornment check, and no job file provided. $txtrst" 1
+    vecho "${txtgry}$ME: Passed enviornment check! $txtrst" 1
     exit 0
 fi
 
@@ -146,17 +160,6 @@ vecho "Shoreside variables set" 1
 [[ -n "$JOB_TIMEOUT" ]] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not set" 12; }
 [ "$JOB_TIMEOUT" -gt 1 ] || { vexit "JOB_TIMEOUT ($JOB_TIMEOUT) not greater than one" 12; }
 vecho "JOB_TIMEOUT set" 1
-
-#-------------------------------------------------------
-#  Part 5: Checking ssh
-#-------------------------------------------------------
-if [ "$MYNAME" != "$MONTE_MOOS_HOST" ]; then
-    "${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh" --test
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        vexit " with ssh (exit code $EXIT_CODE). If you are not using the current computer as the client, feel free to continue" 14
-    fi
-fi
 
 #-------------------------------------------------------
 #  Done!

@@ -71,7 +71,7 @@ job_filename() {
 #       foo/bar/baz -> foo
 #       foo/bar -> foo
 #       /home/job_dirs/foo/bar -> foo
-#       jobname -> misc_job
+#       jobname -> misc_jobs
 #--------------------------------------------------------------
 job_dirname() {
     local input
@@ -81,7 +81,7 @@ job_dirname() {
     this_job_path=$(job_path "$input")
     this_job_dir="${this_job_path%%/*}" # extract everything before /
     if [[ -z $this_job_dir || "$(job_filename $input)" == "$this_job_dir" ]]; then
-        this_job_dir=misc_job
+        this_job_dir=misc_jobs
     fi
     echo "$this_job_dir"
 }

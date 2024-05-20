@@ -135,5 +135,5 @@ mv .temp_status "${CARLO_DIR_LOCATION}"/status.txt
 #--------------------------------------------------------------
 
 if [[ $MYNAME != "$MONTE_MOOS_HOST" && $HOSTLESS != "yes" ]]; then
-    "${MONTE_MOOS_BASE_DIR}/scripts/send2host.sh" "${CARLO_DIR_LOCATION}/status.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/status/${MYNAME}.txt" >&/dev/null
+    "${MONTE_MOOS_BASE_DIR}/client_scripts/send2host.sh" "${CARLO_DIR_LOCATION}/status.txt" "${MONTE_MOOS_HOST_RECIEVE_DIR}/clients/status/${MYNAME}.txt" >&/dev/null
 fi

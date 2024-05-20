@@ -34,22 +34,26 @@ is_in_job() {
 # Checks if a repo has been built
 #--------------------------------------------------------------
 has_not_built_repo() {
+
     local repo_name
     local num
     repo_name=$1
     built_dirs_cache="${CARLO_DIR_LOCATION}/.built_dirs"
     if [ -f "$built_dirs_cache" ]; then
         num=$(grep -Fx -m 1 "$repo_name" "$built_dirs_cache")
-        # vecho "grep -Fx -m 1 \"$repo_name\" \"$built_dirs_cache\"" 10
-        # vecho "num=$num" 10
         if [ -z "$num" ]; then
             # Repo not found. need to build
             return 0
         fi
     fi
     if [[ ! -d "$MONTE_MOOS_CLIENT_REPOS_DIR/$repo_name"/bin ]]; then
-        return 0 # repo bin directory does not exist. Need to build
+        if [[ ! -d "$MONTE_MOOS_CLIENT_REPOS_DIR/$repo_name"/trunk/bin ]]; then
+            vecho "Could not find binaries" 10
+            return 0 # repo bin directory does not exist. Need to build
+        fi
     fi
+
+    vecho "$repo_name found!" 10
     return 1
 }
 
@@ -234,7 +238,7 @@ clone_repo() { # $repo_name $repo_link
     local repo_name
     repo_name=$1
     local repo_link
-    repo_link=$2}
+    repo_link=$2
     local my_pwd
     my_pwd=$(pwd)
 
@@ -261,6 +265,13 @@ clone_repo() { # $repo_name $repo_link
         if [[ -d "$repo_link" ]]; then
             echo "        Linking $repo_name to moos dirs..."
             ln -s "$repo_link" "${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo_name}"
+            if [ $? -ne 0 ]; then
+                rm -rf "${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo_name}"
+                ln -s "$repo_link" "${MONTE_MOOS_CLIENT_REPOS_DIR}/${repo_name}"
+                if [ $? -ne 0 ]; then
+                    vexit "ln -s $repo_link failed. Check $repo_links_file" 2
+                fi
+            fi
         else
             vexit "${txtylw}linking to $repo_name failed. Repo does not exist. Check $repo_links_file ${txtrst}" 2
         fi

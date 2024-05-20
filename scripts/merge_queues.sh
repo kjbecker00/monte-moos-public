@@ -24,7 +24,7 @@ for ARGI; do
         echo "$ME: [OPTIONS] queue_file_1.txt queue_file_2.txt"
         echo "                                                          "
         echo "This script takes in two queues and merges them together."
-        echo "The two files are cat'd together and then consolodate_queue.sh"
+        echo "The two files are cat'd together and then consolidate_queue.sh"
         echo "is run to remove duplicates. "
         echo "  NOTE: the order of queue_file_1 and queue_file_2 matter."
         echo "  Job and job_arg combinations not in queue_file_1 will be"
@@ -38,7 +38,7 @@ for ARGI; do
         echo "    Display this help message                         "
         echo "  --verbose=num, -v=num or --verbose, -v              "
         echo "    Set verbosity                                     "
-        echo "    All other args are passed to consolodate_queue.sh "
+        echo "    All other args are passed to consolidate_queue.sh "
         exit 0
     elif [[ "${ARGI}" = "--verbose"* || "${ARGI}" = "-v"* ]]; then
         if [[ "${ARGI}" = "--verbose" || "${ARGI}" = "-v" ]]; then
@@ -82,18 +82,18 @@ echo "${breakpoint}" >>"$TEMP_INPUT_FILE"
 cat $INPUT_FILE2 >>$TEMP_INPUT_FILE
 
 #--------------------------------------------------------------
-#  Part 4: Consolodate the queue
+#  Part 4: consolidate the queue
 #--------------------------------------------------------------
 # Removes duplicates, adds desired_runs, takes max act_runs
 TEMP_OUTPUT=$(temp_filename ${OUTPUT_FILENAME}).out
 rm -f "$TEMP_OUTPUT"
 vecho "Consolodating queue $TEMP_INPUT_FILE to $TEMP_OUTPUT..." 1
 
-${MONTE_MOOS_BASE_DIR}/scripts/consolodate_queue.sh --output=$TEMP_OUTPUT "$TEMP_INPUT_FILE" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
+${MONTE_MOOS_BASE_DIR}/scripts/consolidate_queue.sh --output=$TEMP_OUTPUT "$TEMP_INPUT_FILE" -b="$breakpoint" $FLOW_DOWN_ARGS #>/dev/null
 EXIT_CODE=$?
 # Check for errors
 if [[ $EXIT_CODE -ne 0 ]]; then
-    vexit "Error in consolodate_queue.sh, exited with code $EXIT_CODE " 1
+    vexit "Error in consolidate_queue.sh, exited with code $EXIT_CODE " 1
 fi
 
 # Remove the temp file

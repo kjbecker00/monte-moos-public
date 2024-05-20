@@ -79,8 +79,8 @@ JOB_SHORT_PATH=$(job_path "$PATH_TO_JOB_FILE")
 
 # Set default input results directory
 if [[ -z $INPUT_JOB_RESULTS_DIR ]]; then
-    if [[ -d "${CARLO_DIR_LOCATION}/results/$JOB_SHORT_PATH/$JOB_NAME" ]]; then
-        INPUT_JOB_RESULTS_DIR="${CARLO_DIR_LOCATION}/results/$JOB_SHORT_PATH"
+    if [[ -d "${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME" ]]; then
+        INPUT_JOB_RESULTS_DIR="${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME"
     else
         vexit "No input results directory given or found at: ${CARLO_DIR_LOCATION}/results/$JOB_SHORT_PATH or ${CARLO_DIR_LOCATION}/results/misc_jobs/$JOB_NAME. Please specify a directory with --input_results=" 2
     fi
@@ -172,7 +172,6 @@ for job_result in "$INPUT_JOB_RESULTS_DIR"/*; do
         vecho "    $job_result is not a directory. Skipping..." 2
     fi
 done
-# fi
 
 #--------------------------------------------------------------
 #  Part 5: Determine what to plot using job file

@@ -192,11 +192,21 @@ vecho "Updating queue file $FULL_QUEUE_FILE" 1
 vecho " $JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT" 1
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    sed -i '' "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+
+    if [[ "$JOB_ARGS" == "" ]]; then
+        sed -i '' "s@^$JOB_PATH.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    else
+        sed -i '' "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    fi
+
     vecho "sed -i '' \"s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@\" \"$FULL_QUEUE_FILE\"" 1
 else
     # Linux
-    sed -i "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    if [[ "$JOB_ARGS" == "" ]]; then
+        sed -i "s@^$JOB_PATH.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    else
+        sed -i "s@^$JOB_PATH $JOB_ARGS.*@$JOB_PATH $JOB_ARGS $RUNS_DES $RUNS_ACT@" "$FULL_QUEUE_FILE"
+    fi
 fi
 
 exit 0

@@ -33,7 +33,7 @@ find_repo_location() {
 add_lib() {
     repo=$(find_repo_location "$1")
 
-    vecho "Adding ${repo}'s lib, to IVP_BEHAVIOR_DIRS..." 1
+    vecho "Adding ${repo}'s lib, to IVP_BEHAVIOR_DIRS..." 5
     if [[ -d ${repo}/lib ]]; then
         IVP_BEHAVIOR_DIRS=$IVP_BEHAVIOR_DIRS:${repo}/lib
     elif [[ -d ${repo}/trunk/lib ]]; then
@@ -50,13 +50,21 @@ add_lib() {
 add_bin() {
     repo=$(find_repo_location "$1")
 
-    vecho "Adding ${repo}'s bin and scripts, to $PATH..." 1
-    if [[ -d ${repo}/bin ]]; then
-        PATH=$PATH:${repo}/bin
-        PATH=$PATH:${repo}/scripts
-    elif [[ -d ${repo}/trunk/bin ]]; then
-        PATH=$PATH:${repo}/trunk/bin
-        PATH=$PATH:${repo}/trunk/scripts
+    vecho "Adding ${repo}'s bin and scripts, to $PATH..." 5
+    if [[ -d "${repo}/bin" ]]; then
+        PATH="$PATH:${repo}/bin"
+        PATH="$PATH:${repo}/scripts"
+        if [[ -d "${repo}/ivp/bin" ]]; then
+            PATH="$PATH:${repo}/ivp/bin"
+            PATH="$PATH:${repo}/ivp/scripts"
+        fi
+    elif [[ -d "${repo}/trunk/bin" ]]; then
+        PATH="$PATH:${repo}/trunk/bin"
+        PATH="$PATH:${repo}/trunk/scripts"
+        if [[ -d "${repo}/trunk/ivp/bin" ]]; then
+            PATH="$PATH:${repo}/trunk/ivp/bin"
+            PATH="$PATH:${repo}/trunk/ivp/scripts"
+        fi
     else
         vexit "unable to find ${repo}/trunk/bin or ${repo}/bin" 1
     fi
@@ -79,7 +87,7 @@ add_extra_repos_to_path() {
     #  Part 1 EXTRA_REPOS
     EXTRA_REPO_COUNT=${#EXTRA_REPOS[@]}
     for ((i = 0; i < EXTRA_REPO_COUNT; i++)); do
-        vecho "Sourcing ${EXTRA_REPOS[i]}..." 1
+        vecho "Sourcing ${EXTRA_REPOS[i]}..." 5
         repo="${EXTRA_REPOS[i]}"
         add_repo "$repo"
     done
@@ -87,7 +95,7 @@ add_extra_repos_to_path() {
     #  Part 2: Extra binaries
     EXTRA_BIN_COUNT=${#EXTRA_BIN_REPOS[@]}
     for ((i = 0; i < EXTRA_BIN_COUNT; i++)); do
-        vecho "Sourcing ${EXTRA_BIN_REPOS[i]}..." 1
+        vecho "Sourcing ${EXTRA_BIN_REPOS[i]}..." 5
         repo="${EXTRA_BIN_REPOS[i]}"
         add_bin "$repo"
     done
@@ -95,7 +103,7 @@ add_extra_repos_to_path() {
     #  Part 3: Extra libraries for ivp behaviors
     EXTRA_LIB_COUNT=${#EXTRA_LIB_REPOS[@]}
     for ((i = 0; i < EXTRA_LIB_COUNT; i++)); do
-        vecho "Sourcing ${EXTRA_LIB_REPOS[i]}..." 1
+        vecho "Sourcing ${EXTRA_LIB_REPOS[i]}..." 5
         repo="${EXTRA_LIB_REPOS[i]}"
         add_lib "$repo"
     done

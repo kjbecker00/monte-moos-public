@@ -24,7 +24,6 @@ ctrl_c() {
 # Checks uqueryDB for error
 check_uquerydb() {
     local QUERY_MODE="a"
-    SHORE_TARG=$1
     if [[ "${QUERY_MODE}" = "a" ]]; then
         uQueryDB --alias="mm-query" $SHORE_TARG &>/dev/null
         EXIT_CODE=$?
@@ -134,13 +133,13 @@ vecho "PATH=$PATH" 2
 #-----------------------------------------------------
 #  Part 6: Clean shore mission directory
 #-----------------------------------------------------
-FULL_MISSION_DIR=${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}
-if [[ ! -d $FULL_MISSION_DIR ]]; then
-    if [[ -d ${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION} ]]; then
-        FULL_MISSION_DIR=${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}
+FULL_MISSION_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}"
+if [[ ! -d "$FULL_MISSION_DIR" ]]; then
+    if [[ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}" ]]; then
+        FULL_MISSION_DIR="${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/trunk/${SHORE_MISSION}"
     fi
 fi
-cd $FULL_MISSION_DIR || vexit "cd $FULL_MISSION_DIR failed" 1
+cd "$FULL_MISSION_DIR" || vexit "cd $FULL_MISSION_DIR failed" 1
 if [[ -f clean.sh && $USE_MISSION_CLEAN_SCRIPT == "yes" ]]; then
     ./clean.sh
 fi
@@ -187,6 +186,7 @@ done
 #-------------------------------------------------------
 # If no SHORE_TARG, set the default
 if [ -z $SHORE_TARG ]; then
+    vecho "NO shore targ set ($SHORE_TARG). Setting..." 1
     SHORE_TARG="targ_shoreside.moos"
 fi
 # Allow some time for the shore targ to generate
@@ -194,12 +194,12 @@ COUNT=0
 
 while [ "$COUNT" -lt 30 ]; do
     vecho "    Waiting for shore targ to generate in $(pwd)/${SHORE_TARG} or ${FULL_MISSION_DIR}/${SHORE_TARG}... " 0
-    if [ -f $SHORE_TARG ]; then
+    if [ -f "$SHORE_TARG" ]; then
         break
     fi
     # If SHORE_TARG is not found, check the shoreside mission directory
     if [ -f "${FULL_MISSION_DIR}/${SHORE_TARG}" ]; then
-        SHORE_TARG="${MONTE_MOOS_CLIENT_REPOS_DIR}/${SHORE_REPO}/${SHORE_MISSION}/${SHORE_TARG}"
+        SHORE_TARG="${FULL_MISSION_DIR}/${SHORE_TARG}"
         break
     fi
     sleep 1

@@ -87,7 +87,7 @@ def prepare_alog(input_file):
         output_file_real = remove_extension(input_file) + "_data.csv"
         # Remove the output file if it already exists to prevent aloggrep from asking to overwrite
         # subprocess.run(f"rm {output_file}", shell=True)
-        script = "aloggrep "+input_file+" NODE_REPORT_LOCAL " \
+        script = "aloggrep "+input_file+" NODE_REPORT_LOCAL "+\
             output_file + " -sd --format=time:val --csw --subpat=x:y "
         subprocess.run(script, shell=True, check=True)
         subprocess.run(

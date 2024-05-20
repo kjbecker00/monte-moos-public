@@ -101,9 +101,9 @@ monte_decrypt.sh ${INCOMING_FILE}.enc -d -o
 #  Part 5:  Merges the two files together into
 #     .temp_queue.txt, then overwrirtes the old file.
 #-------------------------------------------------------
-consolodate_queue_flags=" --first_desired --max_actual --first_jobs"
+consolidate_queue_flags=" --first_desired --max_actual --first_jobs"
 TEMP_QUEUE="$(temp_filename queue.txt)"
-/${MONTE_MOOS_BASE_DIR}/scripts/merge_queues.sh --output=$TEMP_QUEUE $INCOMING_FILE ".old_${INCOMING_FILE}" $consolodate_queue_flags #>/dev/null
+/${MONTE_MOOS_BASE_DIR}/scripts/merge_queues.sh --output=$TEMP_QUEUE $INCOMING_FILE ".old_${INCOMING_FILE}" $consolidate_queue_flags #>/dev/null
 rm ".old_${INCOMING_FILE}" 2>/dev/null
 mv "$TEMP_QUEUE" "${INCOMING_FILE}" 2>/dev/null
 echo "$INCOMING_FILE"

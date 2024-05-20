@@ -70,6 +70,10 @@ if [ ! -d ${MONTE_MOOS_CLIENT_REPOS_DIR} ]; then
 fi
 if [ ! -f $built_dirs_cache ]; then
     touch $built_dirs_cache
+    echo "# .built_dirs file created by update_dirs.sh" >>$built_dirs_cache
+    echo "# This file tracks which moos-dirs are up to " >>$built_dirs_cache
+    echo "# date and built. " >>$built_dirs_cache
+
 fi
 
 #-------------------------------------------------------
@@ -115,8 +119,14 @@ handle_repo_links_file() {
         # Update or clone the repo
         if [ -d "${MONTE_MOOS_CLIENT_REPOS_DIR}/$repo_name" ]; then
             update_repo $repo_name $repo_link
+            if [[ $? -ne 0 ]]; then
+                vexit "Error updating $repo_name with link: $repo_link" 10
+            fi
         else
             clone_repo $repo_name $repo_link
+            if [[ $? -ne 0 ]]; then
+                vexit "Error cloning $repo_name with link: $repo_link" 11
+            fi
         fi
 
         #-------------------------------------------------------
@@ -186,13 +196,6 @@ fi
 #-------------------------------------------------------
 handle_repo_links_file "${MONTE_MOOS_BASE_REPO_LINKS}"
 # loop through all repo_links.txt files in the JOB_DIR and all of its parent directories
-
-# TODO, low priority: Add the all option
-# if [[ ALL = "yes"  && -z $JOB_FILE ]]; then
-#     echo "All repos in ${MONTE_MOOS_BASE_REPO_LINKS} have been updated"
-#     echo "Exiting..."
-#     exit 0
-# fi
 
 SEARCH_DIR=$(dirname $JOB_FILE)
 SEARCH_DIR_BASE="${SEARCH_DIR%%/*}/../.."
